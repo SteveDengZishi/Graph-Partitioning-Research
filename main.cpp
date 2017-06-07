@@ -14,8 +14,8 @@ using namespace boost;
 adjacency_list<> g;//default adjacency list using vecS
 
 typedef adjacency_list<>::vertex_descriptor Vert;
-typedef adjacency_list<>::vertex_iterator VertItr;
-typedef adjacency_list<>::edge_descriptor Edge;
+typedef adjacency_list<>::vertex_iterator VertItr; //idx in vecS , ptr in listS
+typedef adjacency_list<>::edge_descriptor Edge; // (a,b), in setS repeated edge is not allowed
 
 int main(){
     //add vertices
