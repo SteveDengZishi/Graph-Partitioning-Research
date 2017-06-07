@@ -69,8 +69,10 @@ int main(){
     dtime_pm_type dtime_pm(dtime.begin(), get(vertex_index, g));
     
     Size time = 0;
+    //visitor
     bfs_time_visitor < dtime_pm_type >vis(dtime_pm, time);
-    breadth_first_search(g, vertex(s, g), visitor(vis));
+    //named parameter version of the algorithm, which it will create its queue and colormap on the heap
+    breadth_first_search(g, vertex(s, g), visitor(vis));//graph, starting vertex, visitor
     
     // Use std::sort to order the vertices by their discover time
     std::vector<graph_traits<graph_t>::vertices_size_type > discover_order(N);
