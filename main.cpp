@@ -11,7 +11,7 @@
 
 using namespace boost;
 
-adjacency_list<> g;//default adjacency list using vecS
+adjacency_list<> g;//default is using adjacency_list<vecS, vecS, directedS> vertex_container, edge_container, typeOfGraph
 
 typedef adjacency_list<>::vertex_descriptor Vert;
 typedef adjacency_list<>::vertex_iterator VertItr; //idx in vecS , ptr in listS
@@ -46,6 +46,7 @@ int main(){
     //adding repeated edges
     result = add_edge(v1,v2,g);
     std::cout<<result.first<<" "<<result.second<<std::endl;
+    
 }
 
 
