@@ -25,6 +25,8 @@
 *.exe
 *.o
 *.so
+main
+ReadData
 
 # Packages #
 ############

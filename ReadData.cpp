@@ -47,7 +47,17 @@ typedef pair<int,int> PII;
 //functions, global variables, comparators & Non-STL Data Structures definition here
 #define SHARDSIZE 8;
 vector<int> arr[8];
-vector<int> adjList[];
+vector<int> adjList[4039];
+
+void numNode(){
+    int nodeID;
+    int maxID=0;
+    while(cin>>nodeID){
+        if(nodeID>maxID) maxID=nodeID;
+    }
+    cout<<"The maxID is: "<<maxID;
+    printf("There are %d nodes in total\n",maxID+1);
+}
 
 void printShard(){
     for(int i=0;i<8;i++){
@@ -58,12 +68,30 @@ void printShard(){
     }
 }
 
-int f(int i, int j){
-    
+//int f(int i, int j){
+//    
+//}
+//
+//int colocation(int idx){
+//    
+//}
+
+void createADJ(){
+    int from,to;
+    while(cin>>from>>to){
+        adjList[from].push_back(to);
+        adjList[to].push_back(from);
+    }
 }
 
-int colocation(int idx){
-    
+void printADJ(){
+    for(int i=0;i<4039;i++){
+        cout<<i<<": ";
+        for(int j=0;j<adjList[i].size();j++){
+            cout<<adjList[i][j]<<" ";
+        }
+        cout<<endl;
+    }
 }
 
 //start of main()
@@ -73,26 +101,26 @@ int main(int argc, const char * argv[]) {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
     
-    //using edge list to decide how many nodes are there
-    int nodeID;
-    int maxID=0;
-    
     //to map nodeID to label
     unordered_map<int, int> shard;
     
     //to get number of nodes from data file
-    while(cin>>nodeID){
-        if(nodeID>maxID) maxID=nodeID;
-    }
+    //numNode();
     
     //random sharding according to mod 8
-    for(int i=0;i<maxID+1;i++){
+    for(int i=0;i<4039;i++){
         int shardID = i % SHARDSIZE;
         shard[i]=shardID;
         arr[shardID].push_back(i);
     }
- 
-    printShard();
+    
+    //show the sharding result
+    //printShard();
+    
+    //create adjacency list from edge list
+    createADJ();
+    printADJ();
+    
     
     return 0;
 }
