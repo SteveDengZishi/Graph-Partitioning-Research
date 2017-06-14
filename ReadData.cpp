@@ -46,7 +46,8 @@ typedef pair<int,int> PII;
 
 //functions, global variables, comparators & Non-STL Data Structures definition here
 #define SHARDSIZE 8;
-vector<int>  arr[8];
+vector<int> arr[8];
+vector<int> adjList[];
 
 void printShard(){
     for(int i=0;i<8;i++){
