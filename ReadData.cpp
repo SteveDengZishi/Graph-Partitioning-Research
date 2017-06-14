@@ -46,7 +46,7 @@ typedef pair<int,int> PII;
 
 //functions, global variables, comparators & Non-STL Data Structures definition here
 #define SHARDSIZE 8;
-vector<int> arr[8];
+vector<int> shard[8];
 vector<int> adjList[4039];
 
 void numNode(){
@@ -61,8 +61,8 @@ void numNode(){
 
 void printShard(){
     for(int i=0;i<8;i++){
-        for(int j=0;j<arr[i].size();j++){
-            cout<<arr[i][j]<<" ";
+        for(int j=0;j<shard[i].size();j++){
+            cout<<shard[i][j]<<" ";
         }
         cout<<endl;
     }
@@ -71,10 +71,22 @@ void printShard(){
 //int f(int i, int j){
 //    
 //}
-//
-//int colocation(int idx){
-//    
-//}
+
+
+
+
+int colocation(int idx,int col){
+    int count=0;
+    //O(VE)
+    for(int i=0;i<shard[col].size();i++){
+        for(int j=0;j<adjList[shard[col][idx]].size();j++){
+                if(shard[col][i]==adjList[shard[col][idx]][j]){
+                    count++;
+            }
+        }
+    }
+    return count;
+}
 
 void createADJ(){
     int from,to;
@@ -101,17 +113,13 @@ int main(int argc, const char * argv[]) {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
     
-    //to map nodeID to label
-    unordered_map<int, int> shard;
-    
     //to get number of nodes from data file
     //numNode();
     
     //random sharding according to mod 8
     for(int i=0;i<4039;i++){
         int shardID = i % SHARDSIZE;
-        shard[i]=shardID;
-        arr[shardID].push_back(i);
+        shard[shardID].push_back(i);
     }
     
     //show the sharding result
