@@ -21,6 +21,7 @@
 #include <set> // To sort and remove duplicate when inserted
 #include <unordered_set> //To remove duplicates and count size
 
+
 //macro here
 #define FOR(i,a,b) for(size_t i=a;i<b;i++)
 #define DE(x) cout << #x << ":" << x << endl
@@ -44,10 +45,17 @@ typedef vector<int> VI;
 typedef vector<pair<int,pair<int,int>>> Edges;
 typedef pair<int,int> PII;
 
+struct Greater
+{
+    template<class T>
+    bool operator()(T const &a, T const &b) const { return a > b; }
+};
+
 //functions, global variables, comparators & Non-STL Data Structures definition here
 #define SHARDSIZE 8;
 vector<int> shard[8];
 vector<int> adjList[4039];
+vector<PII> sortedCountIJ;
 
 void numNode(){
     int nodeID;
@@ -68,24 +76,37 @@ void printShard(){
     }
 }
 
-//int f(int i, int j){
-//    
-//}
-
-
-
-
-int colocation(int idx,int col){
+// returns the colocation count of a nodeID in certain column of shard
+int colocation(int val,int col){
     int count=0;
     //O(VE)
     for(int i=0;i<shard[col].size();i++){
-        for(int j=0;j<adjList[shard[col][idx]].size();j++){
-                if(shard[col][i]==adjList[shard[col][idx]][j]){
+        for(int j=0;j<adjList[val].size();j++){
+                if(shard[col][i]==adjList[val][j]){
                     count++;
             }
         }
     }
     return count;
+}
+
+void printSortedCount(int i, int j){
+    printf("The increase in colocation from shard %d to %d is: ",i,j);
+    for(int k=0;k<sortedCountIJ.size();k++){
+        printf(" (%d,%d) ",sortedCountIJ[k].first,sortedCountIJ[k].second);
+    }
+    cout<<endl<<endl;
+}
+
+void fSort(int i, int j){
+    for(int k=0;k<shard[i].size();k++){
+        //Calculate the increase in count (INC)
+        int INC=colocation(shard[i][k],j)-colocation(shard[i][k],i);
+        pair<int,int> p(INC,shard[i][k]);
+        sortedCountIJ.push_back(p);
+    }
+    sort(ALL(sortedCountIJ),Greater());
+    printSortedCount(i,j);
 }
 
 void createADJ(){
@@ -127,8 +148,15 @@ int main(int argc, const char * argv[]) {
     
     //create adjacency list from edge list
     createADJ();
-    printADJ();
+    //printADJ();
     
+    //calculate, sort and print the increase in colocation count for all nodes moving from i to j
+    //in the form (INC,nodeID)
+    for(int i=0;i<8;i++){
+        for(int j=0;j<8;j++){
+            if(i!=j) fSort(i,j);
+        }
+    }
     
     return 0;
 }
