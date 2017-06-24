@@ -53,8 +53,9 @@ struct Greater
 
 //functions, global variables, comparators & Non-STL Data Structures definition here
 #define SHARDSIZE 8;
+#define nodesN 4847571;
 vector<int> shard[8];
-vector<int> adjList[4039];
+vector<int> adjList[4847571];
 vector<PII> sortedCountIJ;
 
 void numNode(){
@@ -63,7 +64,7 @@ void numNode(){
     while(cin>>nodeID){
         if(nodeID>maxID) maxID=nodeID;
     }
-    cout<<"The maxID is: "<<maxID;
+    cout<<"The maxID is: "<<maxID<<endl;
     printf("There are %d nodes in total\n",maxID+1);
 }
 
@@ -113,12 +114,13 @@ void createADJ(){
     int from,to;
     while(cin>>from>>to){
         adjList[from].push_back(to);
-        adjList[to].push_back(from);
+        // comment out the following line if the graph is directed
+//        adjList[to].push_back(from);
     }
 }
 
 void printADJ(){
-    for(int i=0;i<4039;i++){
+    for(int i=0;i<4847571;i++){
         cout<<i<<": ";
         for(int j=0;j<adjList[i].size();j++){
             cout<<adjList[i][j]<<" ";
@@ -135,10 +137,10 @@ int main(int argc, const char * argv[]) {
     cin.tie(NULL);
     
     //to get number of nodes from data file
-    //numNode();
+//    numNode();
     
     //random sharding according to mod 8
-    for(int i=0;i<4039;i++){
+    for(int i=0;i<4847571;i++){
         int shardID = i % SHARDSIZE;
         shard[shardID].push_back(i);
     }
@@ -148,7 +150,7 @@ int main(int argc, const char * argv[]) {
     
     //create adjacency list from edge list
     createADJ();
-    //printADJ();
+    printADJ();
     
     //calculate, sort and print the increase in colocation count for all nodes moving from i to j
     //in the form (INC,nodeID)
