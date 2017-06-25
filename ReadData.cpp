@@ -54,10 +54,17 @@ struct Greater
 
 //functions, global variables, comparators & Non-STL Data Structures definition here
 #define SHARDSIZE 8;
-#define nodesN 4847571;
+#define nodesN 4039;
 vector<int> shard[8];
-vector<int> adjList[4847571];
+vector<int> adjList[4039];
 vector<PII> sortedCountIJ;
+
+unsigned int int_hash(unsigned int x) {
+    x = ((x >> 16) ^ x) * 0x45d9f3b;
+    x = ((x >> 16) ^ x) * 0x45d9f3b;
+    x = (x >> 16) ^ x;
+    return x;
+}
 
 void numNode(){
     int nodeID;
@@ -71,6 +78,7 @@ void numNode(){
 
 void printShard(){
     for(int i=0;i<8;i++){
+        printf("Shard %d:\n",i);
         for(int j=0;j<shard[i].size();j++){
             cout<<shard[i][j]<<" ";
         }
@@ -121,7 +129,7 @@ void createADJ(){
 }
 
 void printADJ(){
-    for(int i=0;i<4847571;i++){
+    for(int i=0;i<4039;i++){
         cout<<i<<": ";
         for(int j=0;j<adjList[i].size();j++){
             cout<<adjList[i][j]<<" ";
@@ -140,23 +148,25 @@ int main(int argc, const char * argv[]) {
     //to get number of nodes from data file
 //    numNode();
     
-    //random sharding according to mod 8
-    for(int i=0;i<4847571;i++){
-        hash<int> myHash;
-        size_t hash = myHash(i);
-        int shardID = hash % SHARDSIZE;
+    //random sharding according using a integer hash then mod 8 to distribute to shards
+    for(int i=0;i<4039;i++){
+//        cout<<"i is: "<<i<<endl;
+        unsigned hash_val = int_hash(i);
+//        cout<<"hash is: "<<hash_val<<endl;
+        int shardID = hash_val % SHARDSIZE;
+//        cout<<"shard ID is: "<<shardID<<endl;
         shard[shardID].push_back(i);
     }
     
     //show the sharding result
-    //printShard();
+    printShard();
     
     //create adjacency list from edge list
     createADJ();
     printADJ();
     
     //calculate, sort and print the increase in colocation count for all nodes moving from i to j
-    //in the form (INC,nodeID)
+    //in the form (INC(increase in colocation),nodeID)
     for(int i=0;i<8;i++){
         for(int j=0;j<8;j++){
             if(i!=j) fSort(i,j);
