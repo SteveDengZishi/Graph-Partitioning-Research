@@ -84,6 +84,7 @@ void printShard(){
         }
         cout<<endl;
     }
+    cout<<endl;
 }
 
 // returns the colocation count of a nodeID in certain column of shard
@@ -136,6 +137,7 @@ void printADJ(){
         }
         cout<<endl;
     }
+    cout<<endl;
 }
 
 //start of main()
@@ -169,6 +171,7 @@ int main(int argc, const char * argv[]) {
     //in the form (INC(increase in colocation),nodeID)
     for(int i=0;i<8;i++){
         for(int j=0;j<8;j++){
+            sortedCountIJ.clear();
             if(i!=j) fSort(i,j);
         }
     }
