@@ -20,6 +20,7 @@
 #include <unordered_map> // To allow O(1) mapping access using key->value
 #include <set> // To sort and remove duplicate when inserted
 #include <unordered_set> //To remove duplicates and count size
+#include <functional> //To use std::hash
 
 
 //macro here
@@ -141,7 +142,9 @@ int main(int argc, const char * argv[]) {
     
     //random sharding according to mod 8
     for(int i=0;i<4847571;i++){
-        int shardID = i % SHARDSIZE;
+        hash<int> myHash;
+        size_t hash = myHash(i);
+        int shardID = hash % SHARDSIZE;
         shard[shardID].push_back(i);
     }
     
