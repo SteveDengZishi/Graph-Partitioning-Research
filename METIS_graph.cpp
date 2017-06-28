@@ -89,14 +89,13 @@ void createADJ(){
     int maxID=0;
     int edges=0;
     while(cin>>from>>to){
-        adjList[from].push_back(to);
-        // comment out the following line if the graph is directed
-        adjList[to].push_back(from);
+        adjList[from].push_back(to+1);  // use to/from + 1 is to let node start from 1 instead of 0 to fit METIS format
+        adjList[to].push_back(from+1);  // comment out this line if the graph is directed
         // count number of edges and nodes from edge list file
         edges++;
         if(maxID<max(from,to)) maxID=max(from,to);
     }
-    num_nodes=maxID;
+    num_nodes=maxID+1;
     num_edges=edges;
 }
 
@@ -108,7 +107,7 @@ void printADJ(){
         }
         cout<<endl;
     }
-    cout<<endl;
+//    cout<<endl;
 }
 
 //start of main()
