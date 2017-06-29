@@ -140,6 +140,12 @@ void printADJ(){
     cout<<endl;
 }
 
+void printShardSize(){
+    FOR(i,0,8){
+        cout<<shard[i].size()<<" "<<endl;
+    }
+}
+
 //start of main()
 int main(int argc, const char * argv[]) {
     
@@ -162,19 +168,20 @@ int main(int argc, const char * argv[]) {
     
     //show the sharding result
     printShard();
+    printShardSize();
     
     //create adjacency list from edge list
-    createADJ();
-    printADJ();
+//    createADJ();
+//    printADJ();
     
     //calculate, sort and print the increase in colocation count for all nodes moving from i to j
     //in the form (INC(increase in colocation),nodeID)
-    for(int i=0;i<8;i++){
-        for(int j=0;j<8;j++){
-            sortedCountIJ.clear();
-            if(i!=j) fSort(i,j);
-        }
-    }
+//    for(int i=0;i<8;i++){
+//        for(int j=0;j<8;j++){
+//            sortedCountIJ.clear();
+//            if(i!=j) fSort(i,j);
+//        }
+//    }
     
     return 0;
 }
