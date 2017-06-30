@@ -69,15 +69,25 @@ void printLXP(){
 void printRXP(){
     for(int i=0;i<shard;i++){
         for(int j=0;j<shard;j++){
-            int num;
-            cin>>num;
-            if(i!=j) printf("x%d%d <= %d;\n",i,j,num);
+            if(i!=j){
+                int num;
+                cin>>num;
+                printf("x%d%d <= %d;\n",i,j,num);
+            }
         }
     }
 }
 
 void printIJK(){
-    
+    for(int i=0;i<shard;i++){
+        for(int j=0;j<shard;j++){
+            int k; cin>>k;
+            for(int a=0;a<k;a++){
+                int b;cin>>b;
+                
+            }
+        }
+    }
 }
 
 int main(){
@@ -86,6 +96,7 @@ int main(){
     printLC();
     printUC();
     printLXP();
+    printRXP();
     
     return 0;
 }
