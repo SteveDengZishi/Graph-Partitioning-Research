@@ -81,23 +81,27 @@ void printRXP(){
 void printIJK(){
     for(int i=0;i<shard;i++){
         for(int j=0;j<shard;j++){
-            int k; cin>>k; // k is the different number of linear segments
-            for(int h=0;h<k;h++){
-                int a;cin>>a; // a is the gradient of each segments
-                int b, sum, num;
-                cin>>sum>>num;
-                b=sum-num*a; // b is the y-intercept
-                printf("-%d x%d%d +z%d%d <= %d\n",a,i,j,i,j,b);
+            if(i!=j){
+                int k; cin>>k; // k is the different number of linear segments
+                for(int h=0;h<k;h++){
+                    int a;cin>>a; // a is the gradient of each segments
+                    int b, sum, num;
+                    cin>>sum>>num;
+                    b=sum-num*a; // b is the y-intercept
+                    printf("-%d x%d%d +z%d%d <= %d;\n",a,i,j,i,j,b);
+                }
             }
         }
     }
 }
 
 int main(){
+    
     cin>>nodes;
     printObjectiveFunc("max");
     printLC();
     printUC();
+    printIJK();
     printLXP();
     printRXP();
     

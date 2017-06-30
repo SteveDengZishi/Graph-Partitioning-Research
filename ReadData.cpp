@@ -58,6 +58,7 @@ struct Greater
 vector<int> shard[8];
 vector<int> adjList[4039];
 vector<PII> sortedCountIJ;
+vector<int> Pcount;
 
 unsigned int int_hash(unsigned int x) {
     x = ((x >> 16) ^ x) * 0x45d9f3b;
@@ -158,32 +159,42 @@ int countP(){
 struct dataset{
     int a;
     int sum;
-    int num;
+    int no;
     
     dataset(int gradient, int s, int n){
         a=gradient;
         sum=s;
-        num=n;
+        no=n;
     }
 };
 
 vector<dataset> vecD;
 
 void printLinearInfo(){
+    vecD.clear();
     int k=0;
     int sum=0;
-    int a=0;
+    int a=INFINITY;
     int num=0;
+    
     FOR(i,0,sortedCountIJ.size()){
-        if(sortedCountIJ[i].first!=a){
+        if(sortedCountIJ[i].first<=0) break;
+        
+        else if(sortedCountIJ[i].first!=a && sortedCountIJ[i].first>0){
             a=sortedCountIJ[i].first;
             k++;
             vecD.emplace_back(a,a+sum,num+1); // the index will be k-1
         }
+        
         sum+=a;
         num++;
     }
     
+    if(vecD.size()!=0) cout<<vecD.size()<<endl;
+    
+    FOR(j,0,k){
+        printf("%d %d %d\n",vecD[j].a,vecD[j].sum,vecD[j].no);
+    }
 }
 
 //start of main()
@@ -221,11 +232,14 @@ int main(int argc, const char * argv[]) {
         for(int j=0;j<8;j++){
             sortedCountIJ.clear();
             if(i!=j) fSort(i,j);
-            if(countP()!=0) printf("%d\n",countP());
+            if(countP()!=0) Pcount.push_back(countP());
+            printLinearInfo();
         }
     }
     
-    
+    FOR(i,0,Pcount.size()){
+        cout<<Pcount[i]<<endl;
+    }
     
     return 0;
 }

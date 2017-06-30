@@ -6,7 +6,7 @@
 //  Copyright © 2017 Steve DengZishi. All rights reserved.
 //
 
-#include "mapreduce/mapreduce.h"
+#include "mapreduce.h"
 
 // User’s map function
 class WordCounter : public Mapper {
