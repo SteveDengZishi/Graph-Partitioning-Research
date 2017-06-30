@@ -155,6 +155,37 @@ int countP(){
     return cnt;
 }
 
+struct dataset{
+    int a;
+    int sum;
+    int num;
+    
+    dataset(int gradient, int s, int n){
+        a=gradient;
+        sum=s;
+        num=n;
+    }
+};
+
+vector<dataset> vecD;
+
+void printLinearInfo(){
+    int k=0;
+    int sum=0;
+    int a=0;
+    int num=0;
+    FOR(i,0,sortedCountIJ.size()){
+        if(sortedCountIJ[i].first!=a){
+            a=sortedCountIJ[i].first;
+            k++;
+            vecD.emplace_back(a,a+sum,num+1); // the index will be k-1
+        }
+        sum+=a;
+        num++;
+    }
+    
+}
+
 //start of main()
 int main(int argc, const char * argv[]) {
     
