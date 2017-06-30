@@ -117,7 +117,7 @@ void fSort(int i, int j){
         sortedCountIJ.push_back(p);
     }
     sort(ALL(sortedCountIJ),Greater());
-    printSortedCount(i,j);
+//    printSortedCount(i,j);
 }
 
 void createADJ(){
@@ -125,7 +125,7 @@ void createADJ(){
     while(cin>>from>>to){
         adjList[from].push_back(to);
         // comment out the following line if the graph is directed
-//        adjList[to].push_back(from);
+        adjList[to].push_back(from);
     }
 }
 
@@ -146,7 +146,14 @@ void printShardSize(){
     }
 }
 
-
+int countP(){
+    int cnt=0;
+    FOR(i,0,sortedCountIJ.size()){
+        if(sortedCountIJ[i].first>=1) cnt++;
+        else break;
+    }
+    return cnt;
+}
 
 //start of main()
 int main(int argc, const char * argv[]) {
@@ -157,6 +164,7 @@ int main(int argc, const char * argv[]) {
     
     //to get number of nodes from data file
 //    numNode();
+    cout<<4039<<endl;
     
     //random sharding according using a integer hash then mod 8 to distribute to shards
     for(int i=0;i<4039;i++){
@@ -169,21 +177,24 @@ int main(int argc, const char * argv[]) {
     }
     
     //show the sharding result
-    printShard();
+//    printShard();
     printShardSize();
     
     //create adjacency list from edge list
-//    createADJ();
+    createADJ();
 //    printADJ();
     
     //calculate, sort and print the increase in colocation count for all nodes moving from i to j
     //in the form (INC(increase in colocation),nodeID)
-//    for(int i=0;i<8;i++){
-//        for(int j=0;j<8;j++){
-//            sortedCountIJ.clear();
-//            if(i!=j) fSort(i,j);
-//        }
-//    }
+    for(int i=0;i<8;i++){
+        for(int j=0;j<8;j++){
+            sortedCountIJ.clear();
+            if(i!=j) fSort(i,j);
+            if(countP()!=0) printf("%d\n",countP());
+        }
+    }
+    
+    
     
     return 0;
 }
