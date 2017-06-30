@@ -11,6 +11,9 @@
 using namespace std;
 
 int shard=8;
+int nodes;
+int size[8];
+double f=0.10;
 
 void printObjectiveFunc(string minOrMax){
     cout<<minOrMax<<":";
@@ -25,19 +28,52 @@ void printObjectiveFunc(string minOrMax){
 }
 
 void printLC(){
-    
+    for(int i=0;i<shard;i++){
+        for(int j=0;j<shard;j++){
+            if(i!=j){
+                printf("+x%d%d ",i,j);
+                printf("-x%d%d ",j,i);
+            }
+        }
+        printf(">= ");
+        cin>>size[i];
+        int lowerBound=(nodes/shard)*(1-f);
+        int diff=lowerBound-size[i];
+        printf("%d;\n",diff);
+    }
 }
 
 void printUC(){
-    
+    for(int i=0;i<shard;i++){
+        for(int j=0;j<shard;j++){
+            if(i!=j){
+                printf("+x%d%d ",i,j);
+                printf("-x%d%d ",j,i);
+            }
+        }
+        printf("<= ");
+        int upperBound=(nodes/shard)*(1+f);
+        int diff=upperBound-size[i];
+        printf("%d;\n",diff);
+    }
 }
 
 void printLXP(){
-    
+    for(int i=0;i<shard;i++){
+        for(int j=0;j<shard;j++){
+            if(i!=j) printf("x%d%d >= 0;\n",i,j);
+        }
+    }
 }
 
 void printRXP(){
-    
+    for(int i=0;i<shard;i++){
+        for(int j=0;j<shard;j++){
+            int num;
+            cin>>num;
+            if(i!=j) printf("x%d%d <= %d;\n",i,j,num);
+        }
+    }
 }
 
 void printIJK(){
@@ -45,7 +81,11 @@ void printIJK(){
 }
 
 int main(){
+    cin>>nodes;
     printObjectiveFunc("max");
+    printLC();
+    printUC();
+    printLXP();
     
     return 0;
 }
