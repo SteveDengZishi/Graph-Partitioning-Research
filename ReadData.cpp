@@ -57,7 +57,7 @@ struct Greater
 #define nodesN 4039;
 vector<int> shard[8];
 vector<int> adjList[4039];
-vector<PII> sortedCountIJ;
+vector<PII> sortedCountIJ[8][8];
 vector<int> Pcount;
 
 unsigned int int_hash(unsigned int x) {
@@ -104,8 +104,8 @@ int colocation(int val,int col){
 
 void printSortedCount(int i, int j){
     printf("The increase in colocation from shard %d to %d is: ",i,j);
-    for(int k=0;k<sortedCountIJ.size();k++){
-        printf(" (%d,%d) ",sortedCountIJ[k].first,sortedCountIJ[k].second);
+    for(int k=0;k<sortedCountIJ[i][j].size();k++){
+        printf(" (%d,%d) ",sortedCountIJ[i][j][k].first,sortedCountIJ[i][j][k].second);
     }
     cout<<endl<<endl;
 }
@@ -115,10 +115,10 @@ void fSort(int i, int j){
         //Calculate the increase in count (INC)
         int INC=colocation(shard[i][k],j)-colocation(shard[i][k],i);
         pair<int,int> p(INC,shard[i][k]);
-        sortedCountIJ.push_back(p);
+        sortedCountIJ[i][j].push_back(p);
     }
-    sort(ALL(sortedCountIJ),Greater());
-//    printSortedCount(i,j);
+    sort(ALL(sortedCountIJ[i][j]),Greater());
+    printSortedCount(i,j);
 }
 
 void createADJ(){
@@ -147,10 +147,10 @@ void printShardSize(){
     }
 }
 
-int countP(){
+int countP(int i, int j){
     int cnt=0;
-    FOR(i,0,sortedCountIJ.size()){
-        if(sortedCountIJ[i].first>=1) cnt++;
+    FOR(k,0,sortedCountIJ[i][j].size()){
+        if(sortedCountIJ[i][j][k].first>=1) cnt++;
         else break;
     }
     return cnt;
@@ -170,18 +170,18 @@ struct dataset{
 
 vector<dataset> vecD;
 
-void printLinearInfo(){
+void printLinearInfo(int i,int j){
     vecD.clear();
     int k=0;
     int sum=0;
     int a=INFINITY;
     int num=0;
     
-    FOR(i,0,sortedCountIJ.size()){
-        if(sortedCountIJ[i].first<=0) break;
+    FOR(z,0,sortedCountIJ[i][j].size()){
+        if(sortedCountIJ[i][j][z].first<=0) break;
         
-        else if(sortedCountIJ[i].first!=a && sortedCountIJ[i].first>0){
-            a=sortedCountIJ[i].first;
+        else if(sortedCountIJ[i][j][z].first!=a && sortedCountIJ[i][j][z].first>0){
+            a=sortedCountIJ[i][j][z].first;
             k++;
             vecD.emplace_back(a,a+sum,num+1); // the index will be k-1
         }
@@ -194,6 +194,51 @@ void printLinearInfo(){
     
     FOR(j,0,k){
         printf("%d %d %d\n",vecD[j].a,vecD[j].sum,vecD[j].no);
+    }
+}
+
+// cut the ListSize after getting X(ij) values from the linear functions
+void cutList(){
+    FOR(i,0,8){
+        FOR(j,0,8){
+            if(i!=j){
+                int size; cin>>size;
+                sortedCountIJ[i][j].resize(size);
+            }
+        }
+    }
+}
+
+// Stores the first choices of all nodes after each iteration
+vector<PII> vecMove[4039]; // move[nodeID] -> vectors of (gain,destination); //only sorted and leave other options for 2nd moves
+
+void mapToMove(){
+    //clear the move vector
+    FOR(i,0,4039){
+        vecMove[i].clear();
+    }
+    FOR(i,0,8){
+        FOR(j,0,8){
+            //sortedCount after cut
+            FOR(k,0,sortedCountIJ[i][j].size()){
+                vecMove[sortedCountIJ[i][j][k].second].emplace_back(sortedCountIJ[i][j][k].first,j);
+            }
+        }
+    }
+}
+
+
+
+//once each iteration
+void applyShift(vector<PII> m[4039]){
+    //find the node & remove them from shard[harsh_int(nodeID)] & add to new destination shard
+    FOR(i,0,4039){
+        if(m[i].size()!=0){
+            int prev=int_hash(int(i))%8; //problem here: lose track from second iteration
+            //using erase-remove idiom
+            shard[prev].erase(remove(shard[prev].begin(),shard[prev].end(),i),shard[prev].end());
+            shard[m[i][0].second].push_back(int(i));
+        }
     }
 }
 
@@ -230,10 +275,9 @@ int main(int argc, const char * argv[]) {
     //in the form (INC(increase in colocation),nodeID)
     for(int i=0;i<8;i++){
         for(int j=0;j<8;j++){
-            sortedCountIJ.clear();
             if(i!=j) fSort(i,j);
-            if(countP()!=0) Pcount.push_back(countP());
-            printLinearInfo();
+            if(countP(i,j)!=0) Pcount.push_back(countP(i,j));
+            printLinearInfo(i,j);
         }
     }
     
