@@ -211,6 +211,7 @@ void cutList(){
 
 // Stores the first choices of all nodes after each iteration
 vector<PII> vecMove[4039]; // move[nodeID] -> vectors of (gain,destination); //only sorted and leave other options for 2nd moves
+int prevShard[4039];
 
 void mapToMove(){
     //clear the move vector
@@ -221,23 +222,29 @@ void mapToMove(){
         FOR(j,0,8){
             //sortedCount after cut
             FOR(k,0,sortedCountIJ[i][j].size()){
-                vecMove[sortedCountIJ[i][j][k].second].emplace_back(sortedCountIJ[i][j][k].first,j);
+                vecMove[sortedCountIJ[i][j][k].second].emplace_back(sortedCountIJ[i][j][k].first,j);//(gain,destination)
             }
         }
+    }
+    //sort to select the top gain moving option
+    FOR(i,0,4039){
+        sort(ALL(vecMove[i]));
     }
 }
 
 
 
 //once each iteration
-void applyShift(vector<PII> m[4039]){
+void applyShift(vector<PII> m[4039]){ //m[nodeID] -> vectors of (gain,destination)
     //find the node & remove them from shard[harsh_int(nodeID)] & add to new destination shard
     FOR(i,0,4039){
         if(m[i].size()!=0){
-            int prev=int_hash(int(i))%8; //problem here: lose track from second iteration
             //using erase-remove idiom
-            shard[prev].erase(remove(shard[prev].begin(),shard[prev].end(),i),shard[prev].end());
+            shard[prevShard[i]].erase(remove(shard[prevShard[i]].begin(),shard[prevShard[i]].end(),i),shard[prevShard[i]].end());
+            //m[i][0] is each of the top gain movement option
             shard[m[i][0].second].push_back(int(i));
+            //update the location of the previous node for next iteration
+            prevShard[i]=m[i][0].second;
         }
     }
 }
@@ -271,8 +278,16 @@ int main(int argc, const char * argv[]) {
     createADJ();
 //    printADJ();
     
+    //clear the vector before using it
+    FOR(i,0,8){
+        FOR(j,0,8){
+            sortedCountIJ[i][j].clear();
+        }
+    }
+    
     //calculate, sort and print the increase in colocation count for all nodes moving from i to j
     //in the form (INC(increase in colocation),nodeID)
+    
     for(int i=0;i<8;i++){
         for(int j=0;j<8;j++){
             if(i!=j) fSort(i,j);
@@ -284,6 +299,11 @@ int main(int argc, const char * argv[]) {
     FOR(i,0,Pcount.size()){
         cout<<Pcount[i]<<endl;
     }
+    
+    //Three steps to move nodes after the linear program returns constraints X(ij), input values with files injection in cutList()
+    cutList();
+    mapToMove();
+    applyShift(vecMove);
     
     return 0;
 }
