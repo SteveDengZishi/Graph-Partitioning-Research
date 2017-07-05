@@ -120,7 +120,7 @@ void fSort(int i, int j){
         sortedCountIJ[i][j].push_back(p);
     }
     sort(ALL(sortedCountIJ[i][j]),Greater());
-    printSortedCount(i,j);
+//    printSortedCount(i,j);
 }
 
 void createADJ(){
@@ -147,6 +147,7 @@ void printShardSize(){
     FOR(i,0,8){
         cout<<shard[i].size()<<" "<<endl;
     }
+    cout<<endl;
 }
 
 //count how many nodes would like to move (gain in colocation count >=1)
@@ -282,6 +283,14 @@ void clearSortedCount(){
     }
 }
 
+void printTotal(){
+    int total=0;
+    FOR(i,0,8){
+        total+=shard[i].size();
+    }
+    cout<<"Total: "<<total<<endl;
+}
+
 //start of main()
 int main(int argc, const char * argv[]) {
     
@@ -297,9 +306,9 @@ int main(int argc, const char * argv[]) {
     randomShard();
     
     //show the sharding result
-    printShard();
-//    printShardSize();
-    
+//    printShard();
+    printShardSize();
+    printTotal();
     //create adjacency list from edge list
     createADJ();
 //    printADJ();
@@ -334,6 +343,7 @@ int main(int argc, const char * argv[]) {
     applyShift(vecMove);
     printShardSize();
 //    printShard();
+    printTotal();
     
     
     return 0;
