@@ -21,6 +21,7 @@
 #include <set> // To sort and remove duplicate when inserted
 #include <unordered_set> //To remove duplicates and count size
 #include <functional> //To use std::hash
+#include <fstream> // To input and output to files
 
 
 //macro here
@@ -59,6 +60,7 @@ vector<int> shard[8];
 vector<int> adjList[4039];
 vector<PII> sortedCountIJ[8][8];
 vector<int> Pcount;
+ifstream inFile;
 
 unsigned int int_hash(unsigned int x) {
     x = ((x >> 16) ^ x) * 0x45d9f3b;
@@ -209,7 +211,9 @@ void cutList(){
     FOR(i,0,8){
         FOR(j,0,8){
             if(i!=j){
-                int size; cin>>size;
+                int fromTo; char x;
+                inFile>>x>>fromTo;
+                int size; inFile>>size;
                 sortedCountIJ[i][j].resize(size);
             }
         }
@@ -265,6 +269,8 @@ void randomShard(){
         int shardID = hash_val % SHARDSIZE;
         //        cout<<"shard ID is: "<<shardID<<endl;
         shard[shardID].push_back(i);
+        //mark prevShard for the 1st random Sharding
+        prevShard[i]=shardID;
     }
 }
 
@@ -291,8 +297,8 @@ int main(int argc, const char * argv[]) {
     randomShard();
     
     //show the sharding result
-//    printShard();
-    printShardSize();
+    printShard();
+//    printShardSize();
     
     //create adjacency list from edge list
     createADJ();
@@ -303,24 +309,31 @@ int main(int argc, const char * argv[]) {
     
     //calculate, sort and print the increase in colocation count for all nodes moving from i to j
     //in the form (INC(increase in colocation),nodeID)
-    
     for(int i=0;i<8;i++){
         for(int j=0;j<8;j++){
             if(i!=j) fSort(i,j);
             if(countP(i,j)!=0) Pcount.push_back(countP(i,j));
-            printLinearInfo(i,j);
+//            printLinearInfo(i,j);
         }
     }
     
-    //print out the number of nodes wanted to move line by line
-    printCountPIJ();
+    //opening Xij returned from lp_solve to provide input
+    inFile.open("first_iter_x.txt",ios::in);
+    
+    if(!inFile){
+        cerr<<"Error occurs while opening the file"<<endl;
+        exit(1);
+    }
+    
+//    //print out the number of nodes wanted to move line by line
+//    printCountPIJ();
     
     //Three steps to move nodes after the linear program returns constraints X(ij), input values with files injection in cutList()
     cutList();
     mapToMove();
     applyShift(vecMove);
     printShardSize();
-    printShard();
+//    printShard();
     
     
     return 0;

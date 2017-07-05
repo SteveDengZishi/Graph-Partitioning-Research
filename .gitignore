@@ -4,6 +4,13 @@
 *.o
 *.obj
 
+# Test Files
+Test
+Test.cpp
+ReadData
+linear
+METIS_graph
+
 # Precompiled Headers
 *.gch
 *.pch
