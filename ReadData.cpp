@@ -147,6 +147,7 @@ void printShardSize(){
     }
 }
 
+//count how many nodes would like to move (gain in colocation count >=1)
 int countP(int i, int j){
     int cnt=0;
     FOR(k,0,sortedCountIJ[i][j].size()){
@@ -154,6 +155,12 @@ int countP(int i, int j){
         else break;
     }
     return cnt;
+}
+
+void printCountPIJ(){
+    FOR(i,0,Pcount.size()){
+        cout<<Pcount[i]<<endl;
+    }
 }
 
 struct dataset{
@@ -249,6 +256,26 @@ void applyShift(vector<PII> m[4039]){ //m[nodeID] -> vectors of (gain,destinatio
     }
 }
 
+void randomShard(){
+    //random sharding according using a integer hash then mod 8 to distribute to shards
+    for(int i=0;i<4039;i++){
+        //        cout<<"i is: "<<i<<endl;
+        unsigned hash_val = int_hash(i);
+        //        cout<<"hash is: "<<hash_val<<endl;
+        int shardID = hash_val % SHARDSIZE;
+        //        cout<<"shard ID is: "<<shardID<<endl;
+        shard[shardID].push_back(i);
+    }
+}
+
+void clearSortedCount(){
+    FOR(i,0,8){
+        FOR(j,0,8){
+            sortedCountIJ[i][j].clear();
+        }
+    }
+}
+
 //start of main()
 int main(int argc, const char * argv[]) {
     
@@ -258,17 +285,10 @@ int main(int argc, const char * argv[]) {
     
     //to get number of nodes from data file
 //    numNode();
-    cout<<4039<<endl;
+//    cout<<4039<<endl;
     
-    //random sharding according using a integer hash then mod 8 to distribute to shards
-    for(int i=0;i<4039;i++){
-//        cout<<"i is: "<<i<<endl;
-        unsigned hash_val = int_hash(i);
-//        cout<<"hash is: "<<hash_val<<endl;
-        int shardID = hash_val % SHARDSIZE;
-//        cout<<"shard ID is: "<<shardID<<endl;
-        shard[shardID].push_back(i);
-    }
+    // 1st time random sharding using hash and mod
+    randomShard();
     
     //show the sharding result
 //    printShard();
@@ -279,11 +299,7 @@ int main(int argc, const char * argv[]) {
 //    printADJ();
     
     //clear the vector before using it
-    FOR(i,0,8){
-        FOR(j,0,8){
-            sortedCountIJ[i][j].clear();
-        }
-    }
+    clearSortedCount();
     
     //calculate, sort and print the increase in colocation count for all nodes moving from i to j
     //in the form (INC(increase in colocation),nodeID)
@@ -296,14 +312,16 @@ int main(int argc, const char * argv[]) {
         }
     }
     
-    FOR(i,0,Pcount.size()){
-        cout<<Pcount[i]<<endl;
-    }
+    //print out the number of nodes wanted to move line by line
+    printCountPIJ();
     
     //Three steps to move nodes after the linear program returns constraints X(ij), input values with files injection in cutList()
     cutList();
     mapToMove();
     applyShift(vecMove);
+    printShardSize();
+    printShard();
+    
     
     return 0;
 }
