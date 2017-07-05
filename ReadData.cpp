@@ -240,7 +240,7 @@ void mapToMove(){
     }
     //sort to select the top gain moving option
     FOR(i,0,4039){
-        sort(ALL(vecMove[i]));
+        sort(ALL(vecMove[i]),Greater());
     }
 }
 
@@ -309,6 +309,7 @@ int main(int argc, const char * argv[]) {
 //    printShard();
     printShardSize();
     printTotal();
+    printShard();
     //create adjacency list from edge list
     createADJ();
 //    printADJ();
@@ -341,9 +342,10 @@ int main(int argc, const char * argv[]) {
     cutList();
     mapToMove();
     applyShift(vecMove);
+    
     printShardSize();
-//    printShard();
     printTotal();
+    printShard();
     
     
     return 0;
