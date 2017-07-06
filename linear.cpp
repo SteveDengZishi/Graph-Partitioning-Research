@@ -96,7 +96,7 @@ void printIJK(){
 }
 
 int main(){
-    
+    //change sequence of eqn to allow x01 - x76
     cin>>nodes;
     printObjectiveFunc("max");
     printLC();
