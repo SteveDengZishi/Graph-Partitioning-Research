@@ -300,16 +300,16 @@ int main(int argc, const char * argv[]) {
     
     //to get number of nodes from data file
 //    numNode();
-//    cout<<4039<<endl;
+    cout<<4039<<endl;
     
     // 1st time random sharding using hash and mod
     randomShard();
     
     //show the sharding result
 //    printShard();
-    printShardSize();
-    printTotal();
-    printShard();
+//    printShardSize();
+//    printTotal();
+    
     //create adjacency list from edge list
     createADJ();
 //    printADJ();
@@ -323,29 +323,29 @@ int main(int argc, const char * argv[]) {
         for(int j=0;j<8;j++){
             if(i!=j) fSort(i,j);
             if(countP(i,j)!=0) Pcount.push_back(countP(i,j));
-//            printLinearInfo(i,j);
+            printLinearInfo(i,j);
         }
     }
     
     //opening Xij returned from lp_solve to provide input
-    inFile.open("first_iter_x.txt",ios::in);
-    
-    if(!inFile){
-        cerr<<"Error occurs while opening the file"<<endl;
-        exit(1);
-    }
+//    inFile.open("first_iter_x.txt",ios::in);
+//    
+//    if(!inFile){
+//        cerr<<"Error occurs while opening the file"<<endl;
+//        exit(1);
+//    }
     
 //    //print out the number of nodes wanted to move line by line
 //    printCountPIJ();
     
     //Three steps to move nodes after the linear program returns constraints X(ij), input values with files injection in cutList()
-    cutList();
-    mapToMove();
-    applyShift(vecMove);
-    
+//    cutList();
+//    mapToMove();
+//    applyShift(vecMove);
+//    
     printShardSize();
-    printTotal();
-    printShard();
+//    printTotal();
+//    printShard();
     
     
     return 0;
