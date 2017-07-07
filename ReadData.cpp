@@ -300,7 +300,7 @@ int main(int argc, const char * argv[]) {
     
     //to get number of nodes from data file
 //    numNode();
-    cout<<4039<<endl;
+    cout<<4039<<endl;//(lp_ingredient)
     
     // 1st time random sharding using hash and mod
     randomShard();
@@ -323,7 +323,7 @@ int main(int argc, const char * argv[]) {
         for(int j=0;j<8;j++){
             if(i!=j) fSort(i,j);
             if(countP(i,j)!=0) Pcount.push_back(countP(i,j));
-            printLinearInfo(i,j);
+            printLinearInfo(i,j);//(lp_ingredient)
         }
     }
     
@@ -335,15 +335,15 @@ int main(int argc, const char * argv[]) {
 //        exit(1);
 //    }
     
-//    //print out the number of nodes wanted to move line by line
-//    printCountPIJ();
+    //print out the number of nodes wanted to move line by line
+    printCountPIJ();//(lp_ingredient)
     
     //Three steps to move nodes after the linear program returns constraints X(ij), input values with files injection in cutList()
 //    cutList();
 //    mapToMove();
 //    applyShift(vecMove);
 //    
-    printShardSize();
+    printShardSize();//(lp_ingredient)
 //    printTotal();
 //    printShard();
     
