@@ -1,4 +1,6 @@
-SOCIAL GRAPH PARTITIONING ALGORITHMS RESEARCH
+                                 SOCIAL GRAPH PARTITIONING ALGORITHMS RESEARCH
+
+	          Student: Zishi Deng    Professor: Torsten Suel   New York University      
 
 Graph partitioning is a well-known NP-hard problem that has no known efficient algorithm. Given its practical importance, many heuristic algorithms have been proposed. One example is METIS, a k-way multilevel partitioning algorithm, which can deliver good practical results. With the rise of social media, we see huge growth in social networks such as Facebook, Google+ and Twitter. The large amounts of user data make these social graphs impossible to be stored on a single machine. Thus, companies have built large distributed systems to store these graphs, and to run queries on them. However, due to bandwidth constraints and communication overheads, querying nodes across machines takes significantly more time than querying nodes locally. Hence, to minimize communication costs, data needs to be partitioned such that the total number of edges cutting across partitions is minimized while also satisfying constraints on the maximum amount of data that can be stored on each node.
 
