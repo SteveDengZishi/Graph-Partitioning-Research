@@ -225,6 +225,17 @@ void cutList(){
 vector<PII> vecMove[4039]; // move[nodeID] -> vectors of (gain,destination); //only sorted and leave other options for 2nd moves
 int prevShard[4039];
 
+void printVecMove(){
+    FOR(i,0,4039){
+        printf("The movement options for node %d in the form (gains,destination) are: ",int(i));
+        FOR(j,0,vecMove[i].size()){
+            printf(" (%d,%d) ",vecMove[i][j].first,vecMove[i][j].second);
+        }
+        cout<<endl;
+    }
+    cout<<endl<<endl;
+}
+
 void mapToMove(){
     //clear the move vector
     FOR(i,0,4039){
@@ -300,15 +311,16 @@ int main(int argc, const char * argv[]) {
     
     //to get number of nodes from data file
 //    numNode();
-    cout<<4039<<endl;//(lp_ingredient)
+//    cout<<4039<<endl;//(lp_ingredient)
     
     // 1st time random sharding using hash and mod
     randomShard();
     
     //show the sharding result
 //    printShard();
-//    printShardSize();
-//    printTotal();
+    cout<<"Sharding Sizes after random assignment: "<<endl;
+    printShardSize();
+    printTotal();
     
     //create adjacency list from edge list
     createADJ();
@@ -323,28 +335,31 @@ int main(int argc, const char * argv[]) {
         for(int j=0;j<8;j++){
             if(i!=j) fSort(i,j);
             if(countP(i,j)!=0) Pcount.push_back(countP(i,j));
-            printLinearInfo(i,j);//(lp_ingredient)
+//            printLinearInfo(i,j);//(lp_ingredient)
         }
     }
     
     //opening Xij returned from lp_solve to provide input
-//    inFile.open("first_iter_x.txt",ios::in);
-//    
-//    if(!inFile){
-//        cerr<<"Error occurs while opening the file"<<endl;
-//        exit(1);
-//    }
+    inFile.open("first_iter_x.txt",ios::in);
+    
+    if(!inFile){
+        cerr<<"Error occurs while opening the file"<<endl;
+        exit(1);
+    }
     
     //print out the number of nodes wanted to move line by line
-    printCountPIJ();//(lp_ingredient)
+//    printCountPIJ();//(lp_ingredient)
     
     //Three steps to move nodes after the linear program returns constraints X(ij), input values with files injection in cutList()
-//    cutList();
-//    mapToMove();
-//    applyShift(vecMove);
-//    
+    cutList();
+    mapToMove();
+    printVecMove(); //Debugging line
+    
+    applyShift(vecMove);
+    
+    cout<<"Sharding Sizes after first movement by taking top gain movements: "<<endl;
     printShardSize();//(lp_ingredient)
-//    printTotal();
+    printTotal();
 //    printShard();
     
     
