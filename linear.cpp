@@ -35,10 +35,10 @@ void printLC(){
                 printf("-x%d%d ",j,i);
             }
         }
-        printf(">= ");
+        printf("<= ");
         cin>>size[i];
         int lowerBound=(nodes/shard)*(1-f);
-        int diff=lowerBound-size[i];
+        int diff=size[i]-lowerBound;
         printf("%d;\n",diff);
     }
 }
@@ -51,9 +51,9 @@ void printUC(){
                 printf("-x%d%d ",j,i);
             }
         }
-        printf("<= ");
+        printf(">= ");
         int upperBound=(nodes/shard)*(1+f);
-        int diff=upperBound-size[i];
+        int diff=size[i]-upperBound;
         printf("%d;\n",diff);
     }
 }

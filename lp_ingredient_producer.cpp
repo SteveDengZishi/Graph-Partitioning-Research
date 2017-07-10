@@ -1,8 +1,8 @@
 //
-//  ReadData.cpp
+//  lp_ingredient_producer.cpp
 //  Boost
 //
-//  Created by Steve DengZishi on 6/13/17.
+//  Created by Steve DengZishi on 7/10/17.
 //  Copyright © 2017 Steve DengZishi. All rights reserved.
 //
 
@@ -96,8 +96,8 @@ int colocation(int val,int col){
     //O(VE)
     for(int i=0;i<shard[col].size();i++){
         for(int j=0;j<adjList[val].size();j++){
-                if(shard[col][i]==adjList[val][j]){
-                    count++;
+            if(shard[col][i]==adjList[val][j]){
+                count++;
             }
         }
     }
@@ -120,7 +120,7 @@ void fSort(int i, int j){
         sortedCountIJ[i][j].push_back(p);
     }
     sort(ALL(sortedCountIJ[i][j]),Greater());
-//    printSortedCount(i,j);
+    //    printSortedCount(i,j);
 }
 
 void createADJ(){
@@ -310,21 +310,15 @@ int main(int argc, const char * argv[]) {
     cin.tie(NULL);
     
     //to get number of nodes from data file
-//    numNode();
-//    cout<<4039<<endl;//(lp_ingredient)
+    //    numNode();
+    cout<<4039<<endl;//(lp_ingredient)
     
     // 1st time random sharding using hash and mod
     randomShard();
-    
-    //show the sharding result
-//    printShard();
-    cout<<"Sharding Sizes after random assignment: "<<endl;
-    printShardSize();
-    printTotal();
-    
+
     //create adjacency list from edge list
     createADJ();
-//    printADJ();
+    //    printADJ();
     
     //clear the vector before using it
     clearSortedCount();
@@ -338,9 +332,6 @@ int main(int argc, const char * argv[]) {
     for(int i=0;i<8;i++){
         for(int j=0;j<8;j++){
             if(i!=j) fSort(i,j);
-            //should probably do these two lines after the sorting result
-//            if(countP(i,j)!=0) Pcount.push_back(countP(i,j));
-//            printLinearInfo(i,j);//(lp_ingredient)
         }
     }
     
@@ -353,7 +344,7 @@ int main(int argc, const char * argv[]) {
     FOR(i,0,4039){
         vecMove[i].resize(1);
     }
-//    printVecMove();
+    //    printVecMove();
     
     clearSortedCount();
     FOR(i,0,4039){
@@ -368,39 +359,16 @@ int main(int argc, const char * argv[]) {
         FOR(j,0,8){
             if(i!=j){
                 sort(ALL(sortedCountIJ[i][j]),Greater());
-//                printSortedCount(i,j);
-//                if(countP(i,j)!=0) Pcount.push_back(countP(i,j));
-//                printLinearInfo(i,j);//(lp_ingredient)
+                //                printSortedCount(i,j);
+                if(countP(i,j)!=0) Pcount.push_back(countP(i,j));
+                printLinearInfo(i,j);//(lp_ingredient)
             }
         }
     }
     
-        //print out the number of nodes wanted to move line by line
-//    printCountPIJ();//(lp_ingredient)
-//    printShardSize();//(lp_ingredient)
-    
-    
-    //opening Xij returned from lp_solve to provide input
-    inFile.open("first_iter_x_RemRep.txt",ios::in);
-    
-    if(!inFile){
-        cerr<<"Error occurs while opening the file"<<endl;
-        exit(1);
-    }
-    
+    //print out the number of nodes wanted to move line by line
+    printCountPIJ();//(lp_ingredient)
+    printShardSize();//(lp_ingredient)
 
-    //Three steps to move nodes after the linear program returns constraints X(ij), input values with files injection in cutList()
-    cutList();
-    mapToMove();
-    printVecMove(); //Debugging line
-    
-    applyShift(vecMove);
-    
-    cout<<"Sharding Sizes after first movement by taking top gain movements: "<<endl;
-    printShardSize();
-    printTotal();
-//    printShard();
-    
-    
     return 0;
 }
