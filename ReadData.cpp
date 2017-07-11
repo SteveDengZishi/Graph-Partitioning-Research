@@ -368,8 +368,8 @@ int main(int argc, const char * argv[]) {
         FOR(j,0,8){
             if(i!=j){
                 sort(ALL(sortedCountIJ[i][j]),Greater());
-//                printSortedCount(i,j);
-//                if(countP(i,j)!=0) Pcount.push_back(countP(i,j));
+//                printSortedCount(i,j); //debugging line
+//                if(countP(i,j)!=0) Pcount.push_back(countP(i,j)); (lp_ingredient)
 //                printLinearInfo(i,j);//(lp_ingredient)
             }
         }
@@ -381,7 +381,7 @@ int main(int argc, const char * argv[]) {
     
     
     //opening Xij returned from lp_solve to provide input
-    inFile.open("first_iter_x_RemRep.txt",ios::in);
+    inFile.open("first_iter_x_bugFree.txt",ios::in);
     
     if(!inFile){
         cerr<<"Error occurs while opening the file"<<endl;
@@ -401,6 +401,58 @@ int main(int argc, const char * argv[]) {
     printTotal();
 //    printShard();
     
+    
+//Start of second iteration -----------------------------------------------------------------------------------------
+    
+    //clear the vector before using it
+    clearSortedCount();
+    
+    //calculate, sort and print the increase in colocation count for all nodes moving from i to j
+    //in the form (INC(increase in colocation),nodeID)
+    FOR(i,0,4039){
+        vecMove[i].clear();
+    }
+    
+    for(int i=0;i<8;i++){
+        for(int j=0;j<8;j++){
+            if(i!=j) fSort(i,j);
+        }
+    }
+    
+    //sort all movement options for all nodes in i shard, and keep the only highest scoring destination
+    //to eliminate repeated movement falls in top x options
+    //1.mapping
+    //2.resize to top gain movement
+    //3.reconstruct sortedCountIJ
+    mapToMove();
+    FOR(i,0,4039){
+        vecMove[i].resize(1);
+    }
+    //    printVecMove();
+    
+    clearSortedCount();
+    FOR(i,0,4039){
+        //after resizing vecMove only contains top gain movement
+        int dest=vecMove[i][0].second;
+        int gain=vecMove[i][0].first;
+        int origin=prevShard[i];
+        sortedCountIJ[origin][dest].emplace_back(gain,i);
+    }
+    
+    FOR(i,0,8){
+        FOR(j,0,8){
+            if(i!=j){
+                sort(ALL(sortedCountIJ[i][j]),Greater());
+//                printSortedCount(i,j);
+                if(countP(i,j)!=0) Pcount.push_back(countP(i,j));//(lp_ingredient)
+                printLinearInfo(i,j);//(lp_ingredient)
+            }
+        }
+    }
+
+    //print out the number of nodes wanted to move line by line
+    printCountPIJ();//(lp_ingredient)
+    printShardSize();//(lp_ingredient)
     
     return 0;
 }
