@@ -226,6 +226,19 @@ void cutList(){
 vector<PII> vecMove[4039]; // move[nodeID] -> vectors of (gain,destination); //only sorted and leave other options for 2nd moves
 int prevShard[4039];
 
+void printLocatlityFraction(char* numIter){
+    int localEdge=0;
+    FOR(i,0,4039){
+        FOR(j,0,adjList[i].size()){
+            if(prevShard[i]==prevShard[adjList[i][j]]) localEdge++;
+        }
+    }
+    localEdge/=2; //if the graph is undirected each edge was counted twice
+    int totalEdge=88234;
+    double fraction=(double)localEdge/(double)totalEdge;
+    printf("After %s iteration, there are %d local edges out of total %d edges, fraction of local edges is: %lf\n\n",numIter,localEdge,totalEdge,fraction);
+}
+
 void printVecMove(){
     FOR(i,0,4039){
         printf("The movement options for node %d in the form (gains,destination) are: ",int(i));
@@ -327,6 +340,10 @@ int main(int argc, const char * argv[]) {
     createADJ();
 //    printADJ();
     
+    printLocatlityFraction((char*)"0");
+    
+//Start of first iteration--------------------------------------------------------------------------------
+    
     //clear the vector before using it
     clearSortedCount();
     
@@ -402,6 +419,8 @@ int main(int argc, const char * argv[]) {
 //    printTotal();
 //    printShard();
     inFile.close();
+    
+    printLocatlityFraction((char*)"1st");
     
 //Start of second iteration -----------------------------------------------------------------------------------------
     
@@ -487,6 +506,8 @@ int main(int argc, const char * argv[]) {
     //printShard(); //Debugging line
     inFile.close();
     
+    printLocatlityFraction((char*)"2nd");
+    
 // Start of third iteration-----------------------------------------------------------------------------
     
     //print number of nodes
@@ -571,6 +592,7 @@ int main(int argc, const char * argv[]) {
     //printShard();
     inFile.close();
 
+    printLocatlityFraction((char*)"3rd");
     
 // Start of fourth iteration-----------------------------------------------------------------------------
     
@@ -656,7 +678,8 @@ int main(int argc, const char * argv[]) {
     //printShard();
     inFile.close();
     
-
+    printLocatlityFraction((char*)"4th");
+    
 // Start of fifth iteration-----------------------------------------------------------------------------
     
     //print number of nodes
@@ -731,16 +754,17 @@ int main(int argc, const char * argv[]) {
     //Three steps to move nodes after the linear program returns constraints X(ij), input values with files injection in cutList()
     cutList();
     mapToMove();
-    printVecMove(); //Debugging line
+//    printVecMove(); //Debugging line
     
     applyShift(vecMove);
     
-    cout<<"Sharding Sizes after first movement by taking top gain movements: "<<endl; //Debugging line
-    printShardSize(); //Debugging line
-    printTotal(); //Debugging line
+//    cout<<"Sharding Sizes after first movement by taking top gain movements: "<<endl; //Debugging line
+//    printShardSize(); //Debugging line
+//    printTotal(); //Debugging line
     //printShard();
     inFile.close();
 
-
+    printLocatlityFraction((char*)"5th");
+    
     return 0;
 }
