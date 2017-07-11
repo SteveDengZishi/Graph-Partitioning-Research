@@ -399,7 +399,7 @@ int main(int argc, const char * argv[]) {
     
     
     //opening Xij returned from lp_solve to provide input
-    inFile.open("first_iter_x_bugFree.txt",ios::in);
+    inFile.open("1st_iter_x.txt",ios::in);
     
     if(!inFile){
         cerr<<"Error occurs while opening the file"<<endl;
