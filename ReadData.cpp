@@ -38,6 +38,7 @@
 #define FILL(a,b) memset(a, b , sizeof(a)) //fill array a with all bs
 #define INIT(a) FILL(a,0) //initialize array a with all 0s
 #define INF 2e9
+//#define lp_ingredient_2nd
 
 //name space here
 using namespace std;
@@ -318,9 +319,9 @@ int main(int argc, const char * argv[]) {
     
     //show the sharding result
 //    printShard();
-    cout<<"Sharding Sizes after random assignment: "<<endl;
-    printShardSize();
-    printTotal();
+//    cout<<"Sharding Sizes after random assignment: "<<endl;
+//    printShardSize();
+//    printTotal();
     
     //create adjacency list from edge list
     createADJ();
@@ -392,18 +393,22 @@ int main(int argc, const char * argv[]) {
     //Three steps to move nodes after the linear program returns constraints X(ij), input values with files injection in cutList()
     cutList();
     mapToMove();
-    printVecMove(); //Debugging line
+//    printVecMove(); //Debugging line
     
     applyShift(vecMove);
     
-    cout<<"Sharding Sizes after first movement by taking top gain movements: "<<endl;
-    printShardSize();
-    printTotal();
+//    cout<<"Sharding Sizes after first movement by taking top gain movements: "<<endl;
+//    printShardSize();
+//    printTotal();
 //    printShard();
     
     
 //Start of second iteration -----------------------------------------------------------------------------------------
     
+    //print number of nodes
+#ifdef lp_ingredient_2nd
+    cout<<4039<<endl;// (lp_ingredient)
+#endif
     //clear the vector before using it
     clearSortedCount();
     
@@ -439,20 +444,26 @@ int main(int argc, const char * argv[]) {
         sortedCountIJ[origin][dest].emplace_back(gain,i);
     }
     
+    //clear Pcount vector before using
+    Pcount.clear();
+    
     FOR(i,0,8){
         FOR(j,0,8){
             if(i!=j){
                 sort(ALL(sortedCountIJ[i][j]),Greater());
 //                printSortedCount(i,j);
+#ifdef lp_ingredient_2nd
                 if(countP(i,j)!=0) Pcount.push_back(countP(i,j));//(lp_ingredient)
                 printLinearInfo(i,j);//(lp_ingredient)
+#endif
             }
         }
     }
-
+#ifdef lp_ingredient_2nd
     //print out the number of nodes wanted to move line by line
     printCountPIJ();//(lp_ingredient)
     printShardSize();//(lp_ingredient)
+#endif
     
     return 0;
 }
