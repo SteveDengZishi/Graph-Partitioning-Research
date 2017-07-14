@@ -74,7 +74,7 @@ unsigned int int_hash(unsigned int x) {
 }
 
 void printShard(){
-    for(int i=0;i<8;i++){
+    for(int i=0;i<partitions;i++){
         printf("Shard %d:\n",i);
         for(int j=0;j<shard[i].size();j++){
             cout<<shard[i][j]<<" ";
@@ -127,7 +127,7 @@ void createADJ(){
 }
 
 void printADJ(){
-    for(int i=0;i<4039;i++){
+    for(int i=0;i<nodes;i++){
         cout<<i<<": ";
         for(int j=0;j<adjList[i].size();j++){
             cout<<adjList[i][j]<<" ";
@@ -138,7 +138,7 @@ void printADJ(){
 }
 
 void printShardSize(){
-    FOR(i,0,8){
+    FOR(i,0,partitions){
         cout<<shard[i].size()<<" "<<endl;
     }
     cout<<endl;
@@ -201,26 +201,13 @@ void printLinearInfo(int i,int j){
     }
 }
 
-// cut the ListSize after getting X(ij) values from the linear functions
-void cutList(){
-    FOR(i,0,8){
-        FOR(j,0,8){
-            if(i!=j){
-                int fromTo; char x;
-                inFile>>x>>fromTo;
-                int size; inFile>>size;
-                sortedCountIJ[i][j].resize(size);
-            }
-        }
-    }
-}
 
 // Stores the first choices of all nodes after each iteration
 vector<PII>* vecMove; // move[nodeID] -> vectors of (gain,destination); //only sorted and leave other options for 2nd moves
 int* prevShard;
 
 void printVecMove(){
-    FOR(i,0,4039){
+    FOR(i,0,nodes){
         printf("The movement options for node %d in the form (gains,destination) are: ",int(i));
         FOR(j,0,vecMove[i].size()){
             printf(" (%d,%d) ",vecMove[i][j].first,vecMove[i][j].second);
@@ -231,20 +218,16 @@ void printVecMove(){
 }
 
 void mapToMove(){
-    //clear the move vector
-    FOR(i,0,4039){
-        vecMove[i].clear();
-    }
-    FOR(i,0,8){
-        FOR(j,0,8){
+    for(int i=0;i<partitions;i++){
+        for(int j=0;j<partitions;j++){
             //sortedCount after cut
-            FOR(k,0,sortedCountIJ[i][j].size()){
+            for(int k=0;k<sortedCountIJ[i][j].size();k++){
                 vecMove[sortedCountIJ[i][j][k].second].emplace_back(sortedCountIJ[i][j][k].first,j);//(gain,destination)
             }
         }
     }
     //sort to select the top gain moving option
-    FOR(i,0,4039){
+    for(int i=0;i<nodes;i++){
         sort(ALL(vecMove[i]),Greater());
     }
 }
@@ -274,8 +257,8 @@ void loadShard(){
 }
 
 void clearSortedCount(){
-    FOR(i,0,8){
-        FOR(j,0,8){
+    FOR(i,0,partitions){
+        FOR(j,0,partitions){
             sortedCountIJ[i][j].clear();
         }
     }
@@ -283,7 +266,7 @@ void clearSortedCount(){
 
 void printTotal(){
     int total=0;
-    FOR(i,0,8){
+    FOR(i,0,partitions){
         total+=shard[i].size();
     }
     cout<<"Total: "<<total<<endl;
@@ -315,6 +298,7 @@ int main(int argc, const char * argv[]) {
     //create adjacency list from edge list
     createADJ();
     //    printADJ();
+    inFile.close();
     
     //load previous shard[partitions] & prevShard[nodes] using fread()
     loadShard();
@@ -328,9 +312,6 @@ int main(int argc, const char * argv[]) {
     for(int i=0;i<partitions;i++){
         sortedCountIJ[i]=new vector<PII> [partitions];
     }
-    
-    
-    
     
     //calculate, sort and print the increase in colocation count for all nodes moving from i to j
     //in the form (INC(increase in colocation),nodeID)
@@ -347,13 +328,14 @@ int main(int argc, const char * argv[]) {
     //2.resize to top gain movement
     //3.reconstruct sortedCountIJ
     mapToMove();
-    FOR(i,0,4039){
+    for(int i=0;i<nodes;i++){
         vecMove[i].resize(1);
     }
     //    printVecMove();
     
     clearSortedCount();
-    FOR(i,0,4039){
+    
+    FOR(i,0,nodes){
         //after resizing vecMove only contains top gain movement
         int dest=vecMove[i][0].second;
         int gain=vecMove[i][0].first;
@@ -361,8 +343,8 @@ int main(int argc, const char * argv[]) {
         sortedCountIJ[origin][dest].emplace_back(gain,i);
     }
     
-    FOR(i,0,8){
-        FOR(j,0,8){
+    FOR(i,0,partitions){
+        FOR(j,0,partitions){
             if(i!=j){
                 sort(ALL(sortedCountIJ[i][j]),Greater());
                 //                printSortedCount(i,j);
