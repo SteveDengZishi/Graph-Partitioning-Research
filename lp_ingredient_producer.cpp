@@ -216,8 +216,8 @@ void cutList(){
 }
 
 // Stores the first choices of all nodes after each iteration
-vector<PII> vecMove[4039]; // move[nodeID] -> vectors of (gain,destination); //only sorted and leave other options for 2nd moves
-int prevShard[4039];
+vector<PII>* vecMove; // move[nodeID] -> vectors of (gain,destination); //only sorted and leave other options for 2nd moves
+int* prevShard;
 
 void printVecMove(){
     FOR(i,0,4039){
@@ -319,8 +319,15 @@ int main(int argc, const char * argv[]) {
     //load previous shard[partitions] & prevShard[nodes] using fread()
     loadShard();
     
-    //allocate memory for adjList & sortedCountIJ on the heap
+    //allocate memory for vecMove, adjList & sortedCountIJ on the heap
+    adjList=new vector<int>[nodes];
     
+    vecMove=new vector<PII>[nodes];
+    
+    sortedCountIJ=new vector<PII>* [partitions];
+    for(int i=0;i<partitions;i++){
+        sortedCountIJ[i]=new vector<PII> [partitions];
+    }
     
     
     
