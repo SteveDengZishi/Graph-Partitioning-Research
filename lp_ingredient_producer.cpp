@@ -54,29 +54,23 @@ struct Greater
 };
 
 //functions, global variables, comparators & Non-STL Data Structures definition here
-#define SHARDSIZE 8;
-#define nodesN 4039;
-vector<int> shard[8];
-vector<int> adjList[4039];
-vector<PII> sortedCountIJ[8][8];
+
+
+//modified to pointers to allow dynamically allocate on heap
+vector<int>* shard;
+vector<int>* adjList;
+vector<PII>** sortedCountIJ;
 vector<int> Pcount;
-ifstream inFile;
+int partitions;
+int nodes;
+int edges;
+string fileName;
 
 unsigned int int_hash(unsigned int x) {
     x = ((x >> 16) ^ x) * 0x45d9f3b;
     x = ((x >> 16) ^ x) * 0x45d9f3b;
     x = (x >> 16) ^ x;
     return x;
-}
-
-void numNode(){
-    int nodeID;
-    int maxID=0;
-    while(cin>>nodeID){
-        if(nodeID>maxID) maxID=nodeID;
-    }
-    cout<<"The maxID is: "<<maxID<<endl;
-    printf("There are %d nodes in total\n",maxID+1);
 }
 
 void printShard(){
@@ -272,18 +266,11 @@ void applyShift(vector<PII> m[4039]){ //m[nodeID] -> vectors of (gain,destinatio
     }
 }
 
-void randomShard(){
+void loadShard(){
     //random sharding according using a integer hash then mod 8 to distribute to shards
-    for(int i=0;i<4039;i++){
-        //        cout<<"i is: "<<i<<endl;
-        unsigned hash_val = int_hash(i);
-        //        cout<<"hash is: "<<hash_val<<endl;
-        int shardID = hash_val % SHARDSIZE;
-        //        cout<<"shard ID is: "<<shardID<<endl;
-        shard[shardID].push_back(i);
-        //mark prevShard for the 1st random Sharding
-        prevShard[i]=shardID;
-    }
+    FILE* inFile=fopen("sharding_result.bin", "rb");
+    fread(shard, sizeof(shard[0]), partitions, inFile);
+    fread(prevShard, sizeof(prevShard[0]), nodes, inFile);
 }
 
 void clearSortedCount(){
@@ -309,28 +296,40 @@ int main(int argc, const char * argv[]) {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
     
-    //to get number of nodes from data file
-    //    numNode();
-    cout<<4039<<endl;//(lp_ingredient)
+    //get stdin from shell script
+    cin>>fileName;
+    cin>>partitions;
     
-    // 1st time random sharding using hash and mod
-    randomShard();
-
+    fstream inFile;
+    inFile.open(fileName,ios::in);
+    
+    if(!inFile){
+        cerr<<"Error occurs while opening the file"<<endl;
+        exit(1);
+    }
+    
+    //read number of nodes and edges
+    cin>>nodes>>edges;
+    cout<<nodes<<endl;//(lp_ingredient)
+    
     //create adjacency list from edge list
     createADJ();
     //    printADJ();
     
-    //clear the vector before using it
-    clearSortedCount();
+    //load previous shard[partitions] & prevShard[nodes] using fread()
+    loadShard();
+    
+    //allocate memory for adjList & sortedCountIJ on the heap
+    
+    
+    
+    
     
     //calculate, sort and print the increase in colocation count for all nodes moving from i to j
     //in the form (INC(increase in colocation),nodeID)
-    FOR(i,0,4039){
-        vecMove[i].clear();
-    }
     
-    for(int i=0;i<8;i++){
-        for(int j=0;j<8;j++){
+    for(int i=0;i<partitions;i++){
+        for(int j=0;j<partitions;j++){
             if(i!=j) fSort(i,j);
         }
     }
