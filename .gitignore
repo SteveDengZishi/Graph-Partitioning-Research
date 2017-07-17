@@ -5,11 +5,16 @@
 *.obj
 
 # Test Files
+*.bin
 Test
 Test.cpp
 ReadData
 linear
 METIS_graph
+test.sh
+RandomAssignment
+clean
+lp_ingredient_producer
 
 # Precompiled Headers
 *.gch

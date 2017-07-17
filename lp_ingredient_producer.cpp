@@ -33,6 +33,8 @@
 #define DEIFELSE cout<<"DEBUG: in if else"<<endl
 #define DEELSEIF cout<<"DEBUG: in else if"<<endl
 #define DEELSEELSE cout<<"DEBUG: in else else"<<endl
+#define BEFORE cout<<"before"<<endl;
+#define AFTER cout<<"after"<<endl;
 #define ALL(a) a.begin(),a.end()
 #define CINLINE(a) getline(cin,a)
 #define FILL(a,b) memset(a, b , sizeof(a)) //fill array a with all bs
@@ -64,6 +66,7 @@ vector<int> Pcount;
 int partitions;
 int nodes;
 int edges;
+fstream inFile;
 string fileName;
 
 unsigned int int_hash(unsigned int x) {
@@ -119,7 +122,7 @@ void fSort(int i, int j){
 
 void createADJ(){
     int from,to;
-    while(cin>>from>>to){
+    while(inFile>>from>>to){
         adjList[from].push_back(to);
         // comment out the following line if the graph is directed
         adjList[to].push_back(from);
@@ -252,8 +255,24 @@ void applyShift(vector<PII> m[4039]){ //m[nodeID] -> vectors of (gain,destinatio
 void loadShard(){
     //random sharding according using a integer hash then mod 8 to distribute to shards
     FILE* inFile=fopen("sharding_result.bin", "rb");
-    fread(shard, sizeof(shard[0]), partitions, inFile);
-    fread(prevShard, sizeof(prevShard[0]), nodes, inFile);
+    
+//    fseek(inFile,0,SEEK_SET);
+//    fread(shard, sizeof(vector<int>), partitions, inFile);
+//    fread(prevShard, sizeof(int), nodes, inFile);
+    
+// use fscanf instead of fread
+    for(int i=0;i<partitions;i++){
+        int size;
+        fscanf(inFile,"%d",&size);
+        for(int j=0;j<size;j++){
+            int data;
+            fscanf(inFile,"%d",&data);
+            shard[i].push_back(data);
+        }
+    }
+    for(int i=0;i<nodes;i++){
+        fscanf(inFile,"%d",&prevShard[i]);
+    }
 }
 
 void clearSortedCount(){
@@ -283,7 +302,6 @@ int main(int argc, const char * argv[]) {
     cin>>fileName;
     cin>>partitions;
     
-    fstream inFile;
     inFile.open(fileName,ios::in);
     
     if(!inFile){
@@ -292,8 +310,23 @@ int main(int argc, const char * argv[]) {
     }
     
     //read number of nodes and edges
-    cin>>nodes>>edges;
+    inFile>>nodes>>edges;
     cout<<nodes<<endl;//(lp_ingredient)
+    
+    //allocate memory for vecMove, adjList & sortedCountIJ on the heap
+    adjList=new vector<int>[nodes];
+    
+    vecMove=new vector<PII>[nodes];
+    
+    shard=new vector<int> [partitions];
+    
+    prevShard=new int[nodes];
+    
+    sortedCountIJ=new vector<PII>* [partitions];
+    for(int i=0;i<partitions;i++){
+        sortedCountIJ[i]=new vector<PII> [partitions];
+    }
+    
     
     //create adjacency list from edge list
     createADJ();
@@ -302,26 +335,15 @@ int main(int argc, const char * argv[]) {
     
     //load previous shard[partitions] & prevShard[nodes] using fread()
     loadShard();
-    
-    //allocate memory for vecMove, adjList & sortedCountIJ on the heap
-    adjList=new vector<int>[nodes];
-    
-    vecMove=new vector<PII>[nodes];
-    
-    sortedCountIJ=new vector<PII>* [partitions];
-    for(int i=0;i<partitions;i++){
-        sortedCountIJ[i]=new vector<PII> [partitions];
-    }
+//    printShard();
     
     //calculate, sort and print the increase in colocation count for all nodes moving from i to j
     //in the form (INC(increase in colocation),nodeID)
-    
     for(int i=0;i<partitions;i++){
         for(int j=0;j<partitions;j++){
             if(i!=j) fSort(i,j);
         }
     }
-    
     //sort all movement options for all nodes in i shard, and keep the only highest scoring destination
     //to eliminate repeated movement falls in top x options
     //1.mapping

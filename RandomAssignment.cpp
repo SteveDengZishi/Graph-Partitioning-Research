@@ -28,6 +28,7 @@ using namespace std;
 //global variables here
 vector<int>* shard;
 int* prevShard;
+fstream inFile;
 string fileName;
 int partitions;
 int nodes;
@@ -47,12 +48,23 @@ void randomShard(){
         //        cout<<"i is: "<<i<<endl;
         unsigned hash_val = int_hash(i);
         //        cout<<"hash is: "<<hash_val<<endl;
-        int shardID = hash_val % 8;
+        int shardID = hash_val % partitions;
         //        cout<<"shard ID is: "<<shardID<<endl;
         shard[shardID].push_back(i);
         //mark prevShard for the 1st random Sharding
         prevShard[i]=shardID;
     }
+}
+
+void printShard(){
+    for(int i=0;i<partitions;i++){
+        printf("Shard %d:\n",i);
+        for(int j=0;j<shard[i].size();j++){
+            cout<<shard[i][j]<<" ";
+        }
+        cout<<endl;
+    }
+    cout<<endl;
 }
 
 //start of main program
@@ -62,7 +74,6 @@ int main(){
     cin>>fileName;
     cin>>partitions;
     
-    fstream inFile;
     inFile.open(fileName,ios::in);
     
     if(!inFile){
@@ -71,7 +82,7 @@ int main(){
     }
     
     //read number of nodes and edges
-    cin>>nodes>>edges;
+    inFile>>nodes>>edges;
     
     //create data structures with variable size on the heap
     shard=new vector<int>[partitions];
@@ -79,15 +90,29 @@ int main(){
     
     //random sharding
     randomShard();
-    
+//    printShard();
     //output
-    FILE *outFile = fopen("sharding_result.bin", "wb");
-    fwrite(shard, sizeof(shard[0]), partitions, outFile);
-    fwrite(prevShard, sizeof(prevShard[0]), nodes, outFile);
+    FILE* outFile = fopen("sharding_result.bin", "wb");
+    
+    //write block of data to stream
+//    fwrite(prevShard, sizeof(int), nodes, outFile);
+//    fwrite(shard, sizeof(vector<int>), partitions, outFile);
+    for(int i=0;i<partitions;i++){
+        fprintf(outFile,"%d\n",int(shard[i].size()));
+        for(int j=0;j<shard[i].size();j++){
+            fprintf(outFile,"%d ", shard[i][j]);
+        }
+    }
+    
+    for(int i=0;i<nodes;i++){
+        fprintf(outFile,"%d ", prevShard[i]);
+    }
     
     //delete dynamic allocation
     delete [] shard;
     delete [] prevShard;
+    
+    fclose(outFile);
     
     return 0;
 }

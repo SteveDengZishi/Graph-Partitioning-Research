@@ -1,2 +1,2 @@
 #!/bin/bash
-time ./ReadData < facebook_combined.txt
+sort < 1st_iter_x.txt
