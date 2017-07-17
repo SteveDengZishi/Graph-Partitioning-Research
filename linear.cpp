@@ -10,9 +10,9 @@
 
 using namespace std;
 
-int shard=8;
+int shard;
 int nodes;
-int size[8];
+int* size;
 double f=0.10;
 
 void printObjectiveFunc(string minOrMax){
@@ -97,7 +97,12 @@ void printIJK(){
 
 int main(){
     //change sequence of eqn to allow x01 - x76
-    cin>>nodes;
+    cin>>nodes>>shard;
+//    cout<<nodes<<" "<<shard<<endl;
+    
+    //dynamically allocate memory
+    size=new int[shard];
+    
     printObjectiveFunc("max");
     
     printIJK();
@@ -106,5 +111,7 @@ int main(){
     printLC();
     printUC();
     
+    //clean dynamically allocated memory
+    delete [] size;
     return 0;
 }

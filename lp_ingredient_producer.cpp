@@ -235,23 +235,6 @@ void mapToMove(){
     }
 }
 
-
-
-//once each iteration
-void applyShift(vector<PII> m[4039]){ //m[nodeID] -> vectors of (gain,destination)
-    //find the node & remove them from shard[harsh_int(nodeID)] & add to new destination shard
-    FOR(i,0,4039){
-        if(m[i].size()!=0){
-            //using erase-remove idiom
-            shard[prevShard[i]].erase(remove(shard[prevShard[i]].begin(),shard[prevShard[i]].end(),i),shard[prevShard[i]].end());
-            //m[i][0] is each of the top gain movement option
-            shard[m[i][0].second].push_back(int(i));
-            //update the location of the previous node for next iteration
-            prevShard[i]=m[i][0].second;
-        }
-    }
-}
-
 void loadShard(){
     //random sharding according using a integer hash then mod 8 to distribute to shards
     FILE* inFile=fopen("sharding_result.bin", "rb");
@@ -311,7 +294,7 @@ int main(int argc, const char * argv[]) {
     
     //read number of nodes and edges
     inFile>>nodes>>edges;
-    cout<<nodes<<endl;//(lp_ingredient)
+    cout<<nodes<<" "<<partitions<<endl;//(lp_ingredient)
     
     //allocate memory for vecMove, adjList & sortedCountIJ on the heap
     adjList=new vector<int>[nodes];
@@ -379,6 +362,17 @@ int main(int argc, const char * argv[]) {
     //print out the number of nodes wanted to move line by line
     printCountPIJ();//(lp_ingredient)
     printShardSize();//(lp_ingredient)
-
+    
+    //free up allocated memory
+    delete [] shard;
+    delete [] adjList;
+    delete [] vecMove;
+    delete [] prevShard;
+    
+    for(int i=0;i<partitions;i++){
+        delete [] sortedCountIJ[i];
+    }
+    delete [] sortedCountIJ;
+    
     return 0;
 }
