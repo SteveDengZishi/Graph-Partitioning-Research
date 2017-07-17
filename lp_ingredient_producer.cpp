@@ -256,6 +256,8 @@ void loadShard(){
     for(int i=0;i<nodes;i++){
         fscanf(inFile,"%d",&prevShard[i]);
     }
+    
+    fclose(inFile);
 }
 
 void clearSortedCount(){
@@ -297,26 +299,22 @@ int main(int argc, const char * argv[]) {
     cout<<nodes<<" "<<partitions<<endl;//(lp_ingredient)
     
     //allocate memory for vecMove, adjList & sortedCountIJ on the heap
-    adjList=new vector<int>[nodes];
-    
-    vecMove=new vector<PII>[nodes];
-    
-    shard=new vector<int> [partitions];
-    
+    shard=new vector<int>[partitions];
     prevShard=new int[nodes];
+    vecMove=new vector<PII>[nodes];
+    adjList=new vector<int>[nodes];
     
     sortedCountIJ=new vector<PII>* [partitions];
     for(int i=0;i<partitions;i++){
         sortedCountIJ[i]=new vector<PII> [partitions];
     }
     
-    
     //create adjacency list from edge list
     createADJ();
     //    printADJ();
     inFile.close();
     
-    //load previous shard[partitions] & prevShard[nodes] using fread()
+    //load previous shard[partitions] & prevShard[nodes] 
     loadShard();
 //    printShard();
     
@@ -363,11 +361,37 @@ int main(int argc, const char * argv[]) {
     printCountPIJ();//(lp_ingredient)
     printShardSize();//(lp_ingredient)
     
+    //fprint structured data to files to be reload later in applyMove
+    FILE* outFile;
+    outFile=fopen("sharding_result.bin","wb");
+    
+    for(int i=0;i<partitions;i++){
+        fprintf(outFile,"%d\n",int(shard[i].size()));
+        for(int j=0;j<shard[i].size();j++){
+            fprintf(outFile,"%d ", shard[i][j]);
+        }
+    }
+    
+    for(int i=0;i<nodes;i++){
+        fprintf(outFile,"%d ", prevShard[i]);
+    }
+    
+    for(int i=0;i<partitions;i++){
+        for(int j=0;j<partitions;j++){
+            fprintf(outFile, "%d\n", (int)sortedCountIJ[i][j].size());
+            for(int k=0;k<sortedCountIJ[i][j].size();k++){
+                fprintf(outFile, "%d %d ", sortedCountIJ[i][j][k].first, sortedCountIJ[i][j][k].second);
+            }
+        }
+    }
+    
+    fclose(outFile);
+    
     //free up allocated memory
     delete [] shard;
     delete [] adjList;
-    delete [] vecMove;
     delete [] prevShard;
+    delete [] vecMove;
     
     for(int i=0;i<partitions;i++){
         delete [] sortedCountIJ[i];

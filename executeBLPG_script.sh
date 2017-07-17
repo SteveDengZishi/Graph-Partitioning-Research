@@ -9,40 +9,49 @@
 #set the source file for input
 read -p "Enter the name of the input graph file: " FileName
 read -p "Enter the number of shard: " shard
+#prompt user input
+read -p "Enter the number of iteration: " iter
 
 #compile all .cpp files to executables
 g++ -o clean clean.cpp -std=c++11
+echo -e "\ng++ compiled clean.cpp successfully"
 g++ -o lp_ingredient_producer lp_ingredient_producer.cpp -std=c++11
+echo "g++ compiled lp_ingredient_producer.cpp successfully"
 g++ -o linear linear.cpp -std=c++11
+echo "g++ compiled linear.cpp successfully"
+g++ -o applyMove applyMove.cpp -std=c++11
+echo "g++ compiled applyMove.cpp successfully"
 g++ -o RandomAssignment RandomAssignment.cpp -std=c++11
+echo -e "g++ compiled RandomAssignment.cpp successfully\n"
 
-echo -e "\ng++ compilation complete\n"
-
-#execute ReadData with input graph
-#prompt user input
-#read -p "Enter the number of iteration: " iter
 
 #initialize using random assignment outside of iteration
-
-./RandomAssignment <<END
+echo -e "Starting random initialization...\n"
+./RandomAssignment <<EOF
 $FileName
 $shard
-END
+EOF
 
-./lp_ingredient_producer > lp_ingred.txt <<END
-$FileName
-$shard
-END
-
-./linear < lp_ingred.txt | lp_solve | ./clean | sort #> x_result_$i.txt
+echo -e "Initialization completed\n"
 
 #start of iteration
-#for((i=1;i<iter+1;i++))
-#do
-##vector<int> shard[8], vector<int> adjList[4039], and int prevShard[4039] should not be cleared between iterations
-##./lp_ingredient_producer <<EOF $FileName $shard EOF | ./linear > lp_eqns_$i.txt
-##lp_solve lp_eqns_$i.txt > x_result_$i.txt
-##./applydMove < x_result_$i.txt > movement_$i.txt
+for((i=1;i<iter+1;i++))
+do
+echo "In iteration" $i
+
+./lp_ingredient_producer > lp_ingred.txt <<EOF
+$FileName
+$shard
+EOF
+
+./linear < lp_ingred.txt | lp_solve | ./clean | sort > x_result_$i.txt
+
+x_file=x_result_$i.txt
+
+./applyMove <<EOF
+$FileName
+$shard
+$x_file
+EOF
 ##plotting graph along the way
-#
-#done
+done

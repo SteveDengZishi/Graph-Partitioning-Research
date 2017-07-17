@@ -25,9 +25,12 @@
 
 using namespace std;
 
+#define FOR(i,a,b) for(size_t i=a;i<b;i++)
+
 //global variables here
 vector<int>* shard;
 int* prevShard;
+vector<int>* adjList;
 fstream inFile;
 string fileName;
 int partitions;
@@ -40,6 +43,28 @@ unsigned int int_hash(unsigned int x) {
     x = ((x >> 16) ^ x) * 0x45d9f3b;
     x = (x >> 16) ^ x;
     return x;
+}
+
+void printLocatlityFraction(){
+    int localEdge=0;
+    FOR(i,0,nodes){
+        FOR(j,0,adjList[i].size()){
+            if(prevShard[i]==prevShard[adjList[i][j]]) localEdge++;
+        }
+    }
+    localEdge/=2; //if the graph is undirected each edge was counted twice
+    int totalEdge=edges;
+    double fraction=(double)localEdge/(double)totalEdge;
+    printf("Before iterations, there are %d local edges out of total %d edges, fraction of local edges is: %lf\n\n",localEdge,totalEdge,fraction);
+}
+
+void createADJ(){
+    int from,to;
+    while(inFile>>from>>to){
+        adjList[from].push_back(to);
+        // comment out the following line if the graph is directed
+        adjList[to].push_back(from);
+    }
 }
 
 void randomShard(){
@@ -87,11 +112,17 @@ int main(){
     //create data structures with variable size on the heap
     shard=new vector<int>[partitions];
     prevShard=new int[nodes];
+    adjList=new vector<int>[nodes];
     
+    //produce adjList
+    createADJ();
     //random sharding
     randomShard();
 //    printShard();
-    //output
+    //output locality info to shell
+    printLocatlityFraction();
+    
+    //fprint to files
     FILE* outFile = fopen("sharding_result.bin", "wb");
     
     //write block of data to stream
@@ -111,6 +142,7 @@ int main(){
     //delete dynamic allocation
     delete [] shard;
     delete [] prevShard;
+    delete [] adjList;
     
     fclose(outFile);
     
