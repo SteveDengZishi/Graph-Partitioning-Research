@@ -34,7 +34,7 @@ $FileName
 $shard
 END
 
-./linear < lp_ingred.txt | lp_solve | ./clean
+./linear < lp_ingred.txt | lp_solve | ./clean | sort #> x_result_$i.txt
 
 #start of iteration
 #for((i=1;i<iter+1;i++))
