@@ -94,6 +94,9 @@ void printShard(){
 
 //start of main program
 int main(){
+    //optimize iostream
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
     
     //get stdin from shell script
     cin>>fileName;

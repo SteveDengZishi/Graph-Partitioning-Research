@@ -96,6 +96,10 @@ void printIJK(){
 }
 
 int main(){
+    //optimize iostream
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    
     //change sequence of eqn to allow x01 - x76
     cin>>nodes>>shard;
 //    cout<<nodes<<" "<<shard<<endl;
