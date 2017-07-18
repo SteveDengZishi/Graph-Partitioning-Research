@@ -1,5 +1,4 @@
 #!/bin/bash
-
 #  executeBLPG_script.sh
 #  Boost
 #

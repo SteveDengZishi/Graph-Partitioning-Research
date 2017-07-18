@@ -197,7 +197,7 @@ void printLinearInfo(int i,int j){
         num++;
     }
     
-    if(vecD.size()!=0) cout<<vecD.size()<<endl;
+    cout<<vecD.size()<<endl;
     
     FOR(j,0,k){
         printf("%d %d %d\n",vecD[j].a,vecD[j].sum,vecD[j].no);
@@ -351,7 +351,7 @@ int main(int argc, const char * argv[]) {
             if(i!=j){
                 sort(ALL(sortedCountIJ[i][j]),Greater());
                 //                printSortedCount(i,j);
-                if(countP(i,j)!=0) Pcount.push_back(countP(i,j));
+                Pcount.push_back(countP(i,j));
                 printLinearInfo(i,j);//(lp_ingredient)
             }
         }

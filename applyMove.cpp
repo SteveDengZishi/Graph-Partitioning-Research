@@ -199,6 +199,14 @@ void loadShard(){
     fclose(inFile);
 }
 
+void printTotalMovement(){
+    int cnt=0;
+    for(int i=0;i<nodes;i++){
+        if(vecMove[i].size()==1) cnt++;
+    }
+    printf("%d nodes out of %d nodes made their movement in this iteration\n",cnt,nodes);
+}
+
 
 
 int main(){
@@ -249,6 +257,7 @@ int main(){
     //    printVecMove(); //Debugging line
     
     applyShift(vecMove);
+    printTotalMovement();
     printLocatlityFraction();
     
     //fprintf shard[partitions] & prevShard[nodes] to be used in next iteration
@@ -259,6 +268,7 @@ int main(){
         for(int j=0;j<shard[i].size();j++){
             fprintf(outFile,"%d ", shard[i][j]);
         }
+        fprintf(outFile,"\n");
     }
     
     for(int i=0;i<nodes;i++){
