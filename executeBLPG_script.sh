@@ -4,12 +4,14 @@
 #
 #  Created by Steve DengZishi on 7/12/17.
 #  Copyright © 2017 Steve DengZishi. All rights reserved.
+echo -e "\nRandomly Initialized Balanced Label Propagation      Version 1.0"
+echo -e "       Copyright © 2017 Steve DengZishi  New York University\n"
 
 #set the source file for input
-read -p "Enter the name of the input graph file: " FileName
-read -p "Enter the number of shard: " shard
+read -p "Enter the file name of the undirected graph: " FileName
+read -p "Enter the number of partitions k (k<1000): " shard
 #prompt user input
-read -p "Enter the number of iteration: " iter
+read -p "Enter the number of iteration to carry out Balanced Label Propagation: " iter
 
 #compile all .cpp files to executables
 g++ -o clean clean.cpp -std=c++11
