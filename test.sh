@@ -26,9 +26,7 @@ EOF
 
 echo -e "Initialization completed\n"
 
-./lp_ingredient_producer > lp_ingred.txt <<EOF
+./lp_ingredient_producer <<EOF
 $FileName
 $shard
 EOF
-
-./linear < lp_ingred.txt
