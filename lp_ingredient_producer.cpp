@@ -62,12 +62,15 @@ struct Greater
 vector<int>* shard;
 vector<int>* adjList;
 vector<PII>** sortedCountIJ;
+int** neighbors;
+int* score;
 vector<int> Pcount;
 int partitions;
 int nodes;
 int edges;
 fstream inFile;
 string fileName;
+time_t s,f;
 
 unsigned int int_hash(unsigned int x) {
     x = ((x >> 16) ^ x) * 0x45d9f3b;
@@ -87,20 +90,6 @@ void printShard(){
     cout<<endl;
 }
 
-// returns the colocation count of a nodeID in certain column of shard
-int colocation(int val,int col){
-    int count=0;
-    //O(VE)
-    for(int i=0;i<shard[col].size();i++){
-        for(int j=0;j<adjList[val].size();j++){
-            if(shard[col][i]==adjList[val][j]){
-                count++;
-            }
-        }
-    }
-    return count;
-}
-
 void printSortedCount(int i, int j){
     printf("The increase in colocation from shard %d to %d is: ",i,j);
     for(int k=0;k<sortedCountIJ[i][j].size();k++){
@@ -112,8 +101,8 @@ void printSortedCount(int i, int j){
 void fSort(int i, int j){
     for(int k=0;k<shard[i].size();k++){
         //Calculate the increase in count (INC)
-        int INC=colocation(shard[i][k],j)-colocation(shard[i][k],i);
-        pair<int,int> p(INC,shard[i][k]);
+        int INC=neighbors[shard[i][k]][j]-neighbors[shard[i][k]][i];
+        PII p(INC,shard[i][k]);
         sortedCountIJ[i][j].push_back(p);
     }
     sort(ALL(sortedCountIJ[i][j]),Greater());
@@ -239,11 +228,11 @@ void loadShard(){
     //random sharding according using a integer hash then mod 8 to distribute to shards
     FILE* inFile=fopen("sharding_result.bin", "rb");
     
-//    fseek(inFile,0,SEEK_SET);
-//    fread(shard, sizeof(vector<int>), partitions, inFile);
-//    fread(prevShard, sizeof(int), nodes, inFile);
+    //    fseek(inFile,0,SEEK_SET);
+    //    fread(shard, sizeof(vector<int>), partitions, inFile);
+    //    fread(prevShard, sizeof(int), nodes, inFile);
     
-// use fscanf instead of fread
+    // use fscanf instead of fread
     for(int i=0;i<partitions;i++){
         int size;
         fscanf(inFile,"%d",&size);
@@ -258,6 +247,32 @@ void loadShard(){
     }
     
     fclose(inFile);
+}
+
+void createNeighborList(){
+    FOR(i,0,nodes){
+        //reset the score array
+        FOR(k,0,partitions) score[k]=0;
+        //go through each neighbor of that node and add score count to the shard it is in
+        FOR(j,0,adjList[i].size()){
+            int where=prevShard[adjList[i][j]];
+            score[where]++;
+        }
+        //assign tempt result to neighbor array
+        FOR(z,0,partitions){
+            neighbors[i][z]=score[z];
+        }
+    }
+}
+
+void printNeighborList(){
+    FOR(i,0,nodes){
+        printf("for node %d: ",(int)i);
+        FOR(j,0,partitions){
+            printf("%d ",neighbors[i][j]);
+        }
+        cout<<endl;
+    }
 }
 
 void clearSortedCount(){
@@ -280,8 +295,8 @@ void printTotal(){
 int main(int argc, const char * argv[]) {
     
     //optimize iostream
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
+    //    ios_base::sync_with_stdio(false);
+    //    cin.tie(NULL);
     
     //get stdin from shell script
     cin>>fileName;
@@ -303,10 +318,16 @@ int main(int argc, const char * argv[]) {
     prevShard=new int[nodes];
     vecMove=new vector<PII>[nodes];
     adjList=new vector<int>[nodes];
+    score=new int[partitions];
     
-    sortedCountIJ=new vector<PII>* [partitions];
+    sortedCountIJ=new vector<PII>*[partitions];
     for(int i=0;i<partitions;i++){
-        sortedCountIJ[i]=new vector<PII> [partitions];
+        sortedCountIJ[i]=new vector<PII>[partitions];
+    }
+    
+    neighbors=new int*[nodes];
+    for(int i=0;i<nodes;i++){
+        neighbors[i]=new int[partitions];
     }
     
     //create adjacency list from edge list
@@ -314,12 +335,18 @@ int main(int argc, const char * argv[]) {
     //    printADJ();
     inFile.close();
     
-    //load previous shard[partitions] & prevShard[nodes] 
+    //load previous shard[partitions] & prevShard[nodes]
     loadShard();
-//    printShard();
+    //    printShard();
+    
+    //create neighbor list
+    //    printADJ();
+    createNeighborList();
+    //    printNeighborList();
     
     //calculate, sort and print the increase in colocation count for all nodes moving from i to j
     //in the form (INC(increase in colocation),nodeID)
+    
     for(int i=0;i<partitions;i++){
         for(int j=0;j<partitions;j++){
             if(i!=j) fSort(i,j);
@@ -392,6 +419,13 @@ int main(int argc, const char * argv[]) {
     delete [] adjList;
     delete [] prevShard;
     delete [] vecMove;
+    delete [] score;
+    
+    for(int i=0;i<nodes;i++){
+        delete [] neighbors[i];
+    }
+    
+    delete [] neighbors;
     
     for(int i=0;i<partitions;i++){
         delete [] sortedCountIJ[i];
