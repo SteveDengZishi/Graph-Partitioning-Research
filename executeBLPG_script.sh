@@ -54,5 +54,9 @@ $FileName
 $shard
 $x_file
 EOF
-##plotting graph along the way
 done
+
+#plotting graph after finish looping
+chmod +x graph_plot.py
+./graph_plot.py
+
