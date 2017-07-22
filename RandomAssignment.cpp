@@ -45,7 +45,7 @@ unsigned int int_hash(unsigned int x) {
     return x;
 }
 
-void printLocatlityFraction(){
+double printLocatlityFraction(){
     int localEdge=0;
     FOR(i,0,nodes){
         FOR(j,0,adjList[i].size()){
@@ -56,6 +56,7 @@ void printLocatlityFraction(){
     int totalEdge=edges;
     double fraction=(double)localEdge/(double)totalEdge;
     printf("Before iterations, there are %d local edges out of total %d edges, fraction of local edges is: %lf\n\n",localEdge,totalEdge,fraction);
+    return fraction;
 }
 
 void createADJ(){
@@ -123,10 +124,16 @@ int main(){
     randomShard();
 //    printShard();
     //output locality info to shell
-    printLocatlityFraction();
+    double locality=printLocatlityFraction();
+    
+    //write data to file for graph plotting
+    FILE* outFile=fopen("graph_plotting_data.txt","w");
+    fprintf(outFile,"node locality\n");
+    fprintf(outFile,"%d %lf\n",nodes,locality);
+    fclose(outFile);
     
     //fprint to files
-    FILE* outFile = fopen("sharding_result.bin", "wb");
+    outFile=fopen("sharding_result.bin", "wb");
     
     //write block of data to stream
 //    fwrite(prevShard, sizeof(int), nodes, outFile);

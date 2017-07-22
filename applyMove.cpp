@@ -86,7 +86,7 @@ void printADJ(){
     cout<<endl;
 }
 
-void printLocatlityFraction(){
+double printLocatlityFraction(){
     int localEdge=0;
     FOR(i,0,nodes){
         FOR(j,0,adjList[i].size()){
@@ -97,6 +97,7 @@ void printLocatlityFraction(){
     int totalEdge=edges;
     double fraction=(double)localEdge/(double)totalEdge;
     printf("There are %d local edges out of total %d edges, fraction of local edges is: %lf\n\n",localEdge,totalEdge,fraction);
+    return fraction;
 }
 
 // cut the ListSize after getting X(ij) values from the linear functions
@@ -199,12 +200,13 @@ void loadShard(){
     fclose(inFile);
 }
 
-void printTotalMovement(){
+int printTotalMovement(){
     int cnt=0;
     for(int i=0;i<nodes;i++){
         if(vecMove[i].size()==1) cnt++;
     }
     printf("%d nodes out of %d nodes made their movement in this iteration\n",cnt,nodes);
+    return cnt;
 }
 
 
@@ -261,11 +263,17 @@ int main(){
     //    printVecMove(); //Debugging line
     
     applyShift(vecMove);
-    printTotalMovement();
-    printLocatlityFraction();
+    int move_count=printTotalMovement();
+    //output locality info to shell
+    double locality=printLocatlityFraction();
+    
+    //write data to file for graph plotting
+    FILE* outFile=fopen("graph_plotting_data.txt","a");
+    fprintf(outFile,"%d %lf\n",move_count,locality);
+    fclose(outFile);
     
     //fprintf shard[partitions] & prevShard[nodes] to be used in next iteration
-    FILE* outFile=fopen("sharding_result.bin","wb");
+    outFile=fopen("sharding_result.bin","wb");
     
     for(int i=0;i<partitions;i++){
         fprintf(outFile,"%d\n",int(shard[i].size()));
