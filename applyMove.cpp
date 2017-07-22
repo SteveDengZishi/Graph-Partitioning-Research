@@ -151,13 +151,24 @@ void applyShift(vector<PII>* m){ //m[nodeID] -> vectors of (gain,destination)
     //find the node & remove them from shard[harsh_int(nodeID)] & add to new destination shard
     FOR(i,0,nodes){
         if(m[i].size()!=0){
-            //using erase-remove idiom
-            shard[prevShard[i]].erase(remove(shard[prevShard[i]].begin(),shard[prevShard[i]].end(),i),shard[prevShard[i]].end());
-            //m[i][0] is each of the top gain movement option
-            shard[m[i][0].second].push_back(int(i));
+//            //using erase-remove idiom (too inefficient, reconstruct shard[nodes] instead)
+//            shard[prevShard[i]].erase(remove(shard[prevShard[i]].begin(),shard[prevShard[i]].end(),i),shard[prevShard[i]].end());
+//            //m[i][0] is each of the top gain movement option
+//            shard[m[i][0].second].push_back(int(i));
+            
             //update the location of the previous node for next iteration
             prevShard[i]=m[i][0].second;
         }
+    }
+}
+
+void reConstructShard(){
+    //clear shard
+    FOR(i,0,partitions){
+        shard[i].clear();
+    }
+    FOR(i,0,nodes){
+        shard[prevShard[i]].push_back((int)i);
     }
 }
 
@@ -263,6 +274,7 @@ int main(){
     //    printVecMove(); //Debugging line
     
     applyShift(vecMove);
+    reConstructShard();
     int move_count=printTotalMovement();
     //output locality info to shell
     double locality=printLocatlityFraction();
