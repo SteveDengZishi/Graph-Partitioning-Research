@@ -5,6 +5,7 @@
 *.obj
 
 # Test Files
+*.html
 *.bin
 Test
 Test.cpp
