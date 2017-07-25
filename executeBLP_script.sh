@@ -4,7 +4,7 @@
 #
 #  Created by Steve DengZishi on 7/12/17.
 #  Copyright © 2017 Steve DengZishi. All rights reserved.
-echo -e "\nRandomly Initialized Balanced Label Propagation      Version 1.0"
+echo -e "\nRandomly Initialized Balanced Label Propagation      Version 1.1"
 echo -e "       Copyright © 2017 Steve DengZishi  New York University\n"
 
 #set the source file for input

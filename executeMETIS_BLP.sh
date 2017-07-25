@@ -5,7 +5,8 @@
 #
 #  Created by Steve DengZishi on 7/24/17.
 #  Copyright © 2017 Steve DengZishi. All rights reserved.
-
+echo -e "\nMETIS Initialized Balanced Label Propagation      Version 1.0"
+echo -e "       Copyright © 2017 Steve DengZishi  New York University\n"
 #prompt user for input
 read -p "Please enter the fileName: " FileName
 read -p "Please enter the number of partition: " partition
