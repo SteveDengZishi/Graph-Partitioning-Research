@@ -5,6 +5,9 @@
 *.obj
 
 # Test Files
+metis.*
+METIS_format_changer
+METIS_graph
 *.html
 *.bin
 Test

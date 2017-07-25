@@ -29,6 +29,7 @@
 #include <set> // To sort and remove duplicate when inserted
 #include <unordered_set> //To remove duplicates and count size
 #include <functional> //To use std::hash
+#include <fstream>
 
 
 //macro here
@@ -44,7 +45,6 @@
 #define CINLINE(a) getline(cin,a)
 #define FILL(a,b) memset(a, b , sizeof(a)) //fill array a with all bs
 #define INIT(a) FILL(a,0) //initialize array a with all 0s
-#define INF 2e9
 
 //name space here
 using namespace std;
@@ -61,46 +61,23 @@ struct Greater
 };
 
 //functions, global variables, comparators & Non-STL Data Structures definition here
-#define nodesN 4039;
-int num_nodes;
-int num_edges;
-vector<int> adjList[4039];
-
-
-unsigned int int_hash(unsigned int x) {
-    x = ((x >> 16) ^ x) * 0x45d9f3b;
-    x = ((x >> 16) ^ x) * 0x45d9f3b;
-    x = (x >> 16) ^ x;
-    return x;
-}
-
-void numNode(){
-    int nodeID;
-    int maxID=0;
-    while(cin>>nodeID){
-        if(nodeID>maxID) maxID=nodeID;
-    }
-    cout<<"The maxID is: "<<maxID<<endl;
-    printf("There are %d nodes in total\n",maxID+1);
-}
+string fileName;
+fstream inFile;
+int nodes;
+int edges;
+vector<int>* adjList;
 
 void createADJ(){
     int from,to;
-    int maxID=0;
-    int edges=0;
-    while(cin>>from>>to){
+    while(inFile>>from>>to){
         adjList[from].push_back(to+1);  // use to/from + 1 is to let node start from 1 instead of 0 to fit METIS format
         adjList[to].push_back(from+1);  // comment out this line if the graph is directed
         // count number of edges and nodes from edge list file
-        edges++;
-        if(maxID<max(from,to)) maxID=max(from,to);
     }
-    num_nodes=maxID+1;
-    num_edges=edges;
 }
 
 void printADJ(){
-    for(int i=0;i<4039;i++){
+    for(int i=0;i<nodes;i++){
 //        cout<<i<<": ";
         for(int j=0;j<adjList[i].size();j++){
             cout<<adjList[i][j]<<" ";
@@ -117,12 +94,24 @@ int main(int argc, const char * argv[]) {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
     
-    //to get number of nodes from data file
-    //    numNode();
+    //read nodes and edges
+    cin>>fileName;
+    
+    inFile.open(fileName,ios::in);
+    
+    if(!inFile){
+        cerr<<"Error occurs while opening the file"<<endl;
+        exit(1);
+    }
+    
+    inFile>>nodes>>edges;
+    
+    //allocate dynamic memory
+    adjList=new vector<int>[nodes];
     
     //create adjacency list from edge list
     createADJ();
-    cout<<num_nodes<<" "<<num_edges<<endl;
+    cout<<nodes<<" "<<edges<<endl;
     printADJ();
     
     return 0;

@@ -1,8 +1,8 @@
 //
-//  RandomAssignment.cpp
+//  METIS_format_changer.cpp
 //  Boost
 //
-//  Created by Steve DengZishi on 7/13/17.
+//  Created by Steve DengZishi on 7/24/17.
 //  Copyright © 2017 Steve DengZishi. All rights reserved.
 //
 
@@ -55,7 +55,7 @@ double printLocatlityFraction(){
     localEdge/=2; //if the graph is undirected each edge was counted twice
     int totalEdge=edges;
     double fraction=(double)localEdge/(double)totalEdge;
-    printf("Before iterations, there are %d local edges out of total %d edges, fraction of local edges is: %lf\n\n",localEdge,totalEdge,fraction);
+    printf("After METIS, there are %d local edges out of total %d edges, fraction of local edges is: %lf\n\n",localEdge,totalEdge,fraction);
     return fraction;
 }
 
@@ -66,20 +66,7 @@ void createADJ(){
         // comment out the following line if the graph is directed
         adjList[to].push_back(from);
     }
-}
-
-void randomShard(){
-    //random sharding according using a integer hash then mod 8 to distribute to shards
-    for(int i=0;i<nodes;i++){
-        //        cout<<"i is: "<<i<<endl;
-        unsigned hash_val = int_hash(i);
-        //        cout<<"hash is: "<<hash_val<<endl;
-        int shardID = hash_val % partitions;
-        //        cout<<"shard ID is: "<<shardID<<endl;
-        shard[shardID].push_back(i);
-        //mark prevShard for the 1st random Sharding
-        prevShard[i]=shardID;
-    }
+    inFile.close();
 }
 
 void printShard(){
@@ -91,6 +78,21 @@ void printShard(){
         cout<<endl;
     }
     cout<<endl;
+}
+
+void loadShard(){
+    //random sharding according using a integer hash then mod 8 to distribute to shards
+    inFile.open("metis.graph.part."+to_string(partitions), ios::in);
+    
+    //read prevShard
+    for(int i=0;i<nodes;i++){
+        inFile<<prevShard[i];
+    }
+    //rebuild shard using prevShard
+    for(int i=0;i<nodes;i++){
+        shard[prevShard[i]].push_back(i);
+    }
+    inFile.close();
 }
 
 //start of main program
@@ -121,8 +123,8 @@ int main(){
     //produce adjList
     createADJ();
     //random sharding
-    randomShard();
-//    printShard();
+    loadShard();
+    //    printShard();
     //output locality info to shell
     double locality=printLocatlityFraction();
     
@@ -136,14 +138,13 @@ int main(){
     outFile=fopen("sharding_result.bin", "wb");
     
     //write block of data to stream
-//    fwrite(prevShard, sizeof(int), nodes, outFile);
-//    fwrite(shard, sizeof(vector<int>), partitions, outFile);
+    //    fwrite(prevShard, sizeof(int), nodes, outFile);
+    //    fwrite(shard, sizeof(vector<int>), partitions, outFile);
     for(int i=0;i<partitions;i++){
         fprintf(outFile,"%d\n",int(shard[i].size()));
         for(int j=0;j<shard[i].size();j++){
             fprintf(outFile,"%d ", shard[i][j]);
         }
-        fprintf(outFile,"\n");
     }
     
     for(int i=0;i<nodes;i++){
@@ -159,3 +160,4 @@ int main(){
     
     return 0;
 }
+
