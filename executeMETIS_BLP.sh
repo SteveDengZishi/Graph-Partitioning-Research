@@ -51,7 +51,7 @@ echo "In iteration" $i
 
 ./lp_ingredient_producer > lp_ingred.txt <<EOF
 $FileName
-$shard
+$partition
 EOF
 
 ./linear < lp_ingred.txt | lp_solve | ./clean | sort > x_result_$i.txt
@@ -60,7 +60,7 @@ x_file=x_result_$i.txt
 
 ./applyMove <<EOF
 $FileName
-$shard
+$partition
 $x_file
 EOF
 done

@@ -55,7 +55,7 @@ double printLocatlityFraction(){
     localEdge/=2; //if the graph is undirected each edge was counted twice
     int totalEdge=edges;
     double fraction=(double)localEdge/(double)totalEdge;
-    printf("After METIS, there are %d local edges out of total %d edges, fraction of local edges is: %lf\n\n",localEdge,totalEdge,fraction);
+    printf("\nAfter METIS, there are %d local edges out of total %d edges, fraction of local edges is: %lf\n\n",localEdge,totalEdge,fraction);
     return fraction;
 }
 
@@ -84,9 +84,14 @@ void loadShard(){
     //random sharding according using a integer hash then mod 8 to distribute to shards
     inFile.open("metis.graph.part."+to_string(partitions), ios::in);
     
+    if(!inFile){
+        cerr<<"Error occurs while opening the file"<<endl;
+        exit(1);
+    }
+    
     //read prevShard
     for(int i=0;i<nodes;i++){
-        inFile<<prevShard[i];
+        inFile>>prevShard[i];
     }
     //rebuild shard using prevShard
     for(int i=0;i<nodes;i++){
@@ -137,14 +142,12 @@ int main(){
     //fprint to files
     outFile=fopen("sharding_result.bin", "wb");
     
-    //write block of data to stream
-    //    fwrite(prevShard, sizeof(int), nodes, outFile);
-    //    fwrite(shard, sizeof(vector<int>), partitions, outFile);
     for(int i=0;i<partitions;i++){
         fprintf(outFile,"%d\n",int(shard[i].size()));
         for(int j=0;j<shard[i].size();j++){
             fprintf(outFile,"%d ", shard[i][j]);
         }
+        fprintf(outFile,"\n");
     }
     
     for(int i=0;i<nodes;i++){
