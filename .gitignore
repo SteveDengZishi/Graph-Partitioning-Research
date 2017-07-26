@@ -5,6 +5,7 @@
 *.obj
 
 # Test Files
+applyMove
 metis.*
 METIS_format_changer
 METIS_graph
