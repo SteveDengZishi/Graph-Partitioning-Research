@@ -171,8 +171,9 @@ int main(int argc, const char * argv[]) {
             shard[returnMax(score)].push_back(from);//place the node in the shard with highest score
         }
         if(!lookup[to]){
-            //mark node as seen
-            lookup[to]=true;
+            lookup[to]=true;//mark node as seen
+            calculateAllScores(from);//calculate the scoring for all shards
+            shard[returnMax(score)].push_back(from);//place the node in the shard with highest score
         }
     }
     
