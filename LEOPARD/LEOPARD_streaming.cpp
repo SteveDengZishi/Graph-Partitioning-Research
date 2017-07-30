@@ -1,3 +1,4 @@
+//
 //  LEOPARD
 //
 //  Created by Steve DengZishi on 7/26/17.
@@ -70,11 +71,23 @@ string fileName;
 fstream inFile;
 int** neighbors;
 int* score;
+int* skippedComp;
+int* prevShard;
 bool* lookup;
-double threshold=0.30;
+double threshold=0.50;
 double r=1.5;
 double a;
 
+void printShard(){
+    for(int i=0;i<partitions;i++){
+        printf("Shard %d:\n",i);
+        for(int j=0;j<shard[i].size();j++){
+            cout<<shard[i][j]<<" ";
+        }
+        cout<<endl;
+    }
+    cout<<endl;
+}
 
 void createADJ(){
     int from,to;
@@ -122,9 +135,47 @@ int returnMax(int* score){
     return index;
 }
 
-int skipping(int nodeID){
+int assignNode(int nodeID){
+    calculateAllScores(nodeID);//calculate the scoring for all shards
+    int maxShard=returnMax(score);
+    shard[maxShard].push_back(nodeID);//place the node in the shard with highest score
+    prevShard[nodeID]=maxShard;
     
-    return 0;
+    return maxShard;
+}
+
+bool skipping(int nodeID){
+    int totalNeighbor=0;
+    //calculate total number of neighbors
+    FOR(i,0,partitions){
+        totalNeighbor+=neighbors[nodeID][i];
+    }
+    skippedComp[nodeID]+=1;
+    if(skippedComp[nodeID]/totalNeighbor>=threshold){
+        skippedComp[nodeID]=0;
+        return true;
+    }
+    return false;
+}
+
+void rippleEffect(int nodeID, int origin){
+    //first chance it may be skipped
+    bool reExamine=skipping(nodeID);
+    int prev,now;
+    if(reExamine){
+        prev=prevShard[nodeID];
+        now=assignNode(nodeID);
+    }
+    else return;
+    //second chance if it is not skipped it may or may not change assignment
+    //only recursively populate to all its neighbors if the node actually moves assignment
+    if(prev!=now){
+        for(int i=0;i<adjList[nodeID].size();i++){
+            //prevent going back to origin and double counting
+            if(adjList[nodeID][i]!=origin) rippleEffect(adjList[nodeID][i],nodeID);
+        }
+    }
+    else return;
 }
 
 //start of main()
@@ -148,6 +199,8 @@ int main(int argc, const char * argv[]) {
     shard=new vector<int>[partitions];
     score=new int[partitions];
     lookup=new bool[nodes]{false};
+    skippedComp=new int[nodes]{0};
+    prevShard=new int[nodes];
     
     //make sure to change neighbors number on the fly
     neighbors=new int*[nodes];
@@ -165,17 +218,36 @@ int main(int argc, const char * argv[]) {
     for(int i=0;i<vecOfEdges.size();i++){
         int from=vecOfEdges[i].first;
         int to=vecOfEdges[i].second;
+        int shardNumFrom,shardNumTo;
+        
         if(!lookup[from]){
             lookup[from]=true;//mark node as seen
-            calculateAllScores(from);//calculate the scoring for all shards
-            shard[returnMax(score)].push_back(from);//place the node in the shard with highest score
+            shardNumFrom=assignNode(from);
         }
+        else{
+            shardNumFrom=prevShard[from];//if node already exist, use the lookup table to find the shard
+        }
+        
         if(!lookup[to]){
             lookup[to]=true;//mark node as seen
-            calculateAllScores(from);//calculate the scoring for all shards
-            shard[returnMax(score)].push_back(from);//place the node in the shard with highest score
+            shardNumTo=assignNode(to);
         }
+        else{
+            shardNumTo=prevShard[to];
+        }
+        
+        //start to check whether there is a need to re-examine, only check when the new edge added
+        //from and to are in different shards
+        if(shardNumFrom!=shardNumTo){
+            //recursively run rippleEffect starting from both points
+            rippleEffect(from,to);
+            rippleEffect(to,from);
+        }
+        
     }
+    
+    //after streaming is done add replications
+    
     
     
     return 0;
