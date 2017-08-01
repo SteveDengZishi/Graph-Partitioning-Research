@@ -114,5 +114,9 @@ int main(int argc, const char * argv[]) {
     cout<<nodes<<" "<<edges<<endl;
     printADJ();
     
+    //free up memory
+    delete [] adjList;
+    adjList=nullptr;
+    
     return 0;
 }

@@ -311,4 +311,11 @@ int main(){
         delete [] sortedCountIJ[i];
     }
     delete [] sortedCountIJ;
+    
+    //remove dangling pointers
+    shard=nullptr;
+    adjList=nullptr;
+    prevShard=nullptr;
+    vecMove=nullptr;
+    sortedCountIJ=nullptr;
 }

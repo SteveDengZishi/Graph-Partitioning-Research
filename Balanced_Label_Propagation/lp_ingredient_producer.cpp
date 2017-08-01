@@ -70,7 +70,6 @@ int nodes;
 int edges;
 fstream inFile;
 string fileName;
-time_t s,f;
 
 unsigned int int_hash(unsigned int x) {
     x = ((x >> 16) ^ x) * 0x45d9f3b;
@@ -431,6 +430,15 @@ int main(int argc, const char * argv[]) {
         delete [] sortedCountIJ[i];
     }
     delete [] sortedCountIJ;
+    
+    //remove dangling pointers
+    shard=nullptr;
+    adjList=nullptr;
+    prevShard=nullptr;
+    vecMove=nullptr;
+    sortedCountIJ=nullptr;
+    score=nullptr;
+    neighbors=nullptr;
     
     return 0;
 }

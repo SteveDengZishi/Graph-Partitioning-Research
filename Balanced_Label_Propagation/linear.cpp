@@ -155,5 +155,7 @@ int main(){
     
     //clean dynamically allocated memory
     delete [] size;
+    size=nullptr;
+    
     return 0;
 }

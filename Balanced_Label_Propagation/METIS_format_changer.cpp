@@ -159,6 +159,11 @@ int main(){
     delete [] prevShard;
     delete [] adjList;
     
+    //remove dangling pointers
+    shard=nullptr;
+    adjList=nullptr;
+    prevShard=nullptr;
+
     fclose(outFile);
     
     return 0;
