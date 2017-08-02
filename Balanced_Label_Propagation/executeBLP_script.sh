@@ -25,7 +25,8 @@ echo "g++ compiled applyMove.cpp successfully"
 g++ -o RandomAssignment RandomAssignment.cpp -std=c++11
 echo -e "g++ compiled RandomAssignment.cpp successfully\n"
 
-
+#time the effective execution
+time(
 #initialize using random assignment outside of iteration
 echo -e "Starting random initialization...\n"
 ./RandomAssignment <<EOF
@@ -55,6 +56,7 @@ $shard
 $x_file
 EOF
 done
+)
 
 #plotting graph after finish looping
 chmod +x graph_plot.py

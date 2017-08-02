@@ -28,6 +28,8 @@ echo -e "g++ compiled applyMove.cpp successfully\n"
 
 echo -e "Running METIS......\n"
 
+#time the effective execution
+time(
 #change input graph file from edge list format into METIS input format
 ./METIS_graph > metis.graph <<EOF
 $FileName
@@ -65,6 +67,7 @@ $partition
 $x_file
 EOF
 done
+)
 
 #plotting graph after finish looping
 chmod +x graph_plot.py
