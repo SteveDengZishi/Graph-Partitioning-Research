@@ -136,22 +136,30 @@ int returnMax(int* score){
 }
 
 int assignNode(int nodeID){
+    cout<<"before"<<endl;
     calculateAllScores(nodeID);//calculate the scoring for all shards
+    cout<<"after"<<endl;
     int maxShard=returnMax(score);
     shard[maxShard].push_back(nodeID);//place the node in the shard with highest score
     prevShard[nodeID]=maxShard;
     
+    //when a node is assigned to a given shard, all neighbors in its adjList gain one neighbor in that shard
+    for(int i=0;i<adjList[nodeID].size();i++){
+        neighbors[adjList[nodeID][i]][maxShard]++;
+    }
     return maxShard;
 }
 
 bool skipping(int nodeID){
+    cout<<"in skipping"<<endl;
     int totalNeighbor=0;
     //calculate total number of neighbors
     FOR(i,0,partitions){
         totalNeighbor+=neighbors[nodeID][i];
+        //cout<<"neighbors "<<neighbors[nodeID][i]<<endl;
     }
     skippedComp[nodeID]+=1;
-    if(skippedComp[nodeID]/totalNeighbor>=threshold){
+    if((double)skippedComp[nodeID]/(double)totalNeighbor>=threshold){
         skippedComp[nodeID]=0;
         return true;
     }
@@ -159,11 +167,18 @@ bool skipping(int nodeID){
 }
 
 void rippleEffect(int nodeID, int origin){
+    cout<<"in ripple"<<endl;
     //first chance it may be skipped
     bool reExamine=skipping(nodeID);
+    cout<<"after skipping"<<endl;
+    cout<<reExamine<<endl;
     int prev,now;
     if(reExamine){
         prev=prevShard[nodeID];
+        //when need to re-examine, take out the node and reduce neighbor
+        for(int i=0;i<adjList[nodeID].size();i++){
+            neighbors[adjList[nodeID][i]][prev]--;
+        }
         now=assignNode(nodeID);
     }
     else return;
@@ -179,22 +194,29 @@ void rippleEffect(int nodeID, int origin){
 }
 
 //start of main()
-int main(int argc, const char * argv[]) {
-    //optimize iostream
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
+int main() {
+    
+    cout<<"running program"<<endl;
     //reminder to clear vector between test cases
     //Your code here
     cin>>fileName;
     cin>>partitions;
+    cout<<fileName<<" "<<partitions<<endl;
     
     inFile.open(fileName,ios::in);
-    if(!inFile) cerr<<"could not open file correctly"<<endl;
+    if(!inFile) {
+        cerr<<"could not open file correctly"<<endl;
+        exit(1);
+    }
     
     //read number of nodes and edges
+    cout<<"start reading info"<<endl;
     inFile>>nodes>>edges;
+    cout<<"after reading"<<endl;
+    cout<<nodes<<" "<<edges<<endl;
     
     //allocate memory dynamically
+    cout<<"allocating memo"<<endl;
     adjList=new vector<int>[nodes];
     shard=new vector<int>[partitions];
     score=new int[partitions];
@@ -205,25 +227,35 @@ int main(int argc, const char * argv[]) {
     //make sure to change neighbors number on the fly
     neighbors=new int*[nodes];
     for(int i=0;i<nodes;i++){
-        neighbors[i]=new int[partitions];
+        neighbors[i]=new int[partitions]{0};
     }
-    
+    cout<<"done allocating memo"<<endl;
     //create adjList and vecOfEdges
     createADJ();
     
+    cout<<"done creating adjList"<<endl;
     //re-shuffle the edges to be streamed in later
     random_shuffle(vecOfEdges.begin(), vecOfEdges.end());
     
+    cout<<"done reshuffle"<<endl;
     //stream in edges in random order
+    //seg fault below!!!!!!
     for(int i=0;i<vecOfEdges.size();i++){
+        cout<<i<<endl;
         int from=vecOfEdges[i].first;
         int to=vecOfEdges[i].second;
         int shardNumFrom,shardNumTo;
         
+        cout<<from<<" "<<to<<endl;
+        
         if(!lookup[from]){
+            DEIF;
             lookup[from]=true;//mark node as seen
+            cout<<"before assignNode"<<endl;
             shardNumFrom=assignNode(from);
+            cout<<"after assignNode"<<endl;
         }
+        
         else{
             shardNumFrom=prevShard[from];//if node already exist, use the lookup table to find the shard
         }
@@ -236,6 +268,7 @@ int main(int argc, const char * argv[]) {
             shardNumTo=prevShard[to];
         }
         
+        cout<<shardNumFrom<<" "<<shardNumTo<<endl;
         //start to check whether there is a need to re-examine, only check when the new edge added
         //from and to are in different shards
         if(shardNumFrom!=shardNumTo){
@@ -245,9 +278,9 @@ int main(int argc, const char * argv[]) {
         }
         
     }
-    
+    cout<<"done ripple Effect"<<endl;
     //after streaming is done add replications
-    
+    printShard();
     
     
     return 0;
