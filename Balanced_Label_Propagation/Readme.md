@@ -1,4 +1,4 @@
-#**Use Instruction**#
+**Use Instruction**
 
 	1.To use Randomly initialized Balanced Label Propagation with bokeh plotting:
 		
@@ -15,7 +15,7 @@
 
 		then the bash script will compile all required cpp files and do everything
 
-	<br>
+
 
 	2.To use METIS + BLP, running BLP on top of METIS
 
