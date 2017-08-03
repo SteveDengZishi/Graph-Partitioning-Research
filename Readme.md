@@ -12,7 +12,7 @@ In this research project, we study several methods proposed in recent papers, in
 
 **Repository Description**
 
-	This git repository consists of three folders, and one pdf poster briefly describe the project,
+	This git repository consists of three folders, and one poster briefly describes the purpose of the project,
 
 	Balanced_Label_Propagation
 	LEOPARD
