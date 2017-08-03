@@ -71,10 +71,11 @@ string fileName;
 fstream inFile;
 int** neighbors;
 int* score;
+int* shardSize;
 int* skippedComp;
 int* prevShard;
 bool* lookup;
-double threshold=0.80;
+double threshold=0.15;
 double r=1.5;
 double a;
 
@@ -85,6 +86,13 @@ void printNeighbors(){
         }
         cout<<endl;
     }
+}
+
+void printShardSize(){
+    FOR(i,0,partitions){
+        cout<<shard[i].size()<<" "<<endl;
+    }
+    cout<<endl;
 }
 
 double printLocatlityFraction(){
@@ -136,7 +144,7 @@ void printADJ(){
 int scoring(int nodeID, int shardID){
     //number of neighbours of nodeID in that shard - c(current size of shard)
     a=sqrt(partitions)*abs(edges)/pow(abs(nodes),r);
-    int score=-a*(r/2)*pow(shard[shardID].size(),r-1);
+    int score=-a*(r/2)*pow(shardSize[shardID],r-1);
     return score;
 }
 
@@ -158,12 +166,19 @@ int returnMax(int* score){
     return index;
 }
 
+void constructShard(){
+    for(int i=0;i<nodes;i++){
+        shard[prevShard[i]].push_back(i);
+    }
+}
+
 int assignNode(int nodeID){
-    cout<<"before"<<endl;
+    //cout<<"before"<<endl;
     calculateAllScores(nodeID);//calculate the scoring for all shards
     cout<<"after"<<endl;
     int maxShard=returnMax(score);
-    shard[maxShard].push_back(nodeID);//place the node in the shard with highest score
+    //shard[maxShard].push_back(nodeID);//place the node in the shard with highest score
+    shardSize[maxShard]++;
     prevShard[nodeID]=maxShard;
     
     //when a node is assigned to a given shard, all neighbors in its adjList gain one neighbor in that shard
@@ -202,10 +217,6 @@ void rippleEffect(int nodeID, int origin){
     int prev,now;
     if(reExamine){
         prev=prevShard[nodeID];
-        //when need to re-examine, take out the node and reduce neighbor
-        /* for(int i=0;i<adjList[nodeID].size();i++){
-         neighbors[adjList[nodeID][i]][prev]--;
-         }*/
         now=assignNode(nodeID);
     }
     else return;
@@ -214,10 +225,18 @@ void rippleEffect(int nodeID, int origin){
     //second chance if it is not skipped it may or may not change assignment
     //only recursively populate to all its neighbors if the node actually moves assignment
     if(prev!=now){
+        //when re-examine put node into a different shard, reduce shardSize & neighbor count in prev
+        shardSize[prev]--;
+        for(int i=0;i<adjList[nodeID].size();i++){
+            neighbors[adjList[nodeID][i]][prev]--;
+        }
+        
+        //carry on ripple effect on its neighbors
         for(int i=0;i<adjList[nodeID].size();i++){
             //prevent going back to origin and double counting
             if(adjList[nodeID][i]!=origin) rippleEffect(adjList[nodeID][i],nodeID);
         }
+        
     }
     else return;
 }
@@ -248,6 +267,7 @@ int main() {
     adjList=new vector<int>[nodes];
     shard=new vector<int>[partitions];
     score=new int[partitions];
+    shardSize=new int[partitions]{0};
     lookup=new bool[nodes]{false};
     skippedComp=new int[nodes]{0};
     prevShard=new int[nodes];
@@ -310,7 +330,9 @@ int main() {
     }
     cout<<"done ripple Effect"<<endl;
     //after streaming is done add replications
+    constructShard();
     printShard();
+    printShardSize();
     printLocatlityFraction();
     
     return 0;
