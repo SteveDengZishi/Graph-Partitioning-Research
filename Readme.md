@@ -6,6 +6,7 @@ Graph partitioning is a well-known NP-hard problem that has no known efficient a
 
 In this research project, we study several methods proposed in recent papers, in particular, Balanced Label Propagation, LEOPARD, and a Bayesian Sharding approach. We implement these algorithms and run them on several large social graphs including LiveJournal, Orkut, and Pokec, each with millions of nodes and tens of millions of edges. We then compare and contrast the advantages and drawbacks for each algorithm. Finally, we further optimize the algorithms to improve partition quality.
 
+<br>
 
 Repository Description
 
@@ -26,7 +27,9 @@ Repository Description
 	Result_sample contains some of the graph data plotted after running the partitioning
 
 	References contains all the relevant papers referred during this research 
-	
+
+<br>	
+
 Use Instruction
 
 	Please go into the respective sub-folders to read the instructions from there
