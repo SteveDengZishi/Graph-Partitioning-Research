@@ -74,9 +74,32 @@ int* score;
 int* skippedComp;
 int* prevShard;
 bool* lookup;
-double threshold=0.50;
+double threshold=0.80;
 double r=1.5;
 double a;
+
+void printNeighbors(){
+    FOR(i,0,nodes){
+        FOR(j,0,partitions){
+            cout<<neighbors[i][j]<<" ";
+        }
+        cout<<endl;
+    }
+}
+
+double printLocatlityFraction(){
+    int localEdge=0;
+    FOR(i,0,nodes){
+        FOR(j,0,adjList[i].size()){
+            if(prevShard[i]==prevShard[adjList[i][j]]) localEdge++;
+        }
+    }
+    localEdge/=2; //if the graph is undirected each edge was counted twice
+    int totalEdge=edges;
+    double fraction=(double)localEdge/(double)totalEdge;
+    printf("There are %d local edges out of total %d edges, fraction of local edges is: %lf\n\n",localEdge,totalEdge,fraction);
+    return fraction;
+}
 
 void printShard(){
     for(int i=0;i<partitions;i++){
@@ -151,7 +174,7 @@ int assignNode(int nodeID){
 }
 
 bool skipping(int nodeID){
-    cout<<"in skipping"<<endl;
+    //cout<<"in skipping"<<endl;
     int totalNeighbor=0;
     //calculate total number of neighbors
     FOR(i,0,partitions){
@@ -167,21 +190,27 @@ bool skipping(int nodeID){
 }
 
 void rippleEffect(int nodeID, int origin){
-    cout<<"in ripple"<<endl;
+    //cout<<"in ripple"<<endl;
+    //cout<<"current node is "<<nodeID<<" origin is "<<origin<<endl;
     //first chance it may be skipped
+    
     bool reExamine=skipping(nodeID);
-    cout<<"after skipping"<<endl;
-    cout<<reExamine<<endl;
+    
+    //cout<<"after skipping"<<endl;
+    //cout<<"whether to re-examine is: "<<reExamine<<endl;
+    
     int prev,now;
     if(reExamine){
         prev=prevShard[nodeID];
         //when need to re-examine, take out the node and reduce neighbor
-        for(int i=0;i<adjList[nodeID].size();i++){
-            neighbors[adjList[nodeID][i]][prev]--;
-        }
+        /* for(int i=0;i<adjList[nodeID].size();i++){
+         neighbors[adjList[nodeID][i]][prev]--;
+         }*/
         now=assignNode(nodeID);
     }
     else return;
+    
+    //cout<<prev<<" "<<now<<endl;
     //second chance if it is not skipped it may or may not change assignment
     //only recursively populate to all its neighbors if the node actually moves assignment
     if(prev!=now){
@@ -195,7 +224,6 @@ void rippleEffect(int nodeID, int origin){
 
 //start of main()
 int main() {
-    
     cout<<"running program"<<endl;
     //reminder to clear vector between test cases
     //Your code here
@@ -239,7 +267,8 @@ int main() {
     
     cout<<"done reshuffle"<<endl;
     //stream in edges in random order
-    //seg fault below!!!!!!
+    //seg fault below!!!!!
+    
     for(int i=0;i<vecOfEdges.size();i++){
         cout<<i<<endl;
         int from=vecOfEdges[i].first;
@@ -267,8 +296,9 @@ int main() {
         else{
             shardNumTo=prevShard[to];
         }
+        //printNeighbors();
+        //cout<<"from was put to shard: "<<shardNumFrom<<" "<<"to was put to shard: "<<shardNumTo<<endl;
         
-        cout<<shardNumFrom<<" "<<shardNumTo<<endl;
         //start to check whether there is a need to re-examine, only check when the new edge added
         //from and to are in different shards
         if(shardNumFrom!=shardNumTo){
@@ -281,7 +311,7 @@ int main() {
     cout<<"done ripple Effect"<<endl;
     //after streaming is done add replications
     printShard();
-    
+    printLocatlityFraction();
     
     return 0;
 }

@@ -13,13 +13,13 @@ read -p "Enter the file name of the undirected graph: " FileName
 read -p "Enter the number of partitions k (k<1000): " shard
 
 #compile all .cpp files to executables
-g++ -o main main.cpp -std=c++11
+g++ -o LEOPARD_streaming LEOPARD_streaming.cpp -std=c++11
 echo -e "\ng++ compiled leopard.cpp successfully"
 
 
 #initialize using random assignment outside of iteration
 echo -e "Starting LEOPARD streaming...\n"
-./main <<EOF
+./LEOPARD_streaming <<EOF
 $FileName
 $shard
 EOF
