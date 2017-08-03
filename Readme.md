@@ -12,20 +12,21 @@ In this research project, we study several methods proposed in recent papers, in
 
 **Repository Description**
 
-	This git repository consists of four folders, namely,
+	This git repository consists of three folders, and one pdf poster briefly describe the project,
 
-	**Balanced_Label_Propagation
+	Balanced_Label_Propagation
 	LEOPARD
-	References**
+	References
+	Poster_ZISHI_DENG_pdf
 
-	**Balanced_Label_Propagation** consists of two parts,
+	Balanced_Label_Propagation consists of two parts,
 	1.Randomly initialized Balanced Label Propagation
 	2.METIS + BLP (Balanced Label Propagation run on top of METIS)
 
-	**LEOPARD** stands for Lightweight Edge-Oriented Partitioning and Replication for Dynamic Graphs
+	LEOPARD stands for Lightweight Edge-Oriented Partitioning and Replication for Dynamic Graphs
 	It is still under refinements
 
-	**References** contains all the relevant papers referred during this research 
+	References contains all the relevant papers referred during this research 
 	
 
 **Use Instruction**
