@@ -8,6 +8,7 @@ In this research project, we study several methods proposed in recent papers, in
 
 
 Repository Description
+
 	This git repository consists of four folders, namely,
 
 	Balanced_Label_Propagation
@@ -27,4 +28,5 @@ Repository Description
 	References contains all the relevant papers referred during this research 
 	
 Use Instruction
+
 	Please go into the respective sub-folders to read the instructions from there
