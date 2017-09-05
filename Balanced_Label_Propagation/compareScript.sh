@@ -4,7 +4,7 @@
 #
 #  Created by Steve DengZishi on 7/12/17.
 #  Copyright © 2017 Steve DengZishi. All rights reserved.
-echo -e "\nMETIS + BLP Lateral Comparison Runner               Version 1.1"
+echo -e "\nDisruptive BLP Lateral Comparison Runner               Version 1.1"
 echo -e "     Copyright © 2017 Steve DengZishi  New York University\n"
 
 #set the source file for input
@@ -15,7 +15,7 @@ read -p "Enter the number of iteration to carry out Balanced Label Propagation: 
 
 for((i=2;i<=shard;i++))
 do
-./executeMETIS_BLP.sh<<EOF
+./executeDisruptiveBLP_script.sh<<EOF
 $FileName
 $i
 $iter
