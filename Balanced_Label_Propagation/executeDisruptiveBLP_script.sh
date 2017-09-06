@@ -44,7 +44,7 @@ do
 echo "In iteration" $i
 
 if
-(($i%4==0))
+(($i%11==0))
 then
 echo "Running disruptive round"
 ./disruptiveMove <<EOF
