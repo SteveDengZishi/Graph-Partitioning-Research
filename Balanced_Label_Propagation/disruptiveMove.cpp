@@ -211,10 +211,10 @@ int main(int argc, const char * argv[]) {
     loadShard();
     //    printShard();
     
-    //use a common pool to take out 25% of the nodes from each of the nodes from each shard
+    //use a common pool to take out 10% of the nodes from each of the nodes from each shard
     for(int i=0;i<partitions;i++){
         random_shuffle(shard[i].begin(),shard[i].end());
-        outSize[i]=(int)shard[i].size()*0.25;
+        outSize[i]=(int)shard[i].size()*0.10;
         for(int j=0;j<outSize[i];j++){
             poolVec.push_back(shard[i][j]);
         }
