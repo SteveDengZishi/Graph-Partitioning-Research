@@ -26,6 +26,7 @@ g++ -o disruptiveMove disruptiveMove.cpp -std=c++11
 echo "g++ compiled disruptiveMove.cpp successfully"
 g++ -o RandomAssignment RandomAssignment.cpp -std=c++11
 echo -e "g++ compiled RandomAssignment.cpp successfully\n"
+chmod +x checkConvergence.py
 
 #time the effective execution
 time(
@@ -38,41 +39,69 @@ EOF
 
 echo -e "Initialization completed\n"
 
+skip=0
 #start of iteration
 for((i=1;i<iter+1;i++))
+
 do
-echo "In iteration" $i
+    echo "In iteration" $i
 
-if
-(($i%5==0))
-then
-echo "Running disruptive round"
-./disruptiveMove <<EOF
-$FileName
-$shard
+    #after the first two rounds, start to check whether result converges
+    if (($i>2)) && (($skip==0))
+
+    then
+        result=$(./checkConvergence.py)
+        echo $result
+        if [ "$result" == "TRUE" ]
+
+        then
+            echo "Running disruptive round"
+            ./disruptiveMove <<EOF
+            $FileName
+            $shard
+EOF
+            skip=1
+
+        else
+            ./lp_ingredient_producer > lp_ingred.txt <<EOF
+            $FileName
+            $shard
 EOF
 
-else
-./lp_ingredient_producer > lp_ingred.txt <<EOF
-$FileName
-$shard
+            ./linear < lp_ingred.txt | lp_solve | ./clean | sort > x_result_$i.txt
+
+            x_file=x_result_$i.txt
+
+            ./applyMove <<EOF
+            $FileName
+            $shard
+            $x_file
+EOF
+            skip=0
+        fi
+
+    else
+        ./lp_ingredient_producer > lp_ingred.txt <<EOF
+        $FileName
+        $shard
 EOF
 
-./linear < lp_ingred.txt | lp_solve | ./clean | sort > x_result_$i.txt
+        ./linear < lp_ingred.txt | lp_solve | ./clean | sort > x_result_$i.txt
 
-x_file=x_result_$i.txt
+        x_file=x_result_$i.txt
 
-./applyMove <<EOF
-$FileName
-$shard
-$x_file
+        ./applyMove <<EOF
+        $FileName
+        $shard
+        $x_file
 EOF
-fi
+        skip=0
+    fi
 
 done
-)
+
+)#closing for time() in line 32
 
 #plotting graph after finish looping
 chmod +x graph_plot.py
 ./graph_plot.py
-
