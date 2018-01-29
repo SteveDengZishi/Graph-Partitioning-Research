@@ -26,7 +26,7 @@ for line in infile:
 
 #the difference in locality was the last locality minus off the second last
 localityDiff=float(locality[-1])-float(locality[-2])
-if localityDiff<0.003:
+if localityDiff<0.005:
     print("TRUE")
 else:
     print("FALSE")

@@ -39,6 +39,7 @@ EOF
 
 echo -e "Initialization completed\n"
 
+#to make sure do not run two disruptive rounds in a row
 skip=0
 #start of iteration
 for((i=1;i<iter+1;i++))
@@ -51,11 +52,11 @@ do
 
     then
         result=$(./checkConvergence.py)
-        echo $result
+        #echo $result
         if [ "$result" == "TRUE" ]
 
         then
-            echo "Running disruptive round"
+            echo "Increase in locality converges. Running disruptive round"
             ./disruptiveMove <<EOF
             $FileName
             $shard
@@ -100,7 +101,7 @@ EOF
 
 done
 
-)#closing for time() in line 32
+)
 
 #plotting graph after finish looping
 chmod +x graph_plot.py
