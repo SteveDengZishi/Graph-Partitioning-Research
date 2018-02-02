@@ -57,7 +57,9 @@ do
 
         then
             echo "Increase in locality converges. Running disruptive round"
+
             ./disruptiveMove $FileName $shard
+
             skip=1
 
         else

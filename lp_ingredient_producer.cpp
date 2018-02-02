@@ -298,8 +298,8 @@ int main(int argc, const char * argv[]) {
     //    cin.tie(NULL);
     
     //get stdin from shell script
-    cin>>fileName;
-    cin>>partitions;
+    fileName=argv[0];
+    partitions=atoi(argv[1]);
     
     inFile.open(fileName,ios::in);
     
