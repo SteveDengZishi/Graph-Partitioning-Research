@@ -94,14 +94,11 @@ void printShard(){
 }
 
 //start of main program
-int main(){
-    //optimize iostream
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
+int main(int argc, const char * argv[]){
     
     //get stdin from shell script
-    cin>>fileName;
-    cin>>partitions;
+    fileName=argv[1];
+    partitions=atoi(argv[2]);
     
     inFile.open(fileName,ios::in);
     

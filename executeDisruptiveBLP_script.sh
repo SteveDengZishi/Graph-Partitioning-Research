@@ -32,10 +32,8 @@ chmod +x checkConvergence.py
 time(
 #initialize using random assignment outside of iteration
 echo -e "Starting random initialization...\n"
-./RandomAssignment <<EOF
-$FileName
-$shard
-EOF
+./RandomAssignment $FileName $shard
+
 
 echo -e "Initialization completed\n"
 
@@ -57,45 +55,32 @@ do
 
         then
             echo "Increase in locality converges. Running disruptive round"
-            ./disruptiveMove <<EOF
-            $FileName
-            $shard
-EOF
+
+            ./disruptiveMove $FileName $shard
+
             skip=1
 
         else
-            ./lp_ingredient_producer > lp_ingred.txt <<EOF
-            $FileName
-            $shard
-EOF
+            ./lp_ingredient_producer $FileName $shard > lp_ingred.txt
 
             ./linear < lp_ingred.txt | lp_solve | ./clean | sort > x_result_$i.txt
 
             x_file=x_result_$i.txt
 
-            ./applyMove <<EOF
-            $FileName
-            $shard
-            $x_file
-EOF
+            ./applyMove $FileName $shard $x_file
+
             skip=0
         fi
 
     else
-        ./lp_ingredient_producer > lp_ingred.txt <<EOF
-        $FileName
-        $shard
-EOF
+        ./lp_ingredient_producer $FileName $shard > lp_ingred.txt
 
         ./linear < lp_ingred.txt | lp_solve | ./clean | sort > x_result_$i.txt
 
         x_file=x_result_$i.txt
 
-        ./applyMove <<EOF
-        $FileName
-        $shard
-        $x_file
-EOF
+        ./applyMove $FileName $shard $x_file
+
         skip=0
     fi
 

@@ -222,15 +222,12 @@ int printTotalMovement(){
 
 
 
-int main(){
-    //optimize iostream
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-    
+int main(int argc, const char * argv[]){
+
     //get stdin from shell script
-    cin>>fileName;
-    cin>>partitions;
-    cin>>x_file;
+    fileName=argv[1];
+    partitions=atoi(argv[2]);
+    x_file=argv[3];
     
     inFile.open(fileName,ios::in);
     
