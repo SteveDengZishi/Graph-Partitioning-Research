@@ -32,10 +32,8 @@ chmod +x checkConvergence.py
 time(
 #initialize using random assignment outside of iteration
 echo -e "Starting random initialization...\n"
-./RandomAssignment <<EOF
-$FileName
-$shard
-EOF
+./RandomAssignment $FileName $shard
+
 
 echo -e "Initialization completed\n"
 

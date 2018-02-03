@@ -135,9 +135,6 @@ void printIJK(){
 }
 
 int main(){
-    //optimize iostream
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
 
     cin>>nodes>>shard;
 //    cout<<nodes<<" "<<shard<<endl;
