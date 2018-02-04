@@ -22,6 +22,7 @@
 #include <unordered_set> //To remove duplicates and count size
 #include <functional> //To use std::hash
 #include <fstream> // To input and output to files
+#include <boost/interprocess/shared_memory_object.hpp>
 
 
 //macro here
@@ -125,7 +126,9 @@ void printVecMove(){
     cout<<endl<<endl;
 }
 
+//the bottle-neck is here
 void mapToMove(){
+    cout<<"stuck in here"<<endl;
     //clear the move vector
     FOR(i,0,nodes){
         vecMove[i].clear();
@@ -138,10 +141,12 @@ void mapToMove(){
             }
         }
     }
+    cout<<"finished mapping"<<endl;
     //sort to select the top gain moving option
     FOR(i,0,nodes){
         sort(ALL(vecMove[i]),Greater());
     }
+    cout<<"finished this step"<<endl;
 }
 
 
