@@ -97,6 +97,7 @@ void printSortedCount(int i, int j){
     cout<<endl<<endl;
 }
 
+//producing increase in locality count and sort the result
 void fSort(int i, int j){
     for(int k=0;k<shard[i].size();k++){
         //Calculate the increase in count (INC)
@@ -311,15 +312,18 @@ int main(int argc, const char * argv[]) {
     //allocate memory for vecMove, adjList & sortedCountIJ on the heap
     shard=new vector<int>[partitions];
     prevShard=new int[nodes];
+    //for directly finding movements of nodes
     vecMove=new vector<PII>[nodes];
     adjList=new vector<int>[nodes];
     score=new int[partitions];
     
+    //for showing movement of nodes between shards
     sortedCountIJ=new vector<PII>*[partitions];
     for(int i=0;i<partitions;i++){
         sortedCountIJ[i]=new vector<PII>[partitions];
     }
     
+    //number of neighbors count for each node in each partition
     neighbors=new int*[nodes];
     for(int i=0;i<nodes;i++){
         neighbors[i]=new int[partitions];
@@ -371,6 +375,7 @@ int main(int argc, const char * argv[]) {
     FOR(i,0,partitions){
         FOR(j,0,partitions){
             if(i!=j){
+                //sortedIJ only left with 1 top gain moving option
                 sort(ALL(sortedCountIJ[i][j]),Greater());
                 //                printSortedCount(i,j);
                 Pcount.push_back(countP(i,j));

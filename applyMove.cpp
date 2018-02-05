@@ -128,7 +128,7 @@ void printVecMove(){
 
 //the bottle-neck is here
 void mapToMove(){
-    cout<<"stuck in here"<<endl;
+    cout<<"I am mapping to move vector"<<endl;
     //clear the move vector
     FOR(i,0,nodes){
         vecMove[i].clear();
@@ -146,13 +146,14 @@ void mapToMove(){
     FOR(i,0,nodes){
         sort(ALL(vecMove[i]),Greater());
     }
-    cout<<"finished this step"<<endl;
+    cout<<"finished sorting"<<endl;
 }
 
 
 
 //once each iteration
 void applyShift(vector<PII>* m){ //m[nodeID] -> vectors of (gain,destination)
+    cout<<"I am applying shift"<<endl;
     //find the node & remove them from shard[harsh_int(nodeID)] & add to new destination shard
     FOR(i,0,nodes){
         if(m[i].size()!=0){
@@ -165,6 +166,7 @@ void applyShift(vector<PII>* m){ //m[nodeID] -> vectors of (gain,destination)
             prevShard[i]=m[i][0].second;
         }
     }
+    cout<<"I finished applying shift"<<endl;
 }
 
 void reConstructShard(){
