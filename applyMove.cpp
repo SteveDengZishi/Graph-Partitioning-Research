@@ -169,6 +169,18 @@ void applyShift(vector<PII>* m){ //m[nodeID] -> vectors of (gain,destination)
     cout<<"I finished applying shift"<<endl;
 }
 
+//directly using cutted sortedCountIJ to apply movement
+void applyShift(vector<PII>** sortedIJ){
+    FOR(i,0,partitions){
+        FOR(j,0,partitions){
+            FOR(k,0,sortedCountIJ[i][j].size()){
+                //update the location of the previous node for next iteration
+                prevShard[sortedCountIJ[i][j][k].second]=(int)j;
+            }
+        }
+    }
+}
+
 void reConstructShard(){
     //clear shard
     FOR(i,0,partitions){
@@ -274,10 +286,10 @@ int main(int argc, const char * argv[]){
 
     //Three steps to move nodes after the linear program returns constraints X(ij), input values with files injection in cutList()
     cutList();
-    mapToMove();
+    //mapToMove();
     //    printVecMove(); //Debugging line
     
-    applyShift(vecMove);
+    applyShift(sortedCountIJ);
     reConstructShard();
     int move_count=printTotalMovement();
     //output locality info to shell
