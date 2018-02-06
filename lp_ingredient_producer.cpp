@@ -22,6 +22,7 @@
 #include <unordered_set> //To remove duplicates and count size
 #include <functional> //To use std::hash
 #include <fstream> // To input and output to files
+#include <limits>
 
 
 //macro here
@@ -39,7 +40,6 @@
 #define CINLINE(a) getline(cin,a)
 #define FILL(a,b) memset(a, b , sizeof(a)) //fill array a with all bs
 #define INIT(a) FILL(a,0) //initialize array a with all 0s
-#define INF 2e9
 
 //name space here
 using namespace std;
@@ -70,6 +70,9 @@ int nodes;
 int edges;
 fstream inFile;
 string fileName;
+// Stores the first choices of all nodes after each iteration
+vector<PII>* vecMove; // move[nodeID] -> vectors of (gain,destination); //only sorted and leave other options for 2nd moves
+int* prevShard;
 
 unsigned int int_hash(unsigned int x) {
     x = ((x >> 16) ^ x) * 0x45d9f3b;
@@ -107,6 +110,34 @@ void fSort(int i, int j){
     }
     sort(ALL(sortedCountIJ[i][j]),Greater());
     //    printSortedCount(i,j);
+}
+
+//directly produce vecMove to save time mapping and sorting
+void produceSortedCountIJ(){
+    for(int i=0;i<nodes;i++){
+        //the position (shardID) of the current node
+        int from=prevShard[i];
+        
+        //directly filter out the top gain movement, originally was itself at current position
+        int maxGain=0;
+        int maxDest=from;
+        
+        for(int to=0;to<partitions;to++){
+            //for any other shard other than the current node
+            if(from!=to){
+                //neighbors at other shard - neighbors at current shard
+                int incr_cnt=neighbors[i][to]-neighbors[i][from];
+                if(incr_cnt>maxGain){
+                    maxGain=incr_cnt;
+                    maxDest=to;
+                }
+            }
+        }
+        //check whether there is a effective move option, put directly into sortedcountIJ
+        if (maxGain!=0 && maxDest!=from){
+            sortedCountIJ[from][maxDest].emplace_back(maxGain,i);
+        }
+    }
 }
 
 void createADJ(){
@@ -193,10 +224,6 @@ void printLinearInfo(int i,int j){
     }
 }
 
-
-// Stores the first choices of all nodes after each iteration
-vector<PII>* vecMove; // move[nodeID] -> vectors of (gain,destination); //only sorted and leave other options for 2nd moves
-int* prevShard;
 
 void printVecMove(){
     FOR(i,0,nodes){
@@ -346,16 +373,24 @@ int main(int argc, const char * argv[]) {
     //calculate, sort and print the increase in colocation count for all nodes moving from i to j
     //in the form (INC(increase in colocation),nodeID)
     
+    /*
     for(int i=0;i<partitions;i++){
         for(int j=0;j<partitions;j++){
             if(i!=j) fSort(i,j);
         }
     }
+    */
+    
+    //reduced version of producing sortedCountIJ
+    produceSortedCountIJ();
+    
     //sort all movement options for all nodes in i shard, and keep the only highest scoring destination
     //to eliminate repeated movement falls in top x options
     //1.mapping
     //2.resize to top gain movement
     //3.reconstruct sortedCountIJ
+    
+    /*
     mapToMove();
     for(int i=0;i<nodes;i++){
         vecMove[i].resize(1);
@@ -371,6 +406,7 @@ int main(int argc, const char * argv[]) {
         int origin=prevShard[i];
         sortedCountIJ[origin][dest].emplace_back(gain,i);
     }
+    */
     
     FOR(i,0,partitions){
         FOR(j,0,partitions){

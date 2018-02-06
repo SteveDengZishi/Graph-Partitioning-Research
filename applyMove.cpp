@@ -143,9 +143,9 @@ void mapToMove(){
     }
     cout<<"finished mapping"<<endl;
     //sort to select the top gain moving option
-    FOR(i,0,nodes){
-        sort(ALL(vecMove[i]),Greater());
-    }
+    //FOR(i,0,nodes){
+        //sort(ALL(vecMove[i]),Greater());
+    //}
     cout<<"finished sorting"<<endl;
 }
 
