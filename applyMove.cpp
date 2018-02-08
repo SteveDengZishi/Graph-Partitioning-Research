@@ -55,7 +55,6 @@ struct Greater
     bool operator()(T const &a, T const &b) const { return a > b; }
 };
 
-vector<PII>* vecMove; // move[nodeID] -> vectors of (gain,destination); //only sorted and leave other options for 2nd moves
 int* prevShard;
 vector<int>* adjList;
 vector<PII>** sortedCountIJ;
@@ -66,6 +65,7 @@ fstream inFile;
 int partitions;
 int nodes;
 int edges;
+int move_count;
 
 void createADJ(){
     int from,to;
@@ -115,67 +115,15 @@ void cutList(){
     }
 }
 
-void printVecMove(){
-    FOR(i,0,nodes){
-        printf("The movement options for node %d in the form (gains,destination) are: ",int(i));
-        FOR(j,0,vecMove[i].size()){
-            printf(" (%d,%d) ",vecMove[i][j].first,vecMove[i][j].second);
-        }
-        cout<<endl;
-    }
-    cout<<endl<<endl;
-}
-
-//the bottle-neck is here
-void mapToMove(){
-    cout<<"I am mapping to move vector"<<endl;
-    //clear the move vector
-    FOR(i,0,nodes){
-        vecMove[i].clear();
-    }
-    FOR(i,0,partitions){
-        FOR(j,0,partitions){
-            //sortedCount after cut
-            FOR(k,0,sortedCountIJ[i][j].size()){
-                vecMove[sortedCountIJ[i][j][k].second].emplace_back(sortedCountIJ[i][j][k].first,j);//(gain,destination)
-            }
-        }
-    }
-    cout<<"finished mapping"<<endl;
-    //sort to select the top gain moving option
-    //FOR(i,0,nodes){
-        //sort(ALL(vecMove[i]),Greater());
-    //}
-    cout<<"finished sorting"<<endl;
-}
-
-
-
-//once each iteration
-void applyShift(vector<PII>* m){ //m[nodeID] -> vectors of (gain,destination)
-    cout<<"I am applying shift"<<endl;
-    //find the node & remove them from shard[harsh_int(nodeID)] & add to new destination shard
-    FOR(i,0,nodes){
-        if(m[i].size()!=0){
-//            //using erase-remove idiom (too inefficient, reconstruct shard[nodes] instead)
-//            shard[prevShard[i]].erase(remove(shard[prevShard[i]].begin(),shard[prevShard[i]].end(),i),shard[prevShard[i]].end());
-//            //m[i][0] is each of the top gain movement option
-//            shard[m[i][0].second].push_back(int(i));
-            
-            //update the location of the previous node for next iteration
-            prevShard[i]=m[i][0].second;
-        }
-    }
-    cout<<"I finished applying shift"<<endl;
-}
-
-//directly using cutted sortedCountIJ to apply movement
+//directly using cutted sortedCountIJ to apply movement and count movement at the same time
 void applyShift(vector<PII>** sortedIJ){
+    move_count=0;
     FOR(i,0,partitions){
         FOR(j,0,partitions){
             FOR(k,0,sortedCountIJ[i][j].size()){
                 //update the location of the previous node for next iteration
                 prevShard[sortedCountIJ[i][j][k].second]=(int)j;
+                move_count++;
             }
         }
     }
@@ -230,13 +178,8 @@ void loadShard(){
     fclose(inFile);
 }
 
-int printTotalMovement(){
-    int cnt=0;
-    for(int i=0;i<nodes;i++){
-        if(vecMove[i].size()==1) cnt++;
-    }
-    printf("%d nodes out of %d nodes made their movement in this iteration\n",cnt,nodes);
-    return cnt;
+void printTotalMovement(){
+    printf("%d nodes out of %d nodes made their movement in this iteration\n",move_count,nodes);
 }
 
 
@@ -261,7 +204,6 @@ int main(int argc, const char * argv[]){
     //allocate memory on the heap
     shard=new vector<int>[partitions];
     prevShard=new int[nodes];
-    vecMove=new vector<PII>[nodes];//do not have to load as it will be overidden 
     adjList=new vector<int>[nodes];
     
     sortedCountIJ=new vector<PII>* [partitions];
@@ -286,12 +228,12 @@ int main(int argc, const char * argv[]){
 
     //Three steps to move nodes after the linear program returns constraints X(ij), input values with files injection in cutList()
     cutList();
-    //mapToMove();
-    //    printVecMove(); //Debugging line
     
     applyShift(sortedCountIJ);
     reConstructShard();
-    int move_count=printTotalMovement();
+
+    //print movement info
+    printTotalMovement();
     //output locality info to shell
     double locality=printLocatlityFraction();
     
@@ -321,7 +263,6 @@ int main(int argc, const char * argv[]){
     delete [] shard;
     delete [] adjList;
     delete [] prevShard;
-    delete [] vecMove;
     
     for(int i=0;i<partitions;i++){
         delete [] sortedCountIJ[i];
@@ -332,6 +273,5 @@ int main(int argc, const char * argv[]){
     shard=nullptr;
     adjList=nullptr;
     prevShard=nullptr;
-    vecMove=nullptr;
     sortedCountIJ=nullptr;
 }

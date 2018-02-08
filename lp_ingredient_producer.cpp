@@ -71,7 +71,6 @@ int edges;
 fstream inFile;
 string fileName;
 // Stores the first choices of all nodes after each iteration
-vector<PII>* vecMove; // move[nodeID] -> vectors of (gain,destination); //only sorted and leave other options for 2nd moves
 int* prevShard;
 
 unsigned int int_hash(unsigned int x) {
@@ -100,6 +99,7 @@ void printSortedCount(int i, int j){
     cout<<endl<<endl;
 }
 
+/*
 //producing increase in locality count and sort the result
 void fSort(int i, int j){
     for(int k=0;k<shard[i].size();k++){
@@ -111,14 +111,15 @@ void fSort(int i, int j){
     sort(ALL(sortedCountIJ[i][j]),Greater());
     //    printSortedCount(i,j);
 }
+*/
 
-//directly produce vecMove to save time mapping and sorting
+//directly produce SortedCount to save time mapping and sorting
 void produceSortedCountIJ(){
     for(int i=0;i<nodes;i++){
         //the position (shardID) of the current node
         int from=prevShard[i];
         
-        //directly filter out the top gain movement, originally was itself at current position
+        //directly filter out the top gain movement, by default was itself at current position
         int maxGain=0;
         int maxDest=from;
         
@@ -224,33 +225,6 @@ void printLinearInfo(int i,int j){
     }
 }
 
-
-void printVecMove(){
-    FOR(i,0,nodes){
-        printf("The movement options for node %d in the form (gains,destination) are: ",int(i));
-        FOR(j,0,vecMove[i].size()){
-            printf(" (%d,%d) ",vecMove[i][j].first,vecMove[i][j].second);
-        }
-        cout<<endl;
-    }
-    cout<<endl<<endl;
-}
-
-void mapToMove(){
-    for(int i=0;i<partitions;i++){
-        for(int j=0;j<partitions;j++){
-            //sortedCount after cut
-            for(int k=0;k<sortedCountIJ[i][j].size();k++){
-                vecMove[sortedCountIJ[i][j][k].second].emplace_back(sortedCountIJ[i][j][k].first,j);//(gain,destination)
-            }
-        }
-    }
-    //sort to select the top gain moving option
-    for(int i=0;i<nodes;i++){
-        sort(ALL(vecMove[i]),Greater());
-    }
-}
-
 void loadShard(){
     //random sharding according using a integer hash then mod 8 to distribute to shards
     FILE* inFile=fopen("sharding_result.bin", "rb");
@@ -336,11 +310,9 @@ int main(int argc, const char * argv[]) {
     inFile>>nodes>>edges;
     cout<<nodes<<" "<<partitions<<endl;//(lp_ingredient)
     
-    //allocate memory for vecMove, adjList & sortedCountIJ on the heap
+    //allocate memory for adjList & sortedCountIJ on the heap
     shard=new vector<int>[partitions];
     prevShard=new int[nodes];
-    //for directly finding movements of nodes
-    vecMove=new vector<PII>[nodes];
     adjList=new vector<int>[nodes];
     score=new int[partitions];
     
@@ -373,40 +345,17 @@ int main(int argc, const char * argv[]) {
     //calculate, sort and print the increase in colocation count for all nodes moving from i to j
     //in the form (INC(increase in colocation),nodeID)
     
-    /*
-    for(int i=0;i<partitions;i++){
-        for(int j=0;j<partitions;j++){
-            if(i!=j) fSort(i,j);
-        }
-    }
-    */
-    
-    //reduced version of producing sortedCountIJ
-    produceSortedCountIJ();
-    
+    //previous:
     //sort all movement options for all nodes in i shard, and keep the only highest scoring destination
     //to eliminate repeated movement falls in top x options
     //1.mapping
     //2.resize to top gain movement
     //3.reconstruct sortedCountIJ
+    //reduced version of producing sortedCountIJ
     
-    /*
-    mapToMove();
-    for(int i=0;i<nodes;i++){
-        vecMove[i].resize(1);
-    }
-    //    printVecMove();
-    
-    clearSortedCount();
-    
-    FOR(i,0,nodes){
-        //after resizing vecMove only contains top gain movement
-        int dest=vecMove[i][0].second;
-        int gain=vecMove[i][0].first;
-        int origin=prevShard[i];
-        sortedCountIJ[origin][dest].emplace_back(gain,i);
-    }
-    */
+    //new:
+    //directly produce SortedCountIJ by looping all nodes and selecting top gain movements
+    produceSortedCountIJ();
     
     FOR(i,0,partitions){
         FOR(j,0,partitions){
@@ -454,7 +403,6 @@ int main(int argc, const char * argv[]) {
     delete [] shard;
     delete [] adjList;
     delete [] prevShard;
-    delete [] vecMove;
     delete [] score;
     
     for(int i=0;i<nodes;i++){
@@ -472,7 +420,6 @@ int main(int argc, const char * argv[]) {
     shard=nullptr;
     adjList=nullptr;
     prevShard=nullptr;
-    vecMove=nullptr;
     sortedCountIJ=nullptr;
     score=nullptr;
     neighbors=nullptr;
