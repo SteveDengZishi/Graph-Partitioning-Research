@@ -61,8 +61,8 @@ struct Greater
 //modified to pointers to allow dynamically allocate on heap
 vector<int>* shard;
 vector<int>* adjList;
-vector<PII>** sortedCountIJ;
-int** neighbors;
+vector<PII>** sortedCountIJ;//in each ij pairs, stores sorted (gains,node)
+int** neighbors; //node shard
 int* score;
 vector<int> Pcount;
 int partitions;
