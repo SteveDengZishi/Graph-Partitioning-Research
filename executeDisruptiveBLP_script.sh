@@ -61,12 +61,13 @@ do
             skip=1
 
         else
+            #taking too much time for large graph
             ./lp_ingredient_producer $FileName $shard > lp_ingred.txt
 
             ./linear < lp_ingred.txt | lp_solve | ./clean | sort > x_result_$i.txt
 
             x_file=x_result_$i.txt
-
+            #too much time for large graph, map to move large time for many partitions
             ./applyMove $FileName $shard $x_file
 
             skip=0

@@ -22,6 +22,7 @@
 #include <unordered_set> //To remove duplicates and count size
 #include <functional> //To use std::hash
 #include <fstream> // To input and output to files
+#include <limits>
 
 
 //macro here
@@ -39,7 +40,6 @@
 #define CINLINE(a) getline(cin,a)
 #define FILL(a,b) memset(a, b , sizeof(a)) //fill array a with all bs
 #define INIT(a) FILL(a,0) //initialize array a with all 0s
-#define INF 2e9
 
 //name space here
 using namespace std;
@@ -61,8 +61,9 @@ struct Greater
 //modified to pointers to allow dynamically allocate on heap
 vector<int>* shard;
 vector<int>* adjList;
-vector<PII>** sortedCountIJ;
-int** neighbors;
+vector<PII>** sortedCountIJ;//in each ij pairs, stores sorted (gains,node)
+//vector<PII>* sortedLowestNeighbor;//The bottom 10% of the nodes with lowest neighbor count in current shard when converges s[partition] vector pair<neighbor,nodeID> inversely sorted
+int** neighbors; //[nodeID][shard] gives number of neighbors
 int* score;
 vector<int> Pcount;
 int partitions;
@@ -70,6 +71,8 @@ int nodes;
 int edges;
 fstream inFile;
 string fileName;
+// Stores the first choices of all nodes after each iteration
+int* prevShard;
 
 unsigned int int_hash(unsigned int x) {
     x = ((x >> 16) ^ x) * 0x45d9f3b;
@@ -97,6 +100,8 @@ void printSortedCount(int i, int j){
     cout<<endl<<endl;
 }
 
+/*
+//producing increase in locality count and sort the result
 void fSort(int i, int j){
     for(int k=0;k<shard[i].size();k++){
         //Calculate the increase in count (INC)
@@ -106,6 +111,35 @@ void fSort(int i, int j){
     }
     sort(ALL(sortedCountIJ[i][j]),Greater());
     //    printSortedCount(i,j);
+}
+*/
+
+//directly produce SortedCount to save time mapping and sorting
+void produceSortedCountIJ(){
+    for(int i=0;i<nodes;i++){
+        //the position (shardID) of the current node
+        int from=prevShard[i];
+        
+        //directly filter out the top gain movement, by default was itself at current position
+        int maxGain=0;
+        int maxDest=from;
+        
+        for(int to=0;to<partitions;to++){
+            //for any other shard other than the current node
+            if(from!=to){
+                //neighbors at other shard - neighbors at current shard
+                int incr_cnt=neighbors[i][to]-neighbors[i][from];
+                if(incr_cnt>maxGain){
+                    maxGain=incr_cnt;
+                    maxDest=to;
+                }
+            }
+        }
+        //check whether there is a effective move option, put directly into sortedcountIJ
+        if (maxGain!=0 && maxDest!=from){
+            sortedCountIJ[from][maxDest].emplace_back(maxGain,i);
+        }
+    }
 }
 
 void createADJ(){
@@ -189,37 +223,6 @@ void printLinearInfo(int i,int j){
     
     FOR(j,0,k){
         printf("%d %d %d\n",vecD[j].a,vecD[j].sum,vecD[j].no);
-    }
-}
-
-
-// Stores the first choices of all nodes after each iteration
-vector<PII>* vecMove; // move[nodeID] -> vectors of (gain,destination); //only sorted and leave other options for 2nd moves
-int* prevShard;
-
-void printVecMove(){
-    FOR(i,0,nodes){
-        printf("The movement options for node %d in the form (gains,destination) are: ",int(i));
-        FOR(j,0,vecMove[i].size()){
-            printf(" (%d,%d) ",vecMove[i][j].first,vecMove[i][j].second);
-        }
-        cout<<endl;
-    }
-    cout<<endl<<endl;
-}
-
-void mapToMove(){
-    for(int i=0;i<partitions;i++){
-        for(int j=0;j<partitions;j++){
-            //sortedCount after cut
-            for(int k=0;k<sortedCountIJ[i][j].size();k++){
-                vecMove[sortedCountIJ[i][j][k].second].emplace_back(sortedCountIJ[i][j][k].first,j);//(gain,destination)
-            }
-        }
-    }
-    //sort to select the top gain moving option
-    for(int i=0;i<nodes;i++){
-        sort(ALL(vecMove[i]),Greater());
     }
 }
 
@@ -308,18 +311,19 @@ int main(int argc, const char * argv[]) {
     inFile>>nodes>>edges;
     cout<<nodes<<" "<<partitions<<endl;//(lp_ingredient)
     
-    //allocate memory for vecMove, adjList & sortedCountIJ on the heap
+    //allocate memory for adjList & sortedCountIJ on the heap
     shard=new vector<int>[partitions];
     prevShard=new int[nodes];
-    vecMove=new vector<PII>[nodes];
     adjList=new vector<int>[nodes];
     score=new int[partitions];
     
+    //for showing movement of nodes between shards
     sortedCountIJ=new vector<PII>*[partitions];
     for(int i=0;i<partitions;i++){
         sortedCountIJ[i]=new vector<PII>[partitions];
     }
     
+    //number of neighbors count for each node in each partition
     neighbors=new int*[nodes];
     for(int i=0;i<nodes;i++){
         neighbors[i]=new int[partitions];
@@ -342,35 +346,22 @@ int main(int argc, const char * argv[]) {
     //calculate, sort and print the increase in colocation count for all nodes moving from i to j
     //in the form (INC(increase in colocation),nodeID)
     
-    for(int i=0;i<partitions;i++){
-        for(int j=0;j<partitions;j++){
-            if(i!=j) fSort(i,j);
-        }
-    }
+    //previous:
     //sort all movement options for all nodes in i shard, and keep the only highest scoring destination
     //to eliminate repeated movement falls in top x options
     //1.mapping
     //2.resize to top gain movement
     //3.reconstruct sortedCountIJ
-    mapToMove();
-    for(int i=0;i<nodes;i++){
-        vecMove[i].resize(1);
-    }
-    //    printVecMove();
+    //reduced version of producing sortedCountIJ
     
-    clearSortedCount();
-    
-    FOR(i,0,nodes){
-        //after resizing vecMove only contains top gain movement
-        int dest=vecMove[i][0].second;
-        int gain=vecMove[i][0].first;
-        int origin=prevShard[i];
-        sortedCountIJ[origin][dest].emplace_back(gain,i);
-    }
+    //new:
+    //directly produce SortedCountIJ by looping all nodes and selecting top gain movements
+    produceSortedCountIJ();
     
     FOR(i,0,partitions){
         FOR(j,0,partitions){
             if(i!=j){
+                //sortedIJ only left with 1 top gain moving option
                 sort(ALL(sortedCountIJ[i][j]),Greater());
                 //                printSortedCount(i,j);
                 Pcount.push_back(countP(i,j));
@@ -413,7 +404,6 @@ int main(int argc, const char * argv[]) {
     delete [] shard;
     delete [] adjList;
     delete [] prevShard;
-    delete [] vecMove;
     delete [] score;
     
     for(int i=0;i<nodes;i++){
@@ -431,7 +421,6 @@ int main(int argc, const char * argv[]) {
     shard=nullptr;
     adjList=nullptr;
     prevShard=nullptr;
-    vecMove=nullptr;
     sortedCountIJ=nullptr;
     score=nullptr;
     neighbors=nullptr;
