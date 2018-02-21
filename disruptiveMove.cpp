@@ -91,7 +91,7 @@ void produceSortedLowestNeighbor(){
 }
 
 void producePool(){
-    double disruptiveRate=0.1;
+    double disruptiveRate=0.25;
     FOR(i,0,partitions){
         outSize[i]=shard[i].size()*disruptiveRate;
         FOR(j,0,outSize[i]){
