@@ -62,7 +62,6 @@ struct Greater
 vector<int>* shard;
 vector<int>* adjList;
 vector<PII>** sortedCountIJ;//in each ij pairs, stores sorted (gains,node)
-//vector<PII>* sortedLowestNeighbor;//The bottom 10% of the nodes with lowest neighbor count in current shard when converges s[partition] vector pair<neighbor,nodeID> inversely sorted
 int** neighbors; //[nodeID][shard] gives number of neighbors
 int* score;
 vector<int> Pcount;
@@ -316,6 +315,7 @@ int main(int argc, const char * argv[]) {
     prevShard=new int[nodes];
     adjList=new vector<int>[nodes];
     score=new int[partitions];
+   
     
     //for showing movement of nodes between shards
     sortedCountIJ=new vector<PII>*[partitions];
