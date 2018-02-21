@@ -82,7 +82,8 @@ void produceSortedLowestNeighbor(){
     FOR(i,0,partitions){
         FOR(j,0,shard[i].size()){
             //adding pairs of (neighborsCount,nodeID)
-            sortedLowestNeighbor[i].emplace_back(neighbors[shard[i][j]],shard[i][j]);
+            pair<int,int> neighborCntPair(neighbors[shard[i][j]][i],shard[i][j]);
+            sortedLowestNeighbor[i].push_back(neighborCntPair);
         }
         //sort them from the lowest to the highest
         sort(sortedLowestNeighbor[i].begin(),sortedLowestNeighbor[i].end());
