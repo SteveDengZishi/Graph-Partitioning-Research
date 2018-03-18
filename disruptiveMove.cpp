@@ -60,7 +60,8 @@ struct Greater
 //modified to pointers to allow dynamically allocate on heap
 vector<int>* shard;
 vector<int>* adjList;
-vector<PII>* sortedLowestNeighbor;//The bottom 10% of the nodes with lowest neighbor count in current shard when converges s[partition] vector pair<neighbor,nodeID> inversely sorted
+vector<PII>* sortedLowestNeighbor;//The bottom 25% of the nodes with lowest neighbor count in current shard when converges s[partition] vector pair<neighbor,nodeID> inversely sorted
+vector<pair<double, int>>* sortedLowestRatio;//The bottom 25% of the nodes with lowest local ratio(local degree/degree)
 vector<int> pool;
 int** neighbors;
 int* outSize;//tracking the number of node out from the shards
@@ -77,7 +78,7 @@ unsigned int int_hash(unsigned int x) {
     return x;
 }
 
-//to populate the sortedLowestNeighbor and filter out 10% of the nodes with lowest neighbor counts and join the pool for re-assignment
+//to populate the sortedLowestNeighbor and filter out 25% of the nodes with lowest neighbor counts and join the pool for re-assignment
 void produceSortedLowestNeighbor(){
     FOR(i,0,partitions){
         FOR(j,0,shard[i].size()){
@@ -91,11 +92,35 @@ void produceSortedLowestNeighbor(){
 }
 
 void producePool(){
-    double disruptiveRate=0.25;
+    double disruptiveRate=0.35;
     FOR(i,0,partitions){
         outSize[i]=shard[i].size()*disruptiveRate;
         FOR(j,0,outSize[i]){
             pool.push_back(sortedLowestNeighbor[i][j].second);
+        }
+    }
+}
+
+//Ratio based assignment
+void produceSortedLowestRatio(){
+    FOR(i,0,partitions){
+        FOR(j,0,shard[i].size()){
+            //adding pairs of ((localDeg/degree), nodeID)
+            double ratio=neighbors[shard[i][j]][i]/sqrt(adjList[shard[i][j]].size());
+            pair<double,int> ratioPair(ratio,shard[i][j]);
+            sortedLowestRatio[i].push_back(ratioPair);
+        }
+        //sort local ratio from the lowest to the highest
+        sort(sortedLowestRatio[i].begin(),sortedLowestRatio[i].end());
+    }
+}
+
+void produceRatioPool(){
+    double disruptiveRate=0.40;
+    FOR(i,0,partitions){
+        outSize[i]=shard[i].size()*disruptiveRate;
+        FOR(j,0,outSize[i]){
+            pool.push_back(sortedLowestRatio[i][j].second);
         }
     }
 }
@@ -304,6 +329,7 @@ int main(int argc, const char * argv[]) {
     adjList=new vector<int>[nodes];
     outSize=new int[partitions];
     sortedLowestNeighbor=new vector<PII>[partitions];
+    sortedLowestRatio=new vector<pair<double,int>>[partitions];
     
     //number of neighbors count for each node in each partition
     neighbors=new int*[nodes];
@@ -323,8 +349,15 @@ int main(int argc, const char * argv[]) {
     //find bottom 10% of nodes in each shard in terms of colocation count
     //and then produce a pool for re-assignment
     createNeighborList();
-    produceSortedLowestNeighbor();
-    producePool();
+    
+    //Neighbor Number based re-assignment
+    //produceSortedLowestNeighbor();
+    //producePool();
+    
+    //Local Ratio based re-assignment
+    produceSortedLowestRatio();
+    produceRatioPool();
+    
     int move_count=reAssignPool();
     
     //use a common pool to take out 25% of the nodes from each of the nodes from each shard
