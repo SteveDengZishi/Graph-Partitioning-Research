@@ -6,7 +6,7 @@
 //  Created by Steve DengZishi on 9/26/17.
 //  Copyright © 2017 Steve DengZishi. All rights reserved.
 //
-//  We define convergence to be the case if the improvement in locality is less than 0.3%
+//  We define convergence to be the case if the improvement in locality is less than 0.5%
 //
 //  logic: read from the locality data after each round of BLP and check the improvement of locality whether less than 0.5%
 //  if so, we say BLP converges and we will run a disruptive round from the bash script instead of run disruptive every
