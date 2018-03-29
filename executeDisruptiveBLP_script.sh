@@ -11,8 +11,7 @@ echo -e "       Copyright © 2017 Steve DengZishi  New York University\n"
 #set the source file for input
 read -p "Enter the file name of the undirected graph: " FileName
 read -p "Enter the number of partitions k (k<1000): " shard
-#prompt user input
-read -p "Enter the number of iteration to carry out Balanced Label Propagation: " iter
+
 
 #compile all .cpp files to executables
 g++ -o clean clean.cpp -std=c++11
@@ -41,10 +40,12 @@ echo -e "Initialization completed\n"
 #to make sure do not run two disruptive rounds in a row
 skip=0
 last=0
+i=0
 #start of iteration
-for((i=1;i<iter+1;i++))
+while true
 
 do
+((++i))
 echo "In iteration" $i
 
 #after the first two rounds, start to check whether result converges
