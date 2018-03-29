@@ -28,6 +28,8 @@ for line in infile:
 localityDiff=float(locality[-1])-float(locality[-2])
 if localityDiff<0.005:
     print("TRUE")
+    print(locality[-1])
 else:
     print("FALSE")
+    print(locality[-1])
 

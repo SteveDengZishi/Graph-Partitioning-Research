@@ -1,12 +1,11 @@
-#!/bin/bash
+# !/bin/bash
 
 #  executeProbDisruptiveBLP.sh
 #  Boost
 #
 #  Created by Steve DengZishi on 3/21/18.
 #  Copyright © 2018 Steve DengZishi. All rights reserved.
-
-echo -e "\nRandomly Initialized Balanced Label Propagation      Version 1.2"
+echo -e "\nRandomly Initialized Balanced Label Propagation      Version 1.3"
 echo -e "       Copyright © 2017 Steve DengZishi  New York University\n"
 
 #set the source file for input
@@ -94,3 +93,4 @@ done
 #plotting graph after finish looping
 chmod +x graph_plot.py
 ./graph_plot.py
+

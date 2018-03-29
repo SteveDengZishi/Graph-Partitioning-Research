@@ -1,10 +1,11 @@
 #!/bin/bash
+
 #  executeBLPG_script.sh
 #  Boost
 #
 #  Created by Steve DengZishi on 7/12/17.
 #  Copyright © 2017 Steve DengZishi. All rights reserved.
-echo -e "\nRandomly Initialized Balanced Label Propagation      Version 1.2"
+echo -e "\nRandomly Initialized Balanced Label Propagation      Version 1.4"
 echo -e "       Copyright © 2017 Steve DengZishi  New York University\n"
 
 #set the source file for input
@@ -39,51 +40,70 @@ echo -e "Initialization completed\n"
 
 #to make sure do not run two disruptive rounds in a row
 skip=0
+last=0
 #start of iteration
 for((i=1;i<iter+1;i++))
 
 do
-    echo "In iteration" $i
+echo "In iteration" $i
 
-    #after the first two rounds, start to check whether result converges
-    if (($i>2)) && (($skip==0))
+#after the first two rounds, start to check whether result converges
+if (($i>2)) && (($skip==0))
 
-    then
-        result=$(./checkConvergence.py)
-        #echo $result
-        if [ "$result" == "TRUE" ]
+then
+#declare array to store the returned values
+result=($(./checkConvergence.py))
 
-        then
-            echo "Increase in locality converges. Running disruptive round"
+#echo ${result[0]}
+#echo ${result[1]}
 
-            ./disruptiveMove $FileName $shard
+if [ "${result[0]}" == "TRUE" ]
 
-            skip=1
+then
+echo "Increase in locality converges"
 
-        else
-            #taking too much time for large graph
-            ./lp_ingredient_producer $FileName $shard > lp_ingred.txt
+if (( $(echo "${result[1]} > $last" | bc -l) ))
 
-            ./linear < lp_ingred.txt | lp_solve | ./clean | sort > x_result_$i.txt
+then
+echo "Disruptive condition met, running disruptive round"
 
-            x_file=x_result_$i.txt
-            #too much time for large graph, map to move large time for many partitions
-            ./applyMove $FileName $shard $x_file
+./disruptiveMove $FileName $shard
 
-            skip=0
-        fi
+skip=1
 
-    else
-        ./lp_ingredient_producer $FileName $shard > lp_ingred.txt
+last=${result[1]}
 
-        ./linear < lp_ingred.txt | lp_solve | ./clean | sort > x_result_$i.txt
+else
+echo -e "Converges, ending Balanced Label Propagation\n"
+echo "The highest locality is: $last"
+break
 
-        x_file=x_result_$i.txt
+fi
 
-        ./applyMove $FileName $shard $x_file
+else
+#taking too much time for large graph
+./lp_ingredient_producer $FileName $shard > lp_ingred.txt
 
-        skip=0
-    fi
+./linear < lp_ingred.txt | lp_solve | ./clean | sort > x_result_$i.txt
+
+x_file=x_result_$i.txt
+#too much time for large graph, map to move large time for many partitions
+./applyMove $FileName $shard $x_file
+
+skip=0
+fi
+
+else
+./lp_ingredient_producer $FileName $shard > lp_ingred.txt
+
+./linear < lp_ingred.txt | lp_solve | ./clean | sort > x_result_$i.txt
+
+x_file=x_result_$i.txt
+
+./applyMove $FileName $shard $x_file
+
+skip=0
+fi
 
 done
 
