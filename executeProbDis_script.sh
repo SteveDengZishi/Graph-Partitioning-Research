@@ -11,8 +11,7 @@ echo -e "       Copyright © 2017 Steve DengZishi  New York University\n"
 #set the source file for input
 read -p "Enter the file name of the undirected graph: " FileName
 read -p "Enter the number of partitions k (k<1000): " shard
-#prompt user input
-read -p "Enter the number of iteration to carry out Balanced Label Propagation: " iter
+
 
 #compile all .cpp files to executables
 g++ -o clean clean.cpp -std=c++11
@@ -40,26 +39,47 @@ echo -e "Initialization completed\n"
 
 #to make sure do not run two disruptive rounds in a row
 skip=0
+last=0
+i=0
 #start of iteration
-for((i=1;i<iter+1;i++))
+while true
 
 do
+((++i))
 echo "In iteration" $i
 
 #after the first two rounds, start to check whether result converges
 if (($i>2)) && (($skip==0))
 
 then
-result=$(./checkConvergence.py)
-#echo $result
-if [ "$result" == "TRUE" ]
+#declare array to store the returned values
+result=($(./checkConvergence.py))
+
+#echo ${result[0]}
+#echo ${result[1]}
+
+if [ "${result[0]}" == "TRUE" ]
 
 then
-echo "Increase in locality converges. Running disruptive round"
+echo "Increase in locality converges"
+
+if (( $(echo "${result[1]} > $last" | bc -l) ))
+
+then
+echo "Disruptive condition met, running disruptive round"
 
 ./probDisruptiveMove $FileName $shard
 
 skip=1
+
+last=${result[1]}
+
+else
+echo -e "Converges, ending Balanced Label Propagation\n"
+echo "The highest locality is: $last"
+break
+
+fi
 
 else
 #taking too much time for large graph
@@ -93,4 +113,3 @@ done
 #plotting graph after finish looping
 chmod +x graph_plot.py
 ./graph_plot.py
-
