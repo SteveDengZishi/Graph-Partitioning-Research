@@ -8,7 +8,6 @@
 applyMove
 metis.*
 METIS_format_changer
-METIS_graph
 *.html
 *.bin
 Test
@@ -20,7 +19,8 @@ test.sh
 RandomAssignment
 clean
 lp_ingredient_producer
-
+probDisruptiveMove
+disruptiveMove
 # Precompiled Headers
 *.gch
 *.pch

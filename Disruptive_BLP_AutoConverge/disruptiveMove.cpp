@@ -106,7 +106,8 @@ void produceSortedLowestRatio(){
     FOR(i,0,partitions){
         FOR(j,0,shard[i].size()){
             //adding pairs of ((localDeg/degree), nodeID)
-            double ratio=neighbors[shard[i][j]][i]/sqrt(adjList[shard[i][j]].size());
+            double ratio=(double)neighbors[shard[i][j]][i]/(double)sqrt(adjList[shard[i][j]].size());
+            cout<<"the ratio is: "<<ratio<<endl;
             pair<double,int> ratioPair(ratio,shard[i][j]);
             sortedLowestRatio[i].push_back(ratioPair);
         }
