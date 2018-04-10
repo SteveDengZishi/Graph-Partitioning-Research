@@ -40,6 +40,7 @@
 #define CINLINE(a) getline(cin,a)
 #define FILL(a,b) memset(a, b , sizeof(a)) //fill array a with all bs
 #define INIT(a) FILL(a,0) //initialize array a with all 0s
+#define INF 2147483647
 
 //name space here
 using namespace std;
@@ -202,7 +203,7 @@ void printLinearInfo(int i,int j){
     vecD.clear();
     int k=0;
     int sum=0;
-    int a=INFINITY;
+    int a=INF;
     int num=0;
     
     FOR(z,0,sortedCountIJ[i][j].size()){

@@ -90,18 +90,18 @@ void produceLowestRatio(){
 }
 
 void produceRatioPool(){
-    double alpha=10.0;
+    double alpha=10;
     FOR(i,0,partitions){
         //initialize moveCount
         int moveCnt=0;
         //reseting seed for random number generation
         srand((unsigned)time(NULL));
         FOR(j,0,lowestRatio[i].size()){
-            cout<<"the ratio is "<<lowestRatio[i][j].first<<endl;
+            //cout<<"the ratio is "<<lowestRatio[i][j].first<<endl;
             double moveProb=alpha*(1-lowestRatio[i][j].first);
-            cout<<"move probability is "<<moveProb<<endl;
+            //cout<<"move probability is "<<moveProb<<endl;
             bool move=(rand()%100)<(moveProb*100);
-            cout<<"move decision is "<<move<<endl;
+           // cout<<"move decision is "<<move<<endl;
             if(move){
                 moveCnt++;
                 pool.push_back(lowestRatio[i][j].second);
