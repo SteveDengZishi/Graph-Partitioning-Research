@@ -41,6 +41,7 @@ echo -e "Initialization completed\n"
 skip=0
 last=0
 i=0
+th2=0.01
 #start of iteration
 while true
 
