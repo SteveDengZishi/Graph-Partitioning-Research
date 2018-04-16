@@ -89,7 +89,13 @@ last=${result[1]}
 
 else
 echo -e "Converges, ending Balanced Label Propagation\n"
+if (( $(echo "$last > ${result[1]}" | bc -l) ))
+then
 echo "The highest locality is: $last"
+else
+echo "The highest locality is: ${result[1]}"
+fi
+
 break
 
 fi
