@@ -41,6 +41,7 @@ echo -e "Initialization completed\n"
 skip=0
 last=0
 i=0
+th2=0.01
 #start of iteration
 while true
 
@@ -62,13 +63,24 @@ if [ "${result[0]}" == "TRUE" ]
 
 then
 echo "Increase in locality converges"
+#echo $last
 
-if (( $(echo "${result[1]} > $last" | bc -l) ))
+if(( $(echo "$last <= 0" | bc -l) ))
+then
+#the new peak improvement percentage as compared to the prior peak
+converge_imp_ratio=1
+else
+converge_imp_ratio=$(echo "(${result[1]} - $last) / $last" | bc -l)
+fi
+#echo $converge_imp_ratio
+
+
+if (( $(echo "$converge_imp_ratio > $th2" | bc -l) ))
 
 then
 echo "Disruptive condition met, running disruptive round"
 
-./probDisruptiveMove $FileName $shard
+./disruptiveMove $FileName $shard
 
 skip=1
 
@@ -76,7 +88,13 @@ last=${result[1]}
 
 else
 echo -e "Converges, ending Balanced Label Propagation\n"
+if (( $(echo "$last > ${result[1]}" | bc -l) ))
+then
 echo "The highest locality is: $last"
+else
+echo "The highest locality is: ${result[1]}"
+fi
+
 break
 
 fi
