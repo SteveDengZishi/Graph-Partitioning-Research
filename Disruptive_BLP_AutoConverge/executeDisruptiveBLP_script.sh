@@ -63,8 +63,7 @@ if [ "${result[0]}" == "TRUE" ]
 
 then
 echo "Increase in locality converges"
-echo $th2
-echo $last
+#echo $last
 
 if(( $(echo "$last <= 0" | bc -l) ))
 then
@@ -73,7 +72,7 @@ converge_imp_ratio=1
 else
 converge_imp_ratio=$(echo "(${result[1]} - $last) / $last" | bc -l)
 fi
-echo $converge_imp_ratio
+#echo $converge_imp_ratio
 
 
 if (( $(echo "$converge_imp_ratio > $th2" | bc -l) ))
