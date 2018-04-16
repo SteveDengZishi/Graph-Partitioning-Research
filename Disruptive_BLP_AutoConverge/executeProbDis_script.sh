@@ -5,13 +5,13 @@
 #
 #  Created by Steve DengZishi on 3/21/18.
 #  Copyright © 2018 Steve DengZishi. All rights reserved.
-echo -e "\nRandomly Initialized Balanced Label Propagation      Version 1.3"
+echo -e "\nRandomly Initialized Balanced Label Propagation      Version 1.6"
 echo -e "       Copyright © 2017 Steve DengZishi  New York University\n"
 
 #set the source file for input
 read -p "Enter the file name of the undirected graph: " FileName
 read -p "Enter the number of partitions k (k<1000): " shard
-
+read -p "Enter the seed of random probability: " seed
 
 #compile all .cpp files to executables
 g++ -o clean clean.cpp -std=c++11
@@ -80,7 +80,7 @@ if (( $(echo "$converge_imp_ratio > $th2" | bc -l) ))
 then
 echo "Disruptive condition met, running disruptive round"
 
-./disruptiveMove $FileName $shard
+./probDisruptiveMove $FileName $shard $seed
 
 skip=1
 

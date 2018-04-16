@@ -65,6 +65,7 @@ vector<int> pool;
 int** neighbors;
 int* outSize;//tracking the number of node out from the shards
 int partitions;
+int seed;
 int nodes;
 int edges;
 fstream inFile;
@@ -90,12 +91,13 @@ void produceLowestRatio(){
 }
 
 void produceRatioPool(){
-    double alpha=10;
+    double alpha=5.5;
     FOR(i,0,partitions){
         //initialize moveCount
         int moveCnt=0;
         //reseting seed for random number generation
-        srand((unsigned)time(NULL));
+        srand(seed);
+        //srand((unsigned)time(NULL));
         FOR(j,0,lowestRatio[i].size()){
             //cout<<"the ratio is "<<lowestRatio[i][j].first<<endl;
             double moveProb=alpha*(1-lowestRatio[i][j].first);
@@ -266,6 +268,7 @@ int main(int argc, const char * argv[]) {
     //get stdin from shell script
     fileName=argv[1];
     partitions=atoi(argv[2]);
+    seed=atoi(argv[3]);
     
     inFile.open(fileName,ios::in);
     

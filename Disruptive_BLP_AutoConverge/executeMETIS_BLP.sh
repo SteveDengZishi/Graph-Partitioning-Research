@@ -92,7 +92,7 @@ if (( $(echo "$converge_imp_ratio > $th2" | bc -l) ))
 then
 echo "Disruptive condition met, running disruptive round"
 
-./disruptiveMove $FileName $shard
+./probDisruptiveMove $FileName $shard
 
 skip=1
 
