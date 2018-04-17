@@ -15,6 +15,7 @@ In this research project, we study several methods proposed in recent papers, in
 	This git repository consists of three folders, and one poster briefly describes the purpose of the project,
 
 	Balanced_Label_Propagation
+	Disruptive_BLP_AutoConverge
 	LEOPARD
 	References
 	Poster_ZISHI_DENG_pdf
@@ -23,8 +24,13 @@ In this research project, we study several methods proposed in recent papers, in
 	1.Randomly initialized Balanced Label Propagation
 	2.METIS + BLP (Balanced Label Propagation run on top of METIS)
 
+	Disruptive_BLP_AutoConverge is the major improvements from Balanced_Label_Propagation
+	1.Improved mapping algorithm allow it to run faster on larger graph and partitions
+	2.It will run disruptive rounds when it is close to convergence (When improvement in locality between two rounds < 0.5%)
+	3.It will automatically stop the BLP process and return the highest locality achieved when no improvement can be achieved (Convergence arises and it is lower than the previous convergence point)
+
 	LEOPARD stands for Lightweight Edge-Oriented Partitioning and Replication for Dynamic Graphs
-	It is still under refinements
+	It is still at the beginning stage
 
 	References contains all the relevant papers referred during this research 
 	

@@ -1,10 +1,10 @@
 //
-//  disruptiveMove.cpp
+//  replicate.cpp
 //  Boost
 //
-//  Created by Steve DengZishi on 8/10/17.
-//  Copyright © 2017 Steve DengZishi. All rights reserved.
-
+//  Created by Steve DengZishi on 4/16/18.
+//  Copyright © 2018 Steve DengZishi. All rights reserved.
+//
 #include <iostream>
 #include <cstdio>
 #include <vector>
@@ -60,20 +60,15 @@ struct Greater
 //modified to pointers to allow dynamically allocate on heap
 vector<int>* shard;
 vector<int>* adjList;
-int* outSize;
-vector<int> poolVec;
+vector<PII> sortedNeighborCount;
 int partitions;
+int seed;
 int nodes;
 int edges;
 fstream inFile;
 string fileName;
 
-unsigned int int_hash(unsigned int x) {
-    x = ((x >> 16) ^ x) * 0x45d9f3b;
-    x = ((x >> 16) ^ x) * 0x45d9f3b;
-    x = (x >> 16) ^ x;
-    return x;
-}
+
 
 void printShard(){
     for(int i=0;i<partitions;i++){
@@ -114,8 +109,7 @@ void printShardSize(){
 }
 
 // Stores the first choices of all nodes after each iteration
-//vector<PII>* vecMove; // move[nodeID] -> vectors of (gain,destination); //only sorted and leave other options for 2nd moves
-int* prevShard;
+vector<int>* prevShard;
 
 void loadShard(){
     //random sharding according using a integer hash then mod 8 to distribute to shards
@@ -135,8 +129,10 @@ void loadShard(){
             shard[i].push_back(data);
         }
     }
+    int shardNum;
     for(int i=0;i<nodes;i++){
-        fscanf(inFile,"%d",&prevShard[i]);
+        fscanf(inFile,"%d",&shardNum);
+        prevShard[i].push_back(shardNum);
     }
     
     fclose(inFile);
@@ -148,7 +144,9 @@ void reConstructShard(){
         shard[i].clear();
     }
     FOR(i,0,nodes){
-        shard[prevShard[i]].push_back((int)i);
+        FOR(j,0,prevShard[i].size()){
+            shard[prevShard[i][j]].push_back((int)i);
+        }
     }
 }
 
@@ -164,7 +162,14 @@ double printLocatlityFraction(){
     int localEdge=0;
     FOR(i,0,nodes){
         FOR(j,0,adjList[i].size()){
-            if(prevShard[i]==prevShard[adjList[i][j]]) localEdge++;
+            //reduce chance to recount edges twice due to replication
+            int local=0;
+            FOR(k,0,prevShard[i].size()) {
+                FOR(l,0,prevShard[i].size()){
+                    if(prevShard[i][k]==prevShard[adjList[i][j]][l]) local=1;
+                }
+            }
+            localEdge+=local;
         }
     }
     localEdge/=2; //if the graph is undirected each edge was counted twice
@@ -178,8 +183,8 @@ double printLocatlityFraction(){
 int main(int argc, const char * argv[]) {
     
     //get stdin from shell script
-    cin>>fileName;
-    cin>>partitions;
+    fileName=argv[1];
+    partitions=atoi(argv[2]);
     
     inFile.open(fileName,ios::in);
     
@@ -190,13 +195,12 @@ int main(int argc, const char * argv[]) {
     
     //read number of nodes and edges
     inFile>>nodes>>edges;
-//    cout<<nodes<<" "<<partitions<<endl;//(lp_ingredient)
+    //    cout<<nodes<<" "<<partitions<<endl;//(lp_ingredient)
     
     //allocate memory for vecMove, adjList & sortedCountIJ on the heap
     shard=new vector<int>[partitions];
-    prevShard=new int[nodes];
+    prevShard=new vector<int>[nodes];
     adjList=new vector<int>[nodes];
-    outSize=new int[partitions];
     
     //create adjacency list from edge list
     createADJ();
@@ -207,38 +211,26 @@ int main(int argc, const char * argv[]) {
     loadShard();
     //    printShard();
     
-    //use a common pool to take out 10% of the nodes from each of the nodes from each shard
-    for(int i=0;i<partitions;i++){
-        random_shuffle(shard[i].begin(),shard[i].end());
-        outSize[i]=(int)shard[i].size()*0.10;
-        for(int j=0;j<outSize[i];j++){
-            poolVec.push_back(shard[i][j]);
-        }
+    //adding replications of 10% of the top adjList size() to prevShard
+    int move_count=0.1*nodes;
+    FOR(i,0,nodes){
+        pair<int,int> neighbor_count(adjList[i].size(),i);
+        sortedNeighborCount.push_back(neighbor_count);
     }
     
-    //reshuffle them and update prev[nodes]
-    //first few random nodeID according to the takeout size to be in shard 0, then shard 1...2....3....
-    random_shuffle(poolVec.begin(),poolVec.end());
-    int start=0;
-    int end=0;
-    int move_count=0;
+    sort(sortedNeighborCount.rbegin(),sortedNeighborCount.rend());
     
-    for(int i=0;i<partitions;i++){
-        end=start+outSize[i];
-        for(int j=start;j<end;j++){
-            if(prevShard[poolVec[j]]!=i){
-                move_count++;
-                prevShard[poolVec[j]]=i;
+    FOR(i,0,move_count){
+        FOR(j,0,partitions){
+            if(prevShard[sortedNeighborCount[i].second][0]!=j) prevShard[sortedNeighborCount[i].second].push_back(j);
             }
-        }
-        start=end;
     }
     
     //reconstruct shard[partitions]
     reConstructShard();
     
     //print edge locality information
-    printf("%d nodes out of %d nodes made their movement in this iteration\n",move_count,nodes);
+    printf("%d nodes out of %d nodes get replicated\n",move_count,nodes);
     double locality=printLocatlityFraction();
     
     //write data to file for graph plotting
@@ -257,17 +249,13 @@ int main(int argc, const char * argv[]) {
         fprintf(outFile,"\n");
     }
     
-    for(int i=0;i<nodes;i++){
-        fprintf(outFile,"%d ", prevShard[i]);
-    }
-    
     fclose(outFile);
     
     //free up allocated memory
     delete [] shard;
     delete [] adjList;
     delete [] prevShard;
-
+    
     
     //remove dangling pointers
     shard=nullptr;

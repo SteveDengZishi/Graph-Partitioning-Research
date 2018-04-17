@@ -40,6 +40,7 @@
 #define CINLINE(a) getline(cin,a)
 #define FILL(a,b) memset(a, b , sizeof(a)) //fill array a with all bs
 #define INIT(a) FILL(a,0) //initialize array a with all 0s
+#define INF 2147483647
 
 //name space here
 using namespace std;
@@ -62,7 +63,6 @@ struct Greater
 vector<int>* shard;
 vector<int>* adjList;
 vector<PII>** sortedCountIJ;//in each ij pairs, stores sorted (gains,node)
-//vector<PII>* sortedLowestNeighbor;//The bottom 10% of the nodes with lowest neighbor count in current shard when converges s[partition] vector pair<neighbor,nodeID> inversely sorted
 int** neighbors; //[nodeID][shard] gives number of neighbors
 int* score;
 vector<int> Pcount;
@@ -203,7 +203,7 @@ void printLinearInfo(int i,int j){
     vecD.clear();
     int k=0;
     int sum=0;
-    int a=INFINITY;
+    int a=INF;
     int num=0;
     
     FOR(z,0,sortedCountIJ[i][j].size()){
@@ -316,6 +316,7 @@ int main(int argc, const char * argv[]) {
     prevShard=new int[nodes];
     adjList=new vector<int>[nodes];
     score=new int[partitions];
+   
     
     //for showing movement of nodes between shards
     sortedCountIJ=new vector<PII>*[partitions];
