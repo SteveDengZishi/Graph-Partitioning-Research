@@ -397,12 +397,23 @@ int main(int argc, const char * argv[]) {
     delete [] shard;
     delete [] adjList;
     delete [] prevShard;
-
+    delete [] outSize;
+    delete [] sortedLowestNeighbor;
+    delete [] sortedLowestRatio;
+    
+    for(int i=0;i<nodes;i++){
+        delete [] neighbors[i];
+    }
+    delete [] neighbors;
     
     //remove dangling pointers
     shard=nullptr;
     adjList=nullptr;
     prevShard=nullptr;
+    outSize=nullptr;
+    sortLowestRatio=nullptr;
+    sortedLowestNeighbor=nullptr;
+    neighbors=nullptr;
     
     return 0;
 }
