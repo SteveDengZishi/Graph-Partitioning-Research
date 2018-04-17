@@ -6,6 +6,7 @@
 #  Created by Steve DengZishi on 3/21/18.
 #  Copyright © 2018 Steve DengZishi. All rights reserved.
 echo -e "\nRandomly Initialized Balanced Label Propagation      Version 1.6"
+echo -e "    Probability Based Selective Ratio Disruption with Replication"
 echo -e "       Copyright © 2017 Steve DengZishi  New York University\n"
 
 #set the source file for input
@@ -26,6 +27,8 @@ g++ -o probDisruptiveMove probDisruptiveMove.cpp -std=c++11
 echo "g++ compiled disruptiveMove.cpp successfully"
 g++ -o RandomAssignment RandomAssignment.cpp -std=c++11
 echo -e "g++ compiled RandomAssignment.cpp successfully\n"
+g++ -o replicate replicate.cpp -std=c++11
+echo -e "g++ compiled replicate.cpp successfully\n"
 chmod +x checkConvergence.py
 
 #time the effective execution
@@ -87,7 +90,7 @@ skip=1
 last=${result[1]}
 
 else
-echo -e "Converges, ending Balanced Label Propagation\n"
+echo -e "Converges, ending Balanced Label Propagation"
 if (( $(echo "$last > ${result[1]}" | bc -l) ))
 then
 echo "The highest locality is: $last"
@@ -126,6 +129,8 @@ fi
 
 done
 
+echo -e "Adding replication of popular nodes"
+./replicate $FileName $shard
 )
 
 #plotting graph after finish looping

@@ -10,6 +10,7 @@ echo -e "       Copyright © 2017 Steve DengZishi  New York University\n"
 #prompt user for input
 read -p "Please enter the fileName: " FileName
 read -p "Please enter the number of partition: " shard
+read -p "Please enter the seed of random probability: " seed
 
 #compile all .cpp files to executables
 g++ -o METIS_graph METIS_graph.cpp -std=c++11
@@ -92,7 +93,7 @@ if (( $(echo "$converge_imp_ratio > $th2" | bc -l) ))
 then
 echo "Disruptive condition met, running disruptive round"
 
-./probDisruptiveMove $FileName $shard
+./probDisruptiveMove $FileName $shard $seed
 
 skip=1
 
