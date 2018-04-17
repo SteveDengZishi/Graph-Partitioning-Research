@@ -182,43 +182,12 @@ double printLocatlityFraction(){
     return fraction;
 }
 
-//create NeighborList to be used in finding nodes with minimum neighborCount
-void createNeighborList(){
-    //create local temp array
-    int score[partitions];
-    
-    FOR(i,0,nodes){
-        //reset the score array
-        FOR(k,0,partitions) score[k]=0;
-        //go through each neighbor of that node and add score count to the shard it is in
-        FOR(j,0,adjList[i].size()){
-            int where=prevShard[adjList[i][j]];
-            score[where]++;
-        }
-        //assign tempt result to neighbor array
-        FOR(z,0,partitions){
-            neighbors[i][z]=score[z];
-        }
-    }
-}
-
-void printNeighborList(){
-    FOR(i,0,nodes){
-        printf("for node %d: ",(int)i);
-        FOR(j,0,partitions){
-            printf("%d ",neighbors[i][j]);
-        }
-        cout<<endl;
-    }
-}
-
 //start of main()
 int main(int argc, const char * argv[]) {
     
     //get stdin from shell script
     fileName=argv[1];
     partitions=atoi(argv[2]);
-    seed=atoi(argv[3]);
     
     inFile.open(fileName,ios::in);
     
@@ -233,16 +202,8 @@ int main(int argc, const char * argv[]) {
     
     //allocate memory for vecMove, adjList & sortedCountIJ on the heap
     shard=new vector<int>[partitions];
-    prevShard=new int[nodes];
+    prevShard=new vector<int>[nodes];
     adjList=new vector<int>[nodes];
-    outSize=new int[partitions];
-    lowestRatio=new vector<pair<double,int>>[partitions];
-    
-    //number of neighbors count for each node in each partition
-    neighbors=new int*[nodes];
-    for(int i=0;i<nodes;i++){
-        neighbors[i]=new int[partitions];
-    }
     
     //create adjacency list from edge list
     createADJ();
@@ -253,24 +214,14 @@ int main(int argc, const char * argv[]) {
     loadShard();
     //    printShard();
     
-    //find bottom 10% of nodes in each shard in terms of colocation count
-    //and then produce a pool for re-assignment
-    createNeighborList();
-    
-    //Local Ratio based re-assignment
-    produceLowestRatio();
-    produceRatioPool();
-    
-    int move_count=reAssignPool();
-    
-    //use a common pool to take out 25% of the nodes from each of the nodes from each shard
-    //int move_count = randomShuffle();
+    //adding replications of 10% of the top adjList size() to prevShard
+    int move_count=0.1*nodes;
     
     //reconstruct shard[partitions]
     reConstructShard();
     
     //print edge locality information
-    printf("%d nodes out of %d nodes made their movement in this iteration\n",move_count,nodes);
+    printf("%d nodes out of %d nodes get replicated\n",move_count,nodes);
     double locality=printLocatlityFraction();
     
     //write data to file for graph plotting
