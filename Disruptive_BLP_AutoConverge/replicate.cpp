@@ -60,10 +60,7 @@ struct Greater
 //modified to pointers to allow dynamically allocate on heap
 vector<int>* shard;
 vector<int>* adjList;
-vector<pair<double, int>>* lowestRatio;//local ratio(local degree/degree)
-vector<int> pool;
-int** neighbors;
-int* outSize;//tracking the number of node out from the shards
+vector<PII> sortedNeighborCount;
 int partitions;
 int seed;
 int nodes;
@@ -216,6 +213,18 @@ int main(int argc, const char * argv[]) {
     
     //adding replications of 10% of the top adjList size() to prevShard
     int move_count=0.1*nodes;
+    FOR(i,0,nodes){
+        pair<int,int> neighbor_count(adjList[i].size(),i);
+        sortedNeighborCount.push_back(neighbor_count);
+    }
+    
+    sort(sortedNeighborCount.rbegin(),sortedNeighborCount.rend());
+    
+    FOR(i,0,move_count){
+        FOR(j,0,partitions){
+            if(prevShard[sortedNeighborCount[i].second][0]!=j) prevShard[sortedNeighborCount[i].second].push_back(j);
+            }
+    }
     
     //reconstruct shard[partitions]
     reConstructShard();
@@ -238,10 +247,6 @@ int main(int argc, const char * argv[]) {
             fprintf(outFile,"%d ", shard[i][j]);
         }
         fprintf(outFile,"\n");
-    }
-    
-    for(int i=0;i<nodes;i++){
-        fprintf(outFile,"%d ", prevShard[i]);
     }
     
     fclose(outFile);

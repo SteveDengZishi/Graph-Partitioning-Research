@@ -129,7 +129,7 @@ fi
 
 done
 
-echo -e "Adding replication of popular nodes"
+echo -e "\nAdding replication of popular nodes"
 ./replicate $FileName $shard
 )
 
