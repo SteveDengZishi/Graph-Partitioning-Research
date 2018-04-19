@@ -26,7 +26,7 @@ echo "g++ compiled applyMove.cpp successfully"
 g++ -o probDisruptiveMove probDisruptiveMove.cpp -std=c++11
 echo "g++ compiled disruptiveMove.cpp successfully"
 g++ -o RandomAssignment RandomAssignment.cpp -std=c++11
-echo -e "g++ compiled RandomAssignment.cpp successfully\n"
+echo -e "g++ compiled RandomAssignment.cpp successfully"
 g++ -o replicate replicate.cpp -std=c++11
 echo -e "g++ compiled replicate.cpp successfully\n"
 chmod +x checkConvergence.py

@@ -103,7 +103,7 @@ void produceRatioPool(){
             double moveProb=alpha*(1-lowestRatio[i][j].first);
             //cout<<"move probability is "<<moveProb<<endl;
             bool move=(rand()%100)<(moveProb*100);
-           // cout<<"move decision is "<<move<<endl;
+            //cout<<"move decision is "<<move<<endl;
             if(move){
                 moveCnt++;
                 pool.push_back(lowestRatio[i][j].second);
