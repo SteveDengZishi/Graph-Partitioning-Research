@@ -66,6 +66,7 @@ int** neighbors;
 int* outSize;//tracking the number of node out from the shards
 int partitions;
 int seed;
+double alpha;
 int nodes;
 int edges;
 fstream inFile;
@@ -91,7 +92,7 @@ void produceLowestRatio(){
 }
 
 void produceRatioPool(){
-    double alpha=5.5;
+    //alpha is taken from the 50/round number
     FOR(i,0,partitions){
         //initialize moveCount
         int moveCnt=0;
@@ -269,6 +270,7 @@ int main(int argc, const char * argv[]) {
     fileName=argv[1];
     partitions=atoi(argv[2]);
     seed=atoi(argv[3]);
+    alpha=atof(argv[4]);
     
     inFile.open(fileName,ios::in);
     

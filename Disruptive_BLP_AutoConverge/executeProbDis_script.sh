@@ -82,8 +82,9 @@ if (( $(echo "$converge_imp_ratio > $th2" | bc -l) ))
 
 then
 echo "Disruptive condition met, running disruptive round"
-
-./probDisruptiveMove $FileName $shard $seed
+alpha=$(echo "50/$i" | bc -l)
+#echo $alpha
+./probDisruptiveMove $FileName $shard $seed $alpha
 
 skip=1
 
