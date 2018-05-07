@@ -100,8 +100,8 @@ int main(){
     cin.tie(NULL);
     
     //get stdin from shell script
-    cin>>fileName;
-    cin>>partitions;
+    fileName=argv[1];
+    partitions=atoi(argv[2]);
     
     inFile.open(fileName,ios::in);
     
