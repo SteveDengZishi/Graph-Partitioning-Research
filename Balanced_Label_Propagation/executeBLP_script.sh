@@ -47,11 +47,7 @@ echo "In iteration" $i
 
 x_file=x_result_$i.txt
 
-./applyMove <<EOF
-$FileName
-$shard
-$x_file
-EOF
+./applyMove $FileName $shard $x_file
 done
 )
 
