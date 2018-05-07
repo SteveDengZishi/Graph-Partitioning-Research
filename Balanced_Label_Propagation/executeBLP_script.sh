@@ -41,10 +41,7 @@ for((i=1;i<iter+1;i++))
 do
 echo "In iteration" $i
 
-./lp_ingredient_producer > lp_ingred.txt <<EOF
-$FileName
-$shard
-EOF
+./lp_ingredient_producer $FileName $shard > lp_ingred.txt
 
 ./linear < lp_ingred.txt | lp_solve | ./clean | sort > x_result_$i.txt
 
