@@ -211,8 +211,8 @@ int main(int argc, const char * argv[]) {
     loadShard();
     //    printShard();
     
-    //adding replications of 10% of the top adjList size() to prevShard
-    int move_count=0.1*nodes;
+    //adding replications of 1% of the top adjList size() to prevShard
+    int move_count=0.01*nodes;
     FOR(i,0,nodes){
         pair<int,int> neighbor_count(adjList[i].size(),i);
         sortedNeighborCount.push_back(neighbor_count);
