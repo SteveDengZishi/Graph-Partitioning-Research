@@ -411,7 +411,7 @@ int main(int argc, const char * argv[]) {
     adjList=nullptr;
     prevShard=nullptr;
     outSize=nullptr;
-    sortLowestRatio=nullptr;
+    sortedLowestRatio=nullptr;
     sortedLowestNeighbor=nullptr;
     neighbors=nullptr;
     
