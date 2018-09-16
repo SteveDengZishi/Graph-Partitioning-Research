@@ -22,17 +22,21 @@
 #include <unordered_set> //To remove duplicates and count size
 #include <functional> //To use std::hash
 #include <fstream> // To use c++ input and output to files
+#include <time.h>
+#include <stdlib.h>
 
 using namespace std;
 
 #define FOR(i,a,b) for(size_t i=a;i<b;i++)
 
 //global variables here
-vector<int>* shard;
+vector<int>* blocks;
 int* prevShard;
 vector<int>* adjList;
+double* pi_weights;
 fstream inFile;
 string fileName;
+int block_num;
 int nodes;
 int edges;
 
@@ -67,74 +71,128 @@ void createADJ(){
     }
 }
 
+void generate_pi_weights(){
+    int sum = 0;
+    srand(time(NULL));
+    for(int i=0;i<block_num;i++){
+        pi_weights[i] = rand()%1000;
+        sum+=pi_weights[i];
+    }
+    for(int i=0; i<block_num; i++){
+        pi_weights[i]/=sum;
+    }
+}
+void print_pi_weights(){
+    cout<<"The pi_weights are: "<<endl;
+    for(int i=0;i<block_num;i++){
+        cout<<pi_weights[i]<<" ";
+    }
+    cout<<endl;
+}
+int get_block_assignment(){
+    //generate a random double between 0~1
+    double r = (double) rand()/(RAND_MAX);
+    printf("r number is: %f\n",r);
+    double pi_sum=0.0;
+    for(int i=0;i<block_num;i++){
+        pi_sum+=pi_weights[i];
+        if(pi_sum>=r){
+            return i;
+        }
+    }
+    return block_num;
+}
 //start of main program
 int main(int argc, const char * argv[]){
     
     //get stdin from shell script
     fileName=argv[1];
+    block_num=atoi(argv[2]);
+    nodes=100;
     
-    inFile.open(fileName,ios::in);
+//    inFile.open(fileName,ios::in);
+//
+//    if(!inFile){
+//        cerr<<"Error occurs while opening the file"<<endl;
+//        exit(1);
+//    }
+//
+//    //read number of nodes and edges
+//    inFile>>nodes>>edges;
+//
+//    //create data structures with variable size on the heap
+//    adjList=new vector<int>[nodes];
+//
+//    //produce adjList
+//    createADJ();
     
-    if(!inFile){
-        cerr<<"Error occurs while opening the file"<<endl;
-        exit(1);
-    }
-    
-    //read number of nodes and edges
-    inFile>>nodes>>edges;
-    
-    //create data structures with variable size on the heap
-    adjList=new vector<int>[nodes];
-    
-    //produce adjList
-    createADJ();
     //Bayesian Approach to identify block structure in the network
     //Variational method for approximate inference
     //Variant of BLP which takes a discounted vote over neighbors membership
     //1.Randomly initialize the block assignments
+    pi_weights = new double[block_num];
+    blocks = new vector<int>[block_num];
     
-    //Map blocks to shards
-    //Or collapse nodes to use lpsolve
+    //generate pi vector with respective weights following Dirichlet distribution
+    generate_pi_weights();
+    print_pi_weights();
     
-    //    printShard();
-    //output locality info to shell
-    double locality=printLocatlityFraction();
-    
-    //write data to file for graph plotting
-    FILE* outFile=fopen("graph_plotting_data.txt","w");
-    fprintf(outFile,"node locality\n");
-    fprintf(outFile,"%d %lf\n",nodes,locality);
-    fclose(outFile);
-    
-    //fprint to files
-    outFile=fopen("sharding_result.bin", "wb");
-    
-    //write block of data to stream
-    //    fwrite(prevShard, sizeof(int), nodes, outFile);
-    //    fwrite(shard, sizeof(vector<int>), partitions, outFile);
-    for(int i=0;i<partitions;i++){
-        fprintf(outFile,"%d\n",int(shard[i].size()));
-        for(int j=0;j<shard[i].size();j++){
-            fprintf(outFile,"%d ", shard[i][j]);
-        }
-        fprintf(outFile,"\n");
-    }
-    
+    //randomly assign all nodes to blocks according to their pi biases
     for(int i=0;i<nodes;i++){
-        fprintf(outFile,"%d ", prevShard[i]);
+        //compute block assignment according to bias and store block assignment in blocks vectors
+        int block_assignment = get_block_assignment();
+        blocks[block_assignment].push_back(i);
     }
     
-    //delete dynamic allocation
-    delete [] shard;
-    delete [] prevShard;
-    delete [] adjList;
-    
-    //remove dangling pointers
-    shard=nullptr;
-    adjList=nullptr;
-    prevShard=nullptr;
-    
-    fclose(outFile);
-    
+    for(int i=0;i<block_num;i++){
+        cout<<"In block "<<i<<endl;
+        for(int j=0;j<blocks[i].size();j++){
+            cout<<blocks[i][j]<<" ";
+        }
+        cout<<endl;
+    }
+//    //Map blocks to shards
+//    //Or collapse nodes to use lpsolve
+//
+//    //    printShard();
+//    //output locality info to shell
+//    double locality=printLocatlityFraction();
+//
+//    //write data to file for graph plotting
+//    FILE* outFile=fopen("graph_plotting_data.txt","w");
+//    fprintf(outFile,"node locality\n");
+//    fprintf(outFile,"%d %lf\n",nodes,locality);
+//    fclose(outFile);
+//
+//    //fprint to files
+//    outFile=fopen("sharding_result.bin", "wb");
+//
+//    //write block of data to stream
+//    //    fwrite(prevShard, sizeof(int), nodes, outFile);
+//    //    fwrite(shard, sizeof(vector<int>), partitions, outFile);
+//    for(int i=0;i<partitions;i++){
+//        fprintf(outFile,"%d\n",int(shard[i].size()));
+//        for(int j=0;j<shard[i].size();j++){
+//            fprintf(outFile,"%d ", shard[i][j]);
+//        }
+//        fprintf(outFile,"\n");
+//    }
+//
+//    for(int i=0;i<nodes;i++){
+//        fprintf(outFile,"%d ", prevShard[i]);
+//    }
+//
+//    //delete dynamic allocation
+//    delete [] shard;
+//    delete [] prevShard;
+//    delete [] adjList;
+//
+//    //remove dangling pointers
+//    shard=nullptr;
+//    adjList=nullptr;
+//    prevShard=nullptr;
+//
+//    fclose(outFile);
+//
     return 0;
 }
