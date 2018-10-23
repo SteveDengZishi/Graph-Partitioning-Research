@@ -39,7 +39,9 @@ string fileName;
 int block_num;
 int nodes;
 int edges;
-
+double J;
+double J_1;
+double* h;
 //functions here
 unsigned int int_hash(unsigned int x) {
     x = ((x >> 16) ^ x) * 0x45d9f3b;
@@ -82,17 +84,19 @@ void generate_pi_weights(){
         pi_weights[i]/=sum;
     }
 }
+
 void print_pi_weights(){
     cout<<"The pi_weights are: "<<endl;
     for(int i=0;i<block_num;i++){
         cout<<pi_weights[i]<<" ";
     }
-    cout<<endl;
+    cout<<endl<<endl;
 }
+
 int get_block_assignment(){
     //generate a random double between 0~1
     double r = (double) rand()/(RAND_MAX);
-    printf("r number is: %f\n",r);
+    //printf("r number is: %f\n",r);
     double pi_sum=0.0;
     for(int i=0;i<block_num;i++){
         pi_sum+=pi_weights[i];
@@ -102,12 +106,25 @@ int get_block_assignment(){
     }
     return block_num;
 }
+
+void print_blocks_assignments(){
+    for(int i=0;i<block_num;i++){
+        cout<<"In block "<<i<<endl;
+        for(int j=0;j<blocks[i].size();j++){
+            cout<<blocks[i][j]<<" ";
+        }
+        cout<<endl;
+    }
+}
+
 //start of main program
 int main(int argc, const char * argv[]){
     
     //get stdin from shell script
     fileName=argv[1];
     block_num=atoi(argv[2]);
+    
+    //temp before using actual file
     nodes=100;
     
 //    inFile.open(fileName,ios::in);
@@ -144,12 +161,20 @@ int main(int argc, const char * argv[]){
         blocks[block_assignment].push_back(i);
     }
     
+    print_blocks_assignments();
+    
+    //repeat discounted vote process until convergence in FA[q] variational free energy
+    //while(convergenence condition reached) do
+    J = //expected formula
+    J_1 = //expected formula
+    h = new double[block_num];
     for(int i=0;i<block_num;i++){
-        cout<<"In block "<<i<<endl;
-        for(int j=0;j<blocks[i].size();j++){
-            cout<<blocks[i][j]<<" ";
-        }
-        cout<<endl;
+        h[i] = //expected formula
+    }
+    
+    //sub in formula for discounted vote
+    for(int i=0;i<nodes;i++){
+        
     }
 //    //Map blocks to shards
 //    //Or collapse nodes to use lpsolve
