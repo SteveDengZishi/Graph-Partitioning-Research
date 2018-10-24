@@ -31,6 +31,7 @@ using namespace std;
 
 //global variables here
 vector<int>* blocks;
+vector<int> blockSize;
 int* prevShard;
 vector<int>* adjList;
 int** adjMatrix;
@@ -96,18 +97,45 @@ void convertADJtoADJMatrix(){
 //m++, c+
 int countEdgesWithinComm(){
     int count = 0;
+    FOR(i,0,nodes){
+        FOR(j,0,nodes){
+            if(i>j){
+                if(prevShard[i]==prevShard[j] && adjMatrix[i][j]==1){
+                    count++;
+                }
+            }
+        }
+    }
     return count;
 }
 
 //m+-, c-
 int countNonEdgesWithinComm(){
     int count = 0;
+    FOR(i,0,nodes){
+        FOR(j,0,nodes){
+            if(i>j){
+                if(prevShard[i]==prevShard[j] && adjMatrix[i][j]==0){
+                    count++;
+                }
+            }
+        }
+    }
     return count;
 }
 
 //m-+, d+
 int countEdgesBetweenComm(){
     int count = 0;
+    FOR(i,0,nodes){
+        FOR(j,0,nodes){
+            if(i>j){
+                if(prevShard[i]!=prevShard[j] && adjMatrix[i][j]==1){
+                    count++;
+                }
+            }
+        }
+    }
     return count;
 }
 
@@ -115,9 +143,23 @@ int countEdgesBetweenComm(){
 
 int countNonEdgesBetweenComm(){
     int count = 0;
+    FOR(i,0,nodes){
+        FOR(j,0,nodes){
+            if(i>j){
+                if(prevShard[i]!=prevShard[j] && adjMatrix[i][j]==0){
+                    count++;
+                }
+            }
+        }
+    }
     return count;
 }
 
+void countBlockSize(){
+    FOR(i,0,block_num){
+        blockSize.push_back(blocks[i].size());
+    }
+}
 
 void generate_pi_weights(){
     int sum = 0;
@@ -206,6 +248,9 @@ int main(int argc, const char * argv[]){
         int block_assignment = get_block_assignment();
         blocks[block_assignment].push_back(i);
     }
+    
+    //count the sizes of each block into blockSize vector
+    countBlockSize();
     
     print_blocks_assignments();
     
