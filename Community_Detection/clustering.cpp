@@ -33,6 +33,7 @@ using namespace std;
 vector<int>* blocks;
 int* prevShard;
 vector<int>* adjList;
+int** adjMatrix;
 double* pi_weights;
 fstream inFile;
 string fileName;
@@ -42,6 +43,7 @@ int edges;
 double J;
 double J_1;
 double* h;
+
 //functions here
 unsigned int int_hash(unsigned int x) {
     x = ((x >> 16) ^ x) * 0x45d9f3b;
@@ -64,6 +66,7 @@ double printLocatlityFraction(){
     return fraction;
 }
 
+//build adjacency list from streaming edges
 void createADJ(){
     int from,to;
     while(inFile>>from>>to){
@@ -72,6 +75,49 @@ void createADJ(){
         adjList[to].push_back(from);
     }
 }
+
+//convert adjacency list to adjacency matrix
+void convertADJtoADJMatrix(){
+    //dynamically initialize 2d array to 0s
+    adjMatrix = new int*[nodes];
+
+    FOR(i, 0, nodes){
+        adjMatrix[i] = new int[nodes]{0};
+    }
+
+    //scan through adjList and update edges to matrix
+    FOR(i,0,nodes){
+        FOR(j,0,adjList[i].size()){
+            adjMatrix[i][adjList[i][j]]=1;
+        }
+    }
+}
+
+//m++, c+
+int countEdgesWithinComm(){
+    int count = 0;
+    return count;
+}
+
+//m+-, c-
+int countNonEdgesWithinComm(){
+    int count = 0;
+    return count;
+}
+
+//m-+, d+
+int countEdgesBetweenComm(){
+    int count = 0;
+    return count;
+}
+
+//m--, d-.
+
+int countNonEdgesBetweenComm(){
+    int count = 0;
+    return count;
+}
+
 
 void generate_pi_weights(){
     int sum = 0;
