@@ -140,7 +140,6 @@ int countEdgesBetweenComm(){
 }
 
 //m--, d-.
-
 int countNonEdgesBetweenComm(){
     int count = 0;
     FOR(i,0,nodes){
@@ -155,6 +154,7 @@ int countNonEdgesBetweenComm(){
     return count;
 }
 
+//nµ, nk
 void countBlockSize(){
     FOR(i,0,block_num){
         blockSize.push_back(blocks[i].size());
