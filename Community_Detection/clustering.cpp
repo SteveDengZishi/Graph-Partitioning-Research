@@ -205,12 +205,26 @@ void print_blocks_assignments(){
     }
 }
 
+//prior values for a+0, b+0, a-0, b-0, vec{n0}
+double ap0=2;
+double bp0=1;
+double am0=1;
+double bm0=2;
+double* vecN;
+
 //start of main program
 int main(int argc, const char * argv[]){
     
     //get stdin from shell script
     fileName=argv[1];
     block_num=atoi(argv[2]);
+    
+    //initialize n using block numbers
+    vecN = new double[block_num];
+    FOR(i,0,block_num){
+        vecN[i]=1.0;
+    }
+
     
     //temp before using actual file
     nodes=100;
