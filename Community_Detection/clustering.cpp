@@ -42,7 +42,7 @@ int block_num;
 int nodes;
 int edges;
 double J;
-double J_1;
+double JL;
 double* h;
 
 //functions here
@@ -205,6 +205,11 @@ void print_blocks_assignments(){
     }
 }
 
+int findBestAssignmentK(double J, double JL, double* h){
+    FOR(j,0,block_num){
+        //
+    }
+}
 //prior values for a+0, b+0, a-0, b-0, vec{n0}
 double ap0=2;
 double bp0=1;
@@ -261,6 +266,7 @@ int main(int argc, const char * argv[]){
         //compute block assignment according to bias and store block assignment in blocks vectors
         int block_assignment = get_block_assignment();
         blocks[block_assignment].push_back(i);
+        prevShard[i] = block_assignment;
     }
     
     //count the sizes of each block into blockSize vector
@@ -270,16 +276,27 @@ int main(int argc, const char * argv[]){
     
     //repeat discounted vote process until convergence in FA[q] variational free energy
     //while(convergenence condition reached) do
-    J = //expected formula
-    J_1 = //expected formula
+    
+    //count the number of edges from the observed network
+    int mpp = countEdgesWithinComm();
+    int mpm = countNonEdgesWithinComm();
+    int mmp = countEdgesBetweenComm();
+    int mmm = countNonEdgesBetweenComm();
+    
+    //calculating discounted votes
+    J = digamma(mpp+ap0)-digamma(mpm+bp0)-digamma(mpm+am0)+digamma(mmm+bm0);
+    JL = digamma(mmm+bm0)-digamma(mmp+am0+mmm+bm0)-digamma(mpm+bp0)+digamma(mpp+ap0+mpm+bp0);
     h = new double[block_num];
+    
     for(int i=0;i<block_num;i++){
-        h[i] = //expected formula
+        int ak_sum=0;
+        for(int j=0;j<block_num;j++) ak_sum+=vecN[j];
+        h[i] = digamma(blocks[i].size()+vecN[i])-digamma(ak_sum);
     }
     
     //sub in formula for discounted vote
     for(int i=0;i<nodes;i++){
-        
+        prevShard[i] = findBestAssignmentK(J,JL,h);
     }
 //    //Map blocks to shards
 //    //Or collapse nodes to use lpsolve
