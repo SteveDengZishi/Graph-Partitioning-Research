@@ -47,16 +47,17 @@ double J;
 double JL;
 double* h;
 
-//functions here
-unsigned int int_hash(unsigned int x) {
-    x = ((x >> 16) ^ x) * 0x45d9f3b;
-    x = ((x >> 16) ^ x) * 0x45d9f3b;
-    x = (x >> 16) ^ x;
-    return x;
-}
-
 void randomAssignment(){
-
+    srand(time(NULL));
+    //random sharding according using a integer hash then mod 8 to distribute to shards
+    for(int i=0;i<nodes;i++){
+        //        cout<<"i is: "<<i<<endl;
+        int block_assignment = rand() % block_num;
+        //        cout<<"shard ID is: "<<shardID<<endl;
+        blocks[block_assignment].push_back(i);
+        //mark prevShard for the 1st random Sharding
+        prevShard[i] = block_assignment; 
+    }
 }
 
 double printLocatlityFraction(){
@@ -264,7 +265,7 @@ int main(int argc, const char * argv[]){
     FOR(i,0,block_num){
         vecN[i]=1.0;
     }
-
+   
     //Reading from graphs
     inFile.open(fileName,ios::in);
 
@@ -280,6 +281,9 @@ int main(int argc, const char * argv[]){
     createADJ();
     convertADJtoADJMatrix();
 
+    //initialize prevShard for O(1) block assignment query
+    prevShard = new int[nodes];
+
     //Bayesian Approach to identify block structure in the network
     //Variational method for approximate inference
     //Variant of BLP which takes a discounted vote over neighbors membership
@@ -287,18 +291,6 @@ int main(int argc, const char * argv[]){
     //pi_weights = new double[block_num];
     blocks = new vector<int>[block_num];
     randomAssignment();
-    
-    //generate pi vector with respective weights following Dirichlet distribution
-    //generate_pi_weights();
-    //print_pi_weights();
-    
-    //randomly assign all nodes to blocks according to their pi biases
-    for(int i=0;i<nodes;i++){
-        //compute block assignment according to bias and store block assignment in blocks vectors
-        int block_assignment = get_block_assignment();
-        blocks[block_assignment].push_back(i);
-        prevShard[i] = block_assignment;
-    }
     
     //count the sizes of each block into blockSize vector
     countBlockSize();
