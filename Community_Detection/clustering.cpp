@@ -24,18 +24,20 @@
 #include <fstream> // To use c++ input and output to files
 #include <time.h>
 #include <stdlib.h>
+#include <boost/math/special_functions/digamma.hpp>
 
 using namespace std;
 
 #define FOR(i,a,b) for(size_t i=a;i<b;i++)
-
+#define DIGAMMA boost::math::digamma
 //global variables here
 vector<int>* blocks;
 vector<int> blockSize;
+//check whether it is initialized
 int* prevShard;
 vector<int>* adjList;
 int** adjMatrix;
-double* pi_weights;
+//double* pi_weights;
 fstream inFile;
 string fileName;
 int block_num;
@@ -51,6 +53,10 @@ unsigned int int_hash(unsigned int x) {
     x = ((x >> 16) ^ x) * 0x45d9f3b;
     x = (x >> 16) ^ x;
     return x;
+}
+
+void randomAssignment(){
+
 }
 
 double printLocatlityFraction(){
@@ -69,6 +75,9 @@ double printLocatlityFraction(){
 
 //build adjacency list from streaming edges
 void createADJ(){
+    //create data structures with variable size on the heap
+    adjList = new vector<int>[nodes];
+
     int from,to;
     while(inFile>>from>>to){
         adjList[from].push_back(to);
@@ -161,7 +170,7 @@ void countBlockSize(){
     }
 }
 
-void generate_pi_weights(){
+/* void generate_pi_weights(){
     int sum = 0;
     srand(time(NULL));
     for(int i=0;i<block_num;i++){
@@ -193,7 +202,7 @@ int get_block_assignment(){
         }
     }
     return block_num;
-}
+} */
 
 void print_blocks_assignments(){
     for(int i=0;i<block_num;i++){
@@ -205,10 +214,36 @@ void print_blocks_assignments(){
     }
 }
 
-int findBestAssignmentK(double J, double JL, double* h){
+//using discounted vote to select the most probable block assignment for each node
+int findBestAssignmentK(int i,double J, double JL, double* h){
+    vector<double> results;
     FOR(j,0,block_num){
-        //
+        //count wk = |E(i,Bk)| + |E(Bk,i)|
+        int w_k = countEdgesBetweenNodeAndBlock(i,(int)j);
+        //weigh on the block sizes
+        int effective_size_k = blockSize[j];
+        if(prevShard[i]==(int)j) effective_size_k = blockSize[j] - 1;
+
+        double val = J*w_k - JL*effective_size_k - h[j];
+        results.push_back(val);
     }
+    //return the max resulting index of the results
+    int max_idx=0;
+    FOR(j,1,block_num){
+        if(results[j] > results[max_idx]) max_idx=j;
+    }
+    return max_idx;
+}
+
+//count the number of edges between node y and block z
+int countEdgesBetweenNodeAndBlock(int y, int z){
+    int count = 0;
+    //each of the nodes in block[z] check it adjMatrix with node y whether edge exists
+    FOR(i,0,blocks[z].size()){
+        int node = blocks[z][i];
+        if(adjMatrix[y][node]) count++;
+    }
+    return count;
 }
 //prior values for a+0, b+0, a-0, b-0, vec{n0}
 double ap0=2;
@@ -230,36 +265,32 @@ int main(int argc, const char * argv[]){
         vecN[i]=1.0;
     }
 
-    
-    //temp before using actual file
-    nodes=100;
-    
-//    inFile.open(fileName,ios::in);
-//
-//    if(!inFile){
-//        cerr<<"Error occurs while opening the file"<<endl;
-//        exit(1);
-//    }
-//
-//    //read number of nodes and edges
-//    inFile>>nodes>>edges;
-//
-//    //create data structures with variable size on the heap
-//    adjList=new vector<int>[nodes];
-//
-//    //produce adjList
-//    createADJ();
-    
+    //Reading from graphs
+    inFile.open(fileName,ios::in);
+
+    if(!inFile){
+        cerr<<"Error occurs while opening the file"<<endl;
+        exit(1);
+    }
+
+    //read number of nodes and edges
+    inFile>>nodes>>edges;
+
+    //produce adjList && adjMatrix
+    createADJ();
+    convertADJtoADJMatrix();
+
     //Bayesian Approach to identify block structure in the network
     //Variational method for approximate inference
     //Variant of BLP which takes a discounted vote over neighbors membership
     //1.Randomly initialize the block assignments
-    pi_weights = new double[block_num];
+    //pi_weights = new double[block_num];
     blocks = new vector<int>[block_num];
+    randomAssignment();
     
     //generate pi vector with respective weights following Dirichlet distribution
-    generate_pi_weights();
-    print_pi_weights();
+    //generate_pi_weights();
+    //print_pi_weights();
     
     //randomly assign all nodes to blocks according to their pi biases
     for(int i=0;i<nodes;i++){
@@ -284,19 +315,19 @@ int main(int argc, const char * argv[]){
     int mmm = countNonEdgesBetweenComm();
     
     //calculating discounted votes
-    J = digamma(mpp+ap0)-digamma(mpm+bp0)-digamma(mpm+am0)+digamma(mmm+bm0);
-    JL = digamma(mmm+bm0)-digamma(mmp+am0+mmm+bm0)-digamma(mpm+bp0)+digamma(mpp+ap0+mpm+bp0);
+    J = DIGAMMA(mpp+ap0) - DIGAMMA(mpm+bp0) - DIGAMMA(mpm+am0) + DIGAMMA(mmm+bm0);
+    JL = DIGAMMA(mmm+bm0) - DIGAMMA(mmp+am0+mmm+bm0) - DIGAMMA(mpm+bp0) + DIGAMMA(mpp+ap0+mpm+bp0);
     h = new double[block_num];
     
     for(int i=0;i<block_num;i++){
         int ak_sum=0;
         for(int j=0;j<block_num;j++) ak_sum+=vecN[j];
-        h[i] = digamma(blocks[i].size()+vecN[i])-digamma(ak_sum);
+        h[i] = DIGAMMA(blocks[i].size()+vecN[i]) - DIGAMMA(ak_sum);
     }
     
     //sub in formula for discounted vote
     for(int i=0;i<nodes;i++){
-        prevShard[i] = findBestAssignmentK(J,JL,h);
+        prevShard[i] = findBestAssignmentK((int)i,J,JL,h);
     }
 //    //Map blocks to shards
 //    //Or collapse nodes to use lpsolve
