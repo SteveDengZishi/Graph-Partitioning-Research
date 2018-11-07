@@ -291,7 +291,8 @@ int main(int argc, const char * argv[]){
     //pi_weights = new double[block_num];
     blocks = new vector<int>[block_num];
     randomAssignment();
-    
+    double locality=printLocatlityFraction();
+    cout<<"After random assignments, the locality is: "<<locality<<endl;
     //count the sizes of each block into blockSize vector
     countBlockSize();
     
@@ -326,7 +327,8 @@ int main(int argc, const char * argv[]){
 //
 //    //    printShard();
 //    //output locality info to shell
-//    double locality=printLocatlityFraction();
+    locality=printLocatlityFraction();
+    cout<<"After posterior assignments, the locality is: "<<locality<<endl;
 //
 //    //write data to file for graph plotting
 //    FILE* outFile=fopen("graph_plotting_data.txt","w");
@@ -352,16 +354,26 @@ int main(int argc, const char * argv[]){
 //        fprintf(outFile,"%d ", prevShard[i]);
 //    }
 //
-//    //delete dynamic allocation
-//    delete [] shard;
-//    delete [] prevShard;
-//    delete [] adjList;
-//
-//    //remove dangling pointers
-//    shard=nullptr;
-//    adjList=nullptr;
-//    prevShard=nullptr;
-//
+    //delete dynamic allocation
+    delete [] blocks;
+    delete [] prevShard;
+    delete [] adjList;
+    delete [] h;
+    delete [] vecN;
+
+    FOR(i,0,nodes){
+        delete [] adjMatrix[i];
+    }
+
+    delete [] adjMatrix;
+
+    //remove dangling pointers
+    blocks=nullptr;
+    adjList=nullptr;
+    prevShard=nullptr;
+    vecN=nullptr;
+    h=nullptr;
+    adjMatrix=nullptr;
 //    fclose(outFile);
 //
     return 0;
