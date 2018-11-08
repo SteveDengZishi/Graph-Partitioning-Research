@@ -175,6 +175,13 @@ void countBlockSize(){
     }
 }
 
+void printBlockSize(){
+    FOR(i,0,block_num){
+        cout<<blockSize[i]<<" ";
+    }
+    cout<<endl;
+}
+
 /* void generate_pi_weights(){
     int sum = 0;
     srand(time(NULL));
@@ -261,6 +268,17 @@ void reConstructBlocks(){
     }
 }
 
+//print weights J, JL and h
+void printWeights(){
+    cout<<"The value of J is: "<<J<<endl;
+    cout<<"The value of JL is: "<<JL<<endl;
+    cout<<"The values of h are: ";
+    FOR(i,0,block_num){
+        cout<<h[i]<<" "
+    }
+    cout<<endl;
+}
+
 //prior values for a+0, b+0, a-0, b-0, vec{n0}
 double ap0=2;
 double bp0=1;
@@ -307,19 +325,18 @@ int main(int argc, const char * argv[]){
     blocks = new vector<int>[block_num];
     randomAssignment();
     double locality=printLocatlityFraction();
-    cout<<"After random assignments, the locality is: "<<locality<<endl;
+    printf("After random assignments, the locality is: %lf\n\n", locality);
     
     // initialize a move_cnt > 10 to start the iteration
     int move_cnt = 11;
     
+    //repeat discounted vote process until convergence in FA[q] variational free energy
     while(move_cnt > 10){
+        printf("Starting clustering iteration\n")
         //count the sizes of each block into blockSize vector
         countBlockSize();
-        
+        printBlockSize();
         //print_blocks_assignments();
-        
-        //repeat discounted vote process until convergence in FA[q] variational free energy
-        //while(convergenence condition reached) do
         
         //count the number of edges from the observed network
         int mpp = countEdgesWithinComm();
@@ -337,6 +354,9 @@ int main(int argc, const char * argv[]){
             for(int j=0;j<block_num;j++) ak_sum+=vecN[j];
             h[i] = DIGAMMA(blocks[i].size()+vecN[i]) - DIGAMMA(ak_sum);
         }
+        
+        //Debugging weights
+        printWeights();
         
         //sub in formula for discounted vote
         move_cnt = 0;
