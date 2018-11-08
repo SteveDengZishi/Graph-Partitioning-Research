@@ -170,6 +170,7 @@ int countNonEdgesBetweenComm(){
 
 //nµ, nk
 void countBlockSize(){
+    blockSize.clear();
     FOR(i,0,block_num){
         blockSize.push_back(blocks[i].size());
     }
@@ -274,7 +275,7 @@ void printWeights(){
     cout<<"The value of JL is: "<<JL<<endl;
     cout<<"The values of h are: ";
     FOR(i,0,block_num){
-        cout<<h[i]<<" "
+        cout<<h[i]<<" ";
     }
     cout<<endl;
 }
@@ -332,7 +333,7 @@ int main(int argc, const char * argv[]){
     
     //repeat discounted vote process until convergence in FA[q] variational free energy
     while(move_cnt > 10){
-        printf("Starting clustering iteration\n")
+        printf("Starting clustering iteration\n");
         //count the sizes of each block into blockSize vector
         countBlockSize();
         printBlockSize();
