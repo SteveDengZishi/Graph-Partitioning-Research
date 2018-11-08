@@ -70,7 +70,7 @@ double printLocatlityFraction(){
     localEdge/=2; //if the graph is undirected each edge was counted twice
     int totalEdge=edges;
     double fraction=(double)localEdge/(double)totalEdge;
-    printf("There are %d local edges out of total %d edges, fraction of local edges is: %lf\n\n",localEdge,totalEdge,fraction);
+    printf("There are %d local edges out of total %d edges, fraction of local edges is: %lf\n",localEdge,totalEdge,fraction);
     return fraction;
 }
 
@@ -251,6 +251,16 @@ int findBestAssignmentK(int i,double J, double JL, double* h){
     return max_idx;
 }
 
+void reConstructBlocks(){
+    //clear shard
+    FOR(i,0,block_num){
+        blocks[i].clear();
+    }
+    FOR(i,0,nodes){
+        blocks[prevShard[i]].push_back((int)i);
+    }
+}
+
 //prior values for a+0, b+0, a-0, b-0, vec{n0}
 double ap0=2;
 double bp0=1;
@@ -299,46 +309,52 @@ int main(int argc, const char * argv[]){
     double locality=printLocatlityFraction();
     cout<<"After random assignments, the locality is: "<<locality<<endl;
     
-    //count the sizes of each block into blockSize vector
-    countBlockSize();
+    // initialize a move_cnt > 10 to start the iteration
+    int move_cnt = 11;
     
-    //print_blocks_assignments();
-    
-    //repeat discounted vote process until convergence in FA[q] variational free energy
-    //while(convergenence condition reached) do
-    
-    //count the number of edges from the observed network
-    int mpp = countEdgesWithinComm();
-    int mpm = countNonEdgesWithinComm();
-    int mmp = countEdgesBetweenComm();
-    int mmm = countNonEdgesBetweenComm();
-    
-    //calculating discounted votes
-    J = DIGAMMA(mpp+ap0) - DIGAMMA(mpm+bp0) - DIGAMMA(mpm+am0) + DIGAMMA(mmm+bm0);
-    JL = DIGAMMA(mmm+bm0) - DIGAMMA(mmp+am0+mmm+bm0) - DIGAMMA(mpm+bp0) + DIGAMMA(mpp+ap0+mpm+bp0);
-    h = new double[block_num];
-    
-    for(int i=0;i<block_num;i++){
-        int ak_sum=0;
-        for(int j=0;j<block_num;j++) ak_sum+=vecN[j];
-        h[i] = DIGAMMA(blocks[i].size()+vecN[i]) - DIGAMMA(ak_sum);
+    while(move_cnt > 10){
+        //count the sizes of each block into blockSize vector
+        countBlockSize();
+        
+        //print_blocks_assignments();
+        
+        //repeat discounted vote process until convergence in FA[q] variational free energy
+        //while(convergenence condition reached) do
+        
+        //count the number of edges from the observed network
+        int mpp = countEdgesWithinComm();
+        int mpm = countNonEdgesWithinComm();
+        int mmp = countEdgesBetweenComm();
+        int mmm = countNonEdgesBetweenComm();
+        
+        //calculating discounted votes
+        J = DIGAMMA(mpp+ap0) - DIGAMMA(mpm+bp0) - DIGAMMA(mpm+am0) + DIGAMMA(mmm+bm0);
+        JL = DIGAMMA(mmm+bm0) - DIGAMMA(mmp+am0+mmm+bm0) - DIGAMMA(mpm+bp0) + DIGAMMA(mpp+ap0+mpm+bp0);
+        h = new double[block_num];
+        
+        for(int i=0;i<block_num;i++){
+            int ak_sum=0;
+            for(int j=0;j<block_num;j++) ak_sum+=vecN[j];
+            h[i] = DIGAMMA(blocks[i].size()+vecN[i]) - DIGAMMA(ak_sum);
+        }
+        
+        //sub in formula for discounted vote
+        move_cnt = 0;
+        for(int i=0;i<nodes;i++){
+            int new_assignment = findBestAssignmentK((int)i,J,JL,h);
+            if(prevShard[i]!=new_assignment) move_cnt++;
+            prevShard[i] = new_assignment;
+        }
+    //    //Map blocks to shards
+    //    //Or collapse nodes to use lpsolve
+    //
+    //    //    printShard();
+    //    //output locality info to shell
+        locality=printLocatlityFraction();
+        printf("There are %d nodes moved in the process\n", move_cnt);
+        cout<<"After posterior assignments, the locality is: "<<locality<<endl;
+        reConstructBlocks();
     }
-    
-    //sub in formula for discounted vote
-    int move_cnt = 0;
-    for(int i=0;i<nodes;i++){
-        int new_assignment = findBestAssignmentK((int)i,J,JL,h);
-        if(prevShard[i]!=new_assignment) move_cnt++;
-        prevShard[i] = new_assignment;
-    }
-//    //Map blocks to shards
-//    //Or collapse nodes to use lpsolve
-//
-//    //    printShard();
-//    //output locality info to shell
-    locality=printLocatlityFraction();
-    printf("There are %d nodes moved in the process", move_cnt);
-    cout<<"After posterior assignments, the locality is: "<<locality<<endl;
 //
 //    //write data to file for graph plotting
 //    FILE* outFile=fopen("graph_plotting_data.txt","w");
