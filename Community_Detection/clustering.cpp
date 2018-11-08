@@ -70,7 +70,7 @@ double printLocatlityFraction(){
     localEdge/=2; //if the graph is undirected each edge was counted twice
     int totalEdge=edges;
     double fraction=(double)localEdge/(double)totalEdge;
-    printf("Before iterations, there are %d local edges out of total %d edges, fraction of local edges is: %lf\n\n",localEdge,totalEdge,fraction);
+    printf("There are %d local edges out of total %d edges, fraction of local edges is: %lf\n\n",localEdge,totalEdge,fraction);
     return fraction;
 }
 
@@ -116,6 +116,7 @@ int countEdgesWithinComm(){
             }
         }
     }
+    cout<<"Total number of edges within communities are: "<<count<<endl;
     return count;
 }
 
@@ -131,6 +132,7 @@ int countNonEdgesWithinComm(){
             }
         }
     }
+    cout<<"Total number of non-edges within communities are: "<<count<<endl;
     return count;
 }
 
@@ -146,6 +148,7 @@ int countEdgesBetweenComm(){
             }
         }
     }
+    cout<<"Total number of edges between communities are: "<<count<<endl;
     return count;
 }
 
@@ -161,6 +164,7 @@ int countNonEdgesBetweenComm(){
             }
         }
     }
+    cout<<"Total number of non-edges between communities are: "<<count<<endl;
     return count;
 }
 
@@ -215,6 +219,17 @@ void print_blocks_assignments(){
     }
 }
 
+//count the number of edges between node y and block z
+int countEdgesBetweenNodeAndBlock(int y, int z){
+    int count = 0;
+    //each of the nodes in block[z] check it adjMatrix with node y whether edge exists
+    FOR(i,0,blocks[z].size()){
+        int node = blocks[z][i];
+        if(adjMatrix[y][node]) count++;
+    }
+    return count;
+}
+
 //using discounted vote to select the most probable block assignment for each node
 int findBestAssignmentK(int i,double J, double JL, double* h){
     vector<double> results;
@@ -236,16 +251,6 @@ int findBestAssignmentK(int i,double J, double JL, double* h){
     return max_idx;
 }
 
-//count the number of edges between node y and block z
-int countEdgesBetweenNodeAndBlock(int y, int z){
-    int count = 0;
-    //each of the nodes in block[z] check it adjMatrix with node y whether edge exists
-    FOR(i,0,blocks[z].size()){
-        int node = blocks[z][i];
-        if(adjMatrix[y][node]) count++;
-    }
-    return count;
-}
 //prior values for a+0, b+0, a-0, b-0, vec{n0}
 double ap0=2;
 double bp0=1;
@@ -293,10 +298,11 @@ int main(int argc, const char * argv[]){
     randomAssignment();
     double locality=printLocatlityFraction();
     cout<<"After random assignments, the locality is: "<<locality<<endl;
+    
     //count the sizes of each block into blockSize vector
     countBlockSize();
     
-    print_blocks_assignments();
+    //print_blocks_assignments();
     
     //repeat discounted vote process until convergence in FA[q] variational free energy
     //while(convergenence condition reached) do
@@ -319,8 +325,11 @@ int main(int argc, const char * argv[]){
     }
     
     //sub in formula for discounted vote
+    int move_cnt = 0;
     for(int i=0;i<nodes;i++){
-        prevShard[i] = findBestAssignmentK((int)i,J,JL,h);
+        int new_assignment = findBestAssignmentK((int)i,J,JL,h);
+        if(prevShard[i]!=new_assignment) move_cnt++;
+        prevShard[i] = new_assignment;
     }
 //    //Map blocks to shards
 //    //Or collapse nodes to use lpsolve
@@ -328,6 +337,7 @@ int main(int argc, const char * argv[]){
 //    //    printShard();
 //    //output locality info to shell
     locality=printLocatlityFraction();
+    printf("There are %d nodes moved in the process", move_cnt);
     cout<<"After posterior assignments, the locality is: "<<locality<<endl;
 //
 //    //write data to file for graph plotting
