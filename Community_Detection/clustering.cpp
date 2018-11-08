@@ -43,6 +43,7 @@ string fileName;
 int block_num;
 int nodes;
 int edges;
+int iterations;
 double J;
 double JL;
 double* h;
@@ -70,7 +71,7 @@ double printLocatlityFraction(){
     localEdge/=2; //if the graph is undirected each edge was counted twice
     int totalEdge=edges;
     double fraction=(double)localEdge/(double)totalEdge;
-    printf("There are %d local edges out of total %d edges, fraction of local edges is: %lf\n",localEdge,totalEdge,fraction);
+    printf("\nThere are %d local edges out of total %d edges, fraction of local edges is: %lf\n",localEdge,totalEdge,fraction);
     return fraction;
 }
 
@@ -177,6 +178,7 @@ void countBlockSize(){
 }
 
 void printBlockSize(){
+    cout<<"\nPrinting blocks sizes:\n";
     FOR(i,0,block_num){
         cout<<blockSize[i]<<" ";
     }
@@ -271,6 +273,7 @@ void reConstructBlocks(){
 
 //print weights J, JL and h
 void printWeights(){
+    cout<<"\nPrinting calculated weights..."<<endl;
     cout<<"The value of J is: "<<J<<endl;
     cout<<"The value of JL is: "<<JL<<endl;
     cout<<"The values of h are: ";
@@ -293,6 +296,7 @@ int main(int argc, const char * argv[]){
     //get stdin from shell script
     fileName=argv[1];
     block_num=atoi(argv[2]);
+    iterations=atoi(argv[3]);
     
     //initialize n using block numbers
     vecN = new double[block_num];
@@ -328,12 +332,9 @@ int main(int argc, const char * argv[]){
     double locality=printLocatlityFraction();
     printf("After random assignments, the locality is: %lf\n\n", locality);
     
-    // initialize a move_cnt > 10 to start the iteration
-    int move_cnt = 11;
-    
     //repeat discounted vote process until convergence in FA[q] variational free energy
-    while(move_cnt > 10){
-        printf("Starting clustering iteration\n");
+    while(iterations--){
+        printf("\nStarting clustering iteration.....\n");
         //count the sizes of each block into blockSize vector
         countBlockSize();
         printBlockSize();
@@ -360,7 +361,7 @@ int main(int argc, const char * argv[]){
         printWeights();
         
         //sub in formula for discounted vote
-        move_cnt = 0;
+        int move_cnt = 0;
         for(int i=0;i<nodes;i++){
             int new_assignment = findBestAssignmentK((int)i,J,JL,h);
             if(prevShard[i]!=new_assignment) move_cnt++;
@@ -371,8 +372,8 @@ int main(int argc, const char * argv[]){
     //
     //    //    printShard();
     //    //output locality info to shell
+        printf("There are %d nodes moved in this iteration\n", move_cnt);
         locality=printLocatlityFraction();
-        printf("There are %d nodes moved in the process\n", move_cnt);
         cout<<"After posterior assignments, the locality is: "<<locality<<endl;
         reConstructBlocks();
     }
