@@ -288,6 +288,7 @@ double ap0=2;
 double bp0=1;
 double am0=1;
 double bm0=2;
+
 double* vecN;
 
 //start of main program
