@@ -244,7 +244,7 @@ int countEdgesBetweenNodeAndBlock(int y, int z){
     //each of the nodes in block[z] check it adjMatrix with node y whether edge exists
     FOR(i,0,blocks[z].size()){
         int node = blocks[z][i];
-        if(adjMatrix[y][node]) count++;
+        if(check_connection(y,node)) count++;
     }
     return count;
 }
