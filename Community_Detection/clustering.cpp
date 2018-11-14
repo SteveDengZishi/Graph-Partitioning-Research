@@ -36,7 +36,7 @@ vector<int> blockSize;
 //check whether it is initialized
 int* prevShard;
 vector<int>* adjList;
-int** adjMatrix;
+//int** adjMatrix;
 //double* pi_weights;
 fstream inFile;
 string fileName;
@@ -89,6 +89,8 @@ void createADJ(){
 }
 
 //convert adjacency list to adjacency matrix
+//it is probably too costly on large graphs
+/*
 void convertADJtoADJMatrix(){
     //dynamically initialize 2d array to 0s
     adjMatrix = new int*[nodes];
@@ -104,14 +106,21 @@ void convertADJtoADJMatrix(){
         }
     }
 }
-
+*/
+//replace adjMatrix using adjList in checking edge connection
+int check_connection(int i, int j){
+    FOR(k,0,adjList[i].size()){
+        if(adjList[i][k] == j) return 1;
+    }
+    return 0;
+}
 //m++, c+
 int countEdgesWithinComm(){
     int count = 0;
     FOR(i,0,nodes){
         FOR(j,0,nodes){
             if(i>j){
-                if(prevShard[i]==prevShard[j] && adjMatrix[i][j]==1){
+                if(prevShard[i]==prevShard[j] && check_connection((int)i,(int)j)==1){
                     count++;
                 }
             }
@@ -127,7 +136,7 @@ int countNonEdgesWithinComm(){
     FOR(i,0,nodes){
         FOR(j,0,nodes){
             if(i>j){
-                if(prevShard[i]==prevShard[j] && adjMatrix[i][j]==0){
+                if(prevShard[i]==prevShard[j] && check_connection((int)i,(int)j)==0){
                     count++;
                 }
             }
@@ -143,7 +152,7 @@ int countEdgesBetweenComm(){
     FOR(i,0,nodes){
         FOR(j,0,nodes){
             if(i>j){
-                if(prevShard[i]!=prevShard[j] && adjMatrix[i][j]==1){
+                if(prevShard[i]!=prevShard[j] && check_connection((int)i,(int)j)==1){
                     count++;
                 }
             }
@@ -159,7 +168,7 @@ int countNonEdgesBetweenComm(){
     FOR(i,0,nodes){
         FOR(j,0,nodes){
             if(i>j){
-                if(prevShard[i]!=prevShard[j] && adjMatrix[i][j]==0){
+                if(prevShard[i]!=prevShard[j] && check_connection((int)i,(int)j)==0){
                     count++;
                 }
             }
@@ -318,7 +327,7 @@ int main(int argc, const char * argv[]){
 
     //produce adjList && adjMatrix
     createADJ();
-    convertADJtoADJMatrix();
+    //convertADJtoADJMatrix();
 
     //initialize prevShard for O(1) block assignment query
     prevShard = new int[nodes];
@@ -409,20 +418,22 @@ int main(int argc, const char * argv[]){
     delete [] adjList;
     delete [] h;
     delete [] vecN;
-
+    
+    /*
     FOR(i,0,nodes){
         delete [] adjMatrix[i];
     }
 
     delete [] adjMatrix;
-
+     */
+    
     //remove dangling pointers
     blocks=nullptr;
     adjList=nullptr;
     prevShard=nullptr;
     vecN=nullptr;
     h=nullptr;
-    adjMatrix=nullptr;
+    //adjMatrix=nullptr;
 //    fclose(outFile);
 //
     return 0;
