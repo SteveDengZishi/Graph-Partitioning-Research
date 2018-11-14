@@ -47,6 +47,7 @@ int iterations;
 double J;
 double JL;
 double* h;
+string verbose;
 
 void randomAssignment(){
     srand(time(NULL));
@@ -308,6 +309,8 @@ int main(int argc, const char * argv[]){
     block_num=atoi(argv[2]);
     iterations=atoi(argv[3]);
     
+    if(argc==5) verbose=argv[4];
+    
     //initialize n using block numbers
     vecN = new double[block_num];
     FOR(i,0,block_num){
@@ -367,8 +370,10 @@ int main(int argc, const char * argv[]){
             h[i] = DIGAMMA(blocks[i].size()+vecN[i]) - DIGAMMA(ak_sum);
         }
         
-        //Debugging weights
-        printWeights();
+        if(verbose=="v"){
+            //Debugging weights
+            printWeights();
+        }
         
         //sub in formula for discounted vote
         int move_cnt = 0;
