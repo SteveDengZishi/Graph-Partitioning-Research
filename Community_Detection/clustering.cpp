@@ -116,10 +116,12 @@ int check_connection(int i, int j){
     return 0;
 }
 //m++, c+
-int countEdgesWithinComm(){
+//deprecated as it is too slow for large graphs to use O(V^2+E) method
+/* int countEdgesWithinComm(){
     int count = 0;
     FOR(i,0,nodes){
         FOR(j,0,nodes){
+            //printf("%d %d ", i,j);
             if(i>j){
                 if(prevShard[i]==prevShard[j] && check_connection((int)i,(int)j)==1){
                     count++;
@@ -129,10 +131,27 @@ int countEdgesWithinComm(){
     }
     cout<<"Total number of edges within communities are: "<<count<<endl;
     return count;
+} */
+
+//SUM from 1 to K |E(Bk, Bk)|
+int countEdgesWithinComm(){
+    int count=0;
+    FOR(i,0,block_num){
+        FOR(j,0,blocks[i].size()){
+            FOR(k,0,blocks[i].size()){
+                //undirected graph only count in one direction
+                if(blocks[i][j]>blocks[i][k]){
+                    if(check_connection(blocks[i][j], blocks[i][k])) count++;
+                }
+            }
+        }
+    }
+    cout<<"Total number of edges within communities are: "<<count<<endl;
+    return count;
 }
 
 //m+-, c-
-int countNonEdgesWithinComm(){
+/* int countNonEdgesWithinComm(){
     int count = 0;
     FOR(i,0,nodes){
         FOR(j,0,nodes){
@@ -145,10 +164,22 @@ int countNonEdgesWithinComm(){
     }
     cout<<"Total number of non-edges within communities are: "<<count<<endl;
     return count;
+} */
+
+//SUM from 1 to k (nk(nk-1)/2) - m++
+int countNonEdgesWithinComm(int mpp){
+    int count=0;
+    FOR(i,0,block_num){
+        count += blockSize[i]*(blockSize[i]-1)/2;
+    }
+    count=count-mpp;
+    cout<<"Total number of non-edges within communities are: "<<count<<endl;
+    return count;
 }
 
 //m-+, d+
-int countEdgesBetweenComm(){
+//deprecated
+/* int countEdgesBetweenComm(){
     int count = 0;
     FOR(i,0,nodes){
         FOR(j,0,nodes){
@@ -161,10 +192,18 @@ int countEdgesBetweenComm(){
     }
     cout<<"Total number of edges between communities are: "<<count<<endl;
     return count;
+} */
+
+//m-m++
+int countEdgesBetweenComm(int mpp){
+    int count = edges-mpp;
+    cout<<"Total number of edges between communities are: "<<count<<endl;
+    return count;
 }
 
 //m--, d-.
-int countNonEdgesBetweenComm(){
+//deprecated
+/* int countNonEdgesBetweenComm(){
     int count = 0;
     FOR(i,0,nodes){
         FOR(j,0,nodes){
@@ -175,6 +214,13 @@ int countNonEdgesBetweenComm(){
             }
         }
     }
+    cout<<"Total number of non-edges between communities are: "<<count<<endl;
+    return count;
+} */
+
+//n(n-1)/2-m-m-+
+int countNonEdgesBetweenComm(int mmp){
+    int count = nodes*(nodes-1)/2-edges-mmp;
     cout<<"Total number of non-edges between communities are: "<<count<<endl;
     return count;
 }
@@ -355,9 +401,9 @@ int main(int argc, const char * argv[]){
         
         //count the number of edges from the observed network
         int mpp = countEdgesWithinComm();
-        int mpm = countNonEdgesWithinComm();
-        int mmp = countEdgesBetweenComm();
-        int mmm = countNonEdgesBetweenComm();
+        int mpm = countNonEdgesWithinComm(mpp);
+        int mmp = countEdgesBetweenComm(mpp);
+        int mmm = countNonEdgesBetweenComm(mmp);
         
         //calculating discounted votes
         J = DIGAMMA(mpp+ap0) - DIGAMMA(mpm+bp0) - DIGAMMA(mpm+am0) + DIGAMMA(mmm+bm0);
@@ -373,6 +419,9 @@ int main(int argc, const char * argv[]){
         if(verbose=="v"){
             //Debugging weights
             printWeights();
+        }
+        else{
+            cout<<"\nWeights calculations are done."<<endl;
         }
         
         //sub in formula for discounted vote
