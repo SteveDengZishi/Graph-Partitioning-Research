@@ -348,14 +348,15 @@ double bm0=2;
 double* vecN;
 
 //start of main program
+//input: filename, block_num, (optional) verbose flag v
 int main(int argc, const char * argv[]){
     
     //get stdin from shell script
     fileName=argv[1];
     block_num=atoi(argv[2]);
-    iterations=atoi(argv[3]);
+    iterations=0;
     
-    if(argc==5) verbose=argv[4];
+    if(argc==4) verbose=argv[3];
     
     //initialize n using block numbers
     vecN = new double[block_num];
@@ -391,9 +392,13 @@ int main(int argc, const char * argv[]){
     double locality=printLocatlityFraction();
     printf("After random assignments, the locality is: %lf\n\n", locality);
     
+    //set a flag only to stop interations when locality converges, improvement < 1%
+    bool cont = true;
+    
     //repeat discounted vote process until convergence in FA[q] variational free energy
-    while(iterations--){
-        printf("\nStarting clustering iteration.....\n");
+    while(cont){
+        iterations++;
+        printf("\nStarting clustering iteration %d.....\n", iterations);
         //count the sizes of each block into blockSize vector
         countBlockSize();
         printBlockSize();
@@ -436,8 +441,13 @@ int main(int argc, const char * argv[]){
     //
     //    //    printShard();
     //    //output locality info to shell
-        printf("There are %d nodes moved in this iteration\n", move_cnt);
-        locality=printLocatlityFraction();
+        printf("There are %d nodes moved in this iteration %d\n", move_cnt, iterations);
+        double new_locality=printLocatlityFraction();
+        double change = (new_locality - locality) / locality;
+        if (change < 0.01) cont=false;
+        
+        //override the old locality
+        locality = new_locality;
         cout<<"After posterior assignments, the locality is: "<<locality<<endl;
         reConstructBlocks();
     }
