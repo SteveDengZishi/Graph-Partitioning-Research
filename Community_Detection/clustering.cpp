@@ -115,6 +115,13 @@ int check_connection(int i, int j){
     }
     return 0;
 }
+
+//start with edges in the adjacency list and check whether they have the same communities assignments
+int check_communities(int i, int j){
+    if(prevShard[i]==prevShard[j]) return 1;
+    else return 0;
+}
+
 //m++, c+
 //deprecated as it is too slow for large graphs to use O(V^2+E) method
 /* int countEdgesWithinComm(){
@@ -134,19 +141,31 @@ int check_connection(int i, int j){
 } */
 
 //SUM from 1 to K |E(Bk, Bk)|
+//deprecated as it is still slow for large graphs O(V^2/K+E)
+//int countEdgesWithinComm(){
+//    int count=0;
+//    FOR(i,0,block_num){
+//        FOR(j,0,blocks[i].size()){
+//            FOR(k,0,blocks[i].size()){
+//                //undirected graph only count in one direction
+//                if(blocks[i][j]>blocks[i][k]){
+//                    if(check_connection(blocks[i][j], blocks[i][k])) count++;
+//                }
+//            }
+//        }
+//    }
+//    cout<<"Total number of edges within communities are: "<<count<<endl;
+//    return count;
+//}
+
+//this algorithm takes only O(V+E)
 int countEdgesWithinComm(){
     int count=0;
-    FOR(i,0,block_num){
-        FOR(j,0,blocks[i].size()){
-            FOR(k,0,blocks[i].size()){
-                //undirected graph only count in one direction
-                if(blocks[i][j]>blocks[i][k]){
-                    if(check_connection(blocks[i][j], blocks[i][k])) count++;
-                }
-            }
+    FOR(i,0,nodes){
+        FOR(j,0,adjList[i].size()){
+            if(check_communities(i,adjList[i][j])) count++;
         }
     }
-    cout<<"Total number of edges within communities are: "<<count<<endl;
     return count;
 }
 
@@ -441,7 +460,7 @@ int main(int argc, const char * argv[]){
     //
     //    //    printShard();
     //    //output locality info to shell
-        printf("There are %d nodes moved in this iteration %d\n", move_cnt, iterations);
+        printf("There are %d nodes moved in iteration %d\n", move_cnt, iterations);
         double new_locality=printLocatlityFraction();
         double change = (new_locality - locality) / locality;
         if (change < 0.01) cont=false;
