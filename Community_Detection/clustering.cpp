@@ -142,23 +142,23 @@ int check_communities(int i, int j){
 
 //SUM from 1 to K |E(Bk, Bk)|
 //deprecated as it is still slow for large graphs O(V^2/K+E)
-//int countEdgesWithinComm(){
-//    int count=0;
-//    FOR(i,0,block_num){
-//        FOR(j,0,blocks[i].size()){
-//            FOR(k,0,blocks[i].size()){
-//                //undirected graph only count in one direction
-//                if(blocks[i][j]>blocks[i][k]){
-//                    if(check_connection(blocks[i][j], blocks[i][k])) count++;
-//                }
-//            }
-//        }
-//    }
-//    cout<<"Total number of edges within communities are: "<<count<<endl;
-//    return count;
-//}
+/* int countEdgesWithinComm(){
+    int count=0;
+    FOR(i,0,block_num){
+        FOR(j,0,blocks[i].size()){
+            FOR(k,0,blocks[i].size()){
+                //undirected graph only count in one direction
+                if(blocks[i][j]>blocks[i][k]){
+                    if(check_connection(blocks[i][j], blocks[i][k])) count++;
+                }
+            }
+        }
+    }
+    cout<<"Total number of edges within communities are: "<<count<<endl;
+    return count;
+} */
 
-//this algorithm takes only O(V+E)
+//this algorithm takes only O(V+E) by traversing through adjList
 int countEdgesWithinComm(){
     int count=0;
     FOR(i,0,nodes){
@@ -166,6 +166,8 @@ int countEdgesWithinComm(){
             if(check_communities(i,adjList[i][j])) count++;
         }
     }
+    count = count/2;
+    cout<<"Total number of edges within communities are: "<<count<<endl;
     return count;
 }
 
