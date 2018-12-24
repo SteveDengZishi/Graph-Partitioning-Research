@@ -461,11 +461,10 @@ int main(int argc, const char * argv[]){
         JL = DIGAMMA(mmm+bm0) - DIGAMMA(mmp+am0+mmm+bm0) - DIGAMMA(mpm+bp0) + DIGAMMA(mpp+ap0+mpm+bp0);
         h = new double[block_num];
         
-        for(int i=0;i<block_num;i++){
-            int ak_sum=0;
-            for(int j=0;j<block_num;j++) ak_sum+=vecN[j];
-            h[i] = DIGAMMA(blocks[i].size()+vecN[i]) - DIGAMMA(ak_sum);
-        }
+        int ak_sum=0;
+        for(int j=0;j<block_num;j++) ak_sum+=vecN[j];
+        for(int i=0;i<block_num;i++) h[i] = DIGAMMA(blocks[i].size()+vecN[i]) - DIGAMMA(ak_sum);
+        
         
         if(verbose=="v"){
             //Debugging weights
@@ -478,6 +477,7 @@ int main(int argc, const char * argv[]){
         //sub in formula for discounted vote
         int move_cnt = 0;
         for(int i=0;i<nodes;i++){
+            //cout<<"moving node "<<i<<endl;
             int new_assignment = findBestAssignmentK((int)i,J,JL,h);
             if(prevShard[i]!=new_assignment) move_cnt++;
             prevShard[i] = new_assignment;
