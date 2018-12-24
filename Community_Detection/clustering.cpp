@@ -319,8 +319,12 @@ int countEdgesBetweenNodeAndBlock(int y, int z){
 
 //using discounted vote to select the most probable block assignment for each node
 int findBestAssignmentK(int i,double J, double JL, double* h){
-    vector<double> results;
-    FOR(j,0,block_num){
+
+    vector<pair<int,double>> results;
+    unordered_set<int> target_shards;
+
+    //calculate weights for every blocks, it can be slow, deprecated
+   /*  FOR(j,0,block_num){
         //count wk = |E(i,Bk)| + |E(Bk,i)|
         int w_k = countEdgesBetweenNodeAndBlock(i,(int)j);
         //weigh on the block sizes
@@ -328,14 +332,35 @@ int findBestAssignmentK(int i,double J, double JL, double* h){
         if(prevShard[i]==(int)j) effective_size_k = blockSize[j] - 1;
 
         double val = J*w_k - JL*effective_size_k - h[j];
+        //cout<<val<<" ";
         results.push_back(val);
+    } */
+
+    //only calculate weights for blocks that has adjacent nodes
+    //1.gather which blocks have the adjacent nodes, use unordered_set to remove duplicates
+    FOR(j,0,adjList[i].size()){
+        target_shards.insert(prevShard[adjList[i][j]]);
     }
+
+    //2.loop through those blocks with adjacent nodes and ignore others to generate results pairs
+    for(auto itr=target_shards.begin(); itr!=target_shards.end(); itr++){
+        //count wk = |E(i,Bk)| + |E(Bk,i)|
+        int w_k = countEdgesBetweenNodeAndBlock(i, *itr);
+        //weigh on the block sizes
+        int effective_size_k = blockSize[*itr];
+        if(prevShard[i]==*itr) effective_size_k = blockSize[*itr] - 1;
+
+        double val = J*w_k - JL*effective_size_k - h[*itr];
+        //putting corresponding block index and value into vector of pairs
+        results.emplace_back(*itr, val);
+    }
+
     //return the max resulting index of the results
     int max_idx=0;
-    FOR(j,1,block_num){
-        if(results[j] > results[max_idx]) max_idx=j;
+    FOR(j,1,results.size()){
+        if(results[j].second > results[max_idx].second) max_idx=j;
     }
-    return max_idx;
+    return results[max_idx].first;
 }
 
 void reConstructBlocks(){
