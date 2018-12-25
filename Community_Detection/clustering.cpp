@@ -356,6 +356,9 @@ int findBestAssignmentK(int i,double J, double JL, double* h){
     }
 
     //return the max resulting index of the results
+    //if results vector has no entry, means this node is a lone node
+    if(results.size()==0) return prevShard[i];
+    
     int max_idx=0;
     FOR(j,1,results.size()){
         if(results[j].second > results[max_idx].second) max_idx=j;
@@ -477,8 +480,9 @@ int main(int argc, const char * argv[]){
         //sub in formula for discounted vote
         int move_cnt = 0;
         for(int i=0;i<nodes;i++){
-            //cout<<"moving node "<<i<<endl;
+            cout<<"moving node "<<i<<endl;
             int new_assignment = findBestAssignmentK((int)i,J,JL,h);
+            cout<<"previous lies "<<prevShard[i]<<"; new assignment is "<<new_assignment<<endl;
             if(prevShard[i]!=new_assignment) move_cnt++;
             prevShard[i] = new_assignment;
         }
