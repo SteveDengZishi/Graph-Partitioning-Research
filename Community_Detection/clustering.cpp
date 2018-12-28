@@ -41,8 +41,8 @@ vector<int>* adjList;
 fstream inFile;
 string fileName;
 int block_num;
-int nodes;
-int edges;
+int64_t nodes;
+int64_t edges;
 int iterations;
 double J;
 double JL;
@@ -159,8 +159,8 @@ int check_communities(int i, int j){
 } */
 
 //this algorithm takes only O(V+E) by traversing through adjList
-int countEdgesWithinComm(){
-    int count=0;
+int64_t countEdgesWithinComm(){
+    int64_t count=0;
     FOR(i,0,nodes){
         FOR(j,0,adjList[i].size()){
             if(check_communities(i,adjList[i][j])) count++;
@@ -188,10 +188,10 @@ int countEdgesWithinComm(){
 } */
 
 //SUM from 1 to k (nk(nk-1)/2) - m++
-int countNonEdgesWithinComm(int mpp){
-    int count=0;
+int64_t countNonEdgesWithinComm(int64_t mpp){
+    int64_t count=0;
     FOR(i,0,block_num){
-        count += blockSize[i]*(blockSize[i]-1)/2;
+        if(blockSize[i]!=0) count += blockSize[i]*(blockSize[i]-1)/2;
     }
     count=count-mpp;
     cout<<"Total number of non-edges within communities are: "<<count<<endl;
@@ -216,8 +216,8 @@ int countNonEdgesWithinComm(int mpp){
 } */
 
 //m-m++
-int countEdgesBetweenComm(int mpp){
-    int count = edges-mpp;
+int64_t countEdgesBetweenComm(int64_t mpp){
+    int64_t count = edges-mpp;
     cout<<"Total number of edges between communities are: "<<count<<endl;
     return count;
 }
@@ -240,8 +240,9 @@ int countEdgesBetweenComm(int mpp){
 } */
 
 //n(n-1)/2-m-m-+
-int countNonEdgesBetweenComm(int mmp){
-    int count = nodes*(nodes-1)/2-edges-mmp;
+int64_t countNonEdgesBetweenComm(int64_t mmp){
+    int64_t count=0;
+    if(nodes!=0) count = nodes*(nodes-1)/2-edges-mmp;
     cout<<"Total number of non-edges between communities are: "<<count<<endl;
     return count;
 }
@@ -358,7 +359,7 @@ int findBestAssignmentK(int i,double J, double JL, double* h){
     //return the max resulting index of the results
     //if results vector has no entry, means this node is a lone node
     if(results.size()==0) return prevShard[i];
-    
+
     int max_idx=0;
     FOR(j,1,results.size()){
         if(results[j].second > results[max_idx].second) max_idx=j;
@@ -454,10 +455,10 @@ int main(int argc, const char * argv[]){
         //print_blocks_assignments();
         
         //count the number of edges from the observed network
-        int mpp = countEdgesWithinComm();
-        int mpm = countNonEdgesWithinComm(mpp);
-        int mmp = countEdgesBetweenComm(mpp);
-        int mmm = countNonEdgesBetweenComm(mmp);
+        int64_t mpp = countEdgesWithinComm();
+        int64_t mpm = countNonEdgesWithinComm(mpp);
+        int64_t mmp = countEdgesBetweenComm(mpp);
+        int64_t mmm = countNonEdgesBetweenComm(mmp);
         
         //calculating discounted votes
         J = DIGAMMA(mpp+ap0) - DIGAMMA(mpm+bp0) - DIGAMMA(mpm+am0) + DIGAMMA(mmm+bm0);
@@ -480,9 +481,11 @@ int main(int argc, const char * argv[]){
         //sub in formula for discounted vote
         int move_cnt = 0;
         for(int i=0;i<nodes;i++){
-            cout<<"moving node "<<i<<endl;
             int new_assignment = findBestAssignmentK((int)i,J,JL,h);
-            cout<<"previous lies "<<prevShard[i]<<"; new assignment is "<<new_assignment<<endl;
+            if(verbose=="v"){
+                cout<<"moving node "<<i<<endl;
+                cout<<"previous lies "<<prevShard[i]<<"; new assignment is "<<new_assignment<<endl;
+            }
             if(prevShard[i]!=new_assignment) move_cnt++;
             prevShard[i] = new_assignment;
         }
