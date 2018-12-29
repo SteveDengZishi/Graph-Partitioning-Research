@@ -308,6 +308,7 @@ void print_blocks_assignments(){
 }
 
 //count the number of edges between node y and block z
+//it is slow when clusters are super large
 int countEdgesBetweenNodeAndBlock(int y, int z){
     int count = 0;
     //each of the nodes in block[z] check it adjMatrix with node y whether edge exists
