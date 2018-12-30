@@ -35,6 +35,7 @@ vector<int>* blocks;
 vector<int> blockSize;
 //check whether it is initialized
 int* prevShard;
+int* blockEdgeCount;
 vector<int>* adjList;
 //int** adjMatrix;
 //double* pi_weights;
@@ -368,6 +369,30 @@ int findBestAssignmentK(int i,double J, double JL, double* h){
     return results[max_idx].first;
 }
 
+void showEdgeDensity(){
+    //initialize or clear block edge count
+    FOR(k,0,block_num){
+        blockEdgeCount[k]=0;
+    }
+    //traverse adjacency list and add counts
+    FOR(i,0,nodes){
+        FOR(j,0,adjList[i].size()){
+            //undirected graph prevent double counting
+            //if they are in the same community
+            if(adjList[i][j]>i && prevShard[i]==prevShard[adjList[i][j]]) blockEdgeCount[prevShard[i]]++;
+        }
+    }
+    //print block size and edge density
+    FOR(l,0,block_num){
+        if(blockSize[l]>0 && blockEdgeCount[l]>0) {
+            int64_t possible_edges = blockSize[l]*(blockSize[l]-1)/2;
+            double density = (double)blockEdgeCount[l]/possible_edges;
+            printf("(%d, %.3f) ",blockSize[l],density);
+        }
+    }
+    cout<<endl;
+}
+
 void reConstructBlocks(){
     //clear shard
     FOR(i,0,block_num){
@@ -432,6 +457,7 @@ int main(int argc, const char * argv[]){
 
     //initialize prevShard for O(1) block assignment query
     prevShard = new int[nodes];
+    blockEdgeCount = new int[block_num];
 
     //Bayesian Approach to identify block structure in the network
     //Variational method for approximate inference
@@ -440,6 +466,8 @@ int main(int argc, const char * argv[]){
     //pi_weights = new double[block_num];
     blocks = new vector<int>[block_num];
     randomAssignment();
+    countBlockSize();
+    printBlockSize();
     double locality=printLocatlityFraction();
     printf("After random assignments, the locality is: %lf\n\n", locality);
     
@@ -450,10 +478,6 @@ int main(int argc, const char * argv[]){
     while(cont){
         iterations++;
         printf("\nStarting clustering iteration %d.....\n", iterations);
-        //count the sizes of each block into blockSize vector
-        countBlockSize();
-        printBlockSize();
-        //print_blocks_assignments();
         
         //count the number of edges from the observed network
         int64_t mpp = countEdgesWithinComm();
@@ -502,9 +526,14 @@ int main(int argc, const char * argv[]){
         
         //override the old locality
         locality = new_locality;
-        cout<<"After posterior assignments, the locality is: "<<locality<<endl;
         reConstructBlocks();
+
+        //count the sizes of each block into blockSize vector
+        countBlockSize();
+        showEdgeDensity();
+        //print_blocks_assignments();
     }
+    cout<<"After posterior assignments, the locality is: "<<locality<<endl;
 //
 //    //write data to file for graph plotting
 //    FILE* outFile=fopen("graph_plotting_data.txt","w");
