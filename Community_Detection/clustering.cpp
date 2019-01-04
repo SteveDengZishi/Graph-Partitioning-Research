@@ -519,6 +519,14 @@ int main(int argc, const char * argv[]){
     //
     //    //    printShard();
     //    //output locality info to shell
+        
+        reConstructBlocks();
+
+        //count the sizes of each block into blockSize vector
+        countBlockSize();
+        showEdgeDensity();
+        //print_blocks_assignments();
+
         printf("There are %d nodes moved in iteration %d\n", move_cnt, iterations);
         double new_locality=printLocatlityFraction();
         double change = (new_locality - locality) / locality;
@@ -526,14 +534,8 @@ int main(int argc, const char * argv[]){
         
         //override the old locality
         locality = new_locality;
-        reConstructBlocks();
-
-        //count the sizes of each block into blockSize vector
-        countBlockSize();
-        showEdgeDensity();
-        //print_blocks_assignments();
     }
-    cout<<"After posterior assignments, the locality is: "<<locality<<endl;
+    printf("After %d iterations of posterior assignments, the final locality is: %.5f\n", iterations, locality);
 //
 //    //write data to file for graph plotting
 //    FILE* outFile=fopen("graph_plotting_data.txt","w");
