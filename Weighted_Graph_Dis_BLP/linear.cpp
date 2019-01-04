@@ -114,9 +114,11 @@ void printRXP(){
 }
 
 void printIJK(){
+    //for each ij (from,to) pairs && i!=j
     for(int i=0;i<shard;i++){
         for(int j=0;j<shard;j++){
             if(i!=j){
+                //there are k linear segments
                 int k; cin>>k; // k is the different number of linear segments
                 for(int h=0;h<k;h++){
                     string string_i=convertToThreeDigit(i);
