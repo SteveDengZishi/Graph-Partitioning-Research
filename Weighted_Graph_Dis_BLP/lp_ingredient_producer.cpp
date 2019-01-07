@@ -453,6 +453,7 @@ int main(int argc, const char * argv[]) {
     delete [] prevShard;
     delete [] score;
     delete [] mass;
+    delete [] nodesTranslation;
     
     for(int i=0;i<nodes;i++){
         delete [] neighbors[i];
@@ -473,7 +474,8 @@ int main(int argc, const char * argv[]) {
     sortedCountIJ=nullptr;
     score=nullptr;
     neighbors=nullptr;
-    mass = nullptr;
+    mass=nullptr;
+    nodesTranslation=nullptr;
     
     return 0;
 }
