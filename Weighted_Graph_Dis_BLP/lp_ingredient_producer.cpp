@@ -63,7 +63,7 @@ struct Greater
 vector<int>* shard;
 vector<pair<int,int>>* adjList;
 int* mass;
-int* nodesTranslation;
+int* nodesTranslation;//map nodes to its pivot if it a node in the community
 vector<PII>** sortedCountIJ;//in each ij pairs, stores sorted (gains,node)
 int** neighbors; //[nodeID][shard] gives number of neighbors
 int* score;
@@ -307,6 +307,7 @@ void printTotal(){
     cout<<"Total: "<<total<<endl;
 }
 
+//using translation table and eligible communities assignments(blocks) to form node weights(mass) and edge weights(weighted_adjList) to combine communities into a single node
 void combineCommunities(){
     //initialize mass to 1
     FOR(i,0,nodes){
@@ -322,12 +323,30 @@ void combineCommunities(){
         }
     }
     //form weighted adjList
-    //copy first then adjust
+    //pivot node means the first node of a community or an individual node
     FOR(y,0,nodes){
         FOR(z,0,adjList[y].size()){
-            //only pivot nodes have weight of more than 1
-            //subordinate nodes no longer have weights, but it's not possible to remove
-            //hence should first add all pivots, then add all
+            //only count edges in single direction x-y if x<y
+            if(y<adjList[y][z]){
+                int pivot_x=nodesTranslation[y];
+                int pivot_y=nodesTranslation[adjList[y][z]];
+                //if they do not have the same pivot node, means it is an external edges
+                if(pivot_x!=pivot_y){
+                    //check whether this edge is already added with weight before
+                    bool found=false;
+                    FOR(x,0,weighted_adjList[nodesTranslation[y]].size()){
+                        //if we already pushed this edge, add 1 to its weight
+                        if(weighted_adjList[pivot_x][x].first==pivot_y){
+                            found=true;
+                            weighted_adjList[pivot_x][x].second++;
+                            break;
+                        }
+                    }
+                    if(found==false){
+                        weighted_adjList[pivot_x].emplace_back(pivot_y,1);
+                    }
+                }
+            }
         }
     }
 }
