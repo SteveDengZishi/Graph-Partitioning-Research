@@ -61,7 +61,9 @@ struct Greater
 
 //modified to pointers to allow dynamically allocate on heap
 vector<int>* shard;
-vector<int>* adjList;
+vector<pair<int,int>>* adjList;
+int* mass;
+int* nodesTranslation;
 vector<PII>** sortedCountIJ;//in each ij pairs, stores sorted (gains,node)
 int** neighbors; //[nodeID][shard] gives number of neighbors
 int* score;
@@ -188,6 +190,8 @@ void printCountPIJ(){
     }
 }
 
+// each dataset contains data of a piece-wise linear equation
+// where a is the gradient, sum is the y (total utility gain), no is the x (number of movement)
 struct dataset{
     int a;
     int sum;
@@ -205,11 +209,13 @@ vector<dataset> vecD;
 //For each to from pair, print the linear information required for equations
 void printLinearInfo(int i,int j){
     vecD.clear();
+    //k is the count of linear piece in each ij from to pairs
     int k=0;
     int sum=0;
     int a=INF;
     int num=0;
     
+    //ordered (gain, nodeID) in sortedCountIJ
     FOR(z,0,sortedCountIJ[i][j].size()){
         if(sortedCountIJ[i][j][z].first<=0) break;
         
@@ -301,6 +307,31 @@ void printTotal(){
     cout<<"Total: "<<total<<endl;
 }
 
+void combineCommunities(){
+    //initialize mass to 1
+    FOR(i,0,nodes){
+        mass[i]=1;
+    }
+    //transform mass according to comm
+    FOR(j,0,block_num){
+        //pivot node mass increases to community size if the comm size is not 0
+        if(blocks[j].size()>0) mass[blocks[j][0]]=blocks[j].size();
+        //reduce the mass of subordinate nodes
+        FOR(k,1,blocks[j].size()){
+            mass[blocks[j][k]]=0;
+        }
+    }
+    //form weighted adjList
+    //copy first then adjust
+    FOR(y,0,nodes){
+        FOR(z,0,adjList[y].size()){
+            //only pivot nodes have weight of more than 1
+            //subordinate nodes no longer have weights, but it's not possible to remove
+            //hence should first add all pivots, then add all
+        }
+    }
+}
+
 //start of main()
 int main(int argc, const char * argv[]) {
     
@@ -323,7 +354,10 @@ int main(int argc, const char * argv[]) {
     shard=new vector<int>[partitions];
     prevShard=new int[nodes];
     adjList=new vector<int>[nodes];
+    weighted_adjList=new vector<PII>[nodes];
     score=new int[partitions];
+    mass=new int[nodes];
+    nodesTranslation=new int[nodes];
    
     
     //for showing movement of nodes between shards
@@ -342,6 +376,9 @@ int main(int argc, const char * argv[]) {
     createADJ();
     //    printADJ();
     inFile.close();
+    
+    //combine nodes using communities assignments and change adjList and mass
+    combineCommunities();
     
     //load previous shard[partitions] & prevShard[nodes]
     loadShard();
@@ -412,8 +449,10 @@ int main(int argc, const char * argv[]) {
     //free up allocated memory
     delete [] shard;
     delete [] adjList;
+    delete [] weighted_adjList;
     delete [] prevShard;
     delete [] score;
+    delete [] mass;
     
     for(int i=0;i<nodes;i++){
         delete [] neighbors[i];
@@ -429,10 +468,12 @@ int main(int argc, const char * argv[]) {
     //remove dangling pointers
     shard=nullptr;
     adjList=nullptr;
+    weighted_adjList=nullptr;
     prevShard=nullptr;
     sortedCountIJ=nullptr;
     score=nullptr;
     neighbors=nullptr;
+    mass = nullptr;
     
     return 0;
 }
