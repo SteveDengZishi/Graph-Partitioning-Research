@@ -71,6 +71,7 @@ vector<int> Pcount;
 int partitions;
 int nodes;
 int edges;
+int block_num;
 fstream inFile;
 string fileName;
 // Stores the first choices of all nodes after each iteration
@@ -351,6 +352,34 @@ void combineCommunities(){
     }
 }
 
+//load node translations, if a node belongs to a comm, its translate to its pivot(first) node in the community
+void loadTranslation(){
+    //init array
+    FOR(z,0,nodes){
+        nodesTranslation[z]=z;
+    }
+    inFile.open("clusters.txt",ios::in);
+    
+    if(!inFile){
+        cerr<<"Error occurs while opening the file"<<endl;
+        exit(1);
+    }
+    //how many number of lines(communities)
+    inFile>>block_num;
+    //each line start with a size, and size number of nodes with the first as the pivot
+    FOR(i,0,block_num){
+        int size;
+        int pivot;
+        inFile>>size;
+        inFile>>pivot;
+        FOR(j,1,size){
+            int sub_node; inFile>>sub_node;
+            nodesTranslation[sub_node]=pivot;
+        }
+    }
+    inFile.close();
+}
+
 //start of main()
 int main(int argc, const char * argv[]) {
     
@@ -396,6 +425,8 @@ int main(int argc, const char * argv[]) {
     //    printADJ();
     inFile.close();
     
+    //load node translation table
+    loadTranslation();
     //combine nodes using communities assignments and change adjList and mass
     combineCommunities();
     
