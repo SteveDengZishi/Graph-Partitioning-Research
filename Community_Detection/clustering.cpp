@@ -35,7 +35,9 @@ vector<int>* blocks;
 vector<int> blockSize;
 //check whether it is initialized
 int* prevShard;
-int* blockEdgeCount;
+int* blockIntEdgeCount;
+int* blockExtEdgeCount;
+double* density; // defined as the ratio of number of internal edges/external edges
 vector<int>* adjList;
 //int** adjMatrix;
 //double* pi_weights;
@@ -369,28 +371,67 @@ int findBestAssignmentK(int i,double J, double JL, double* h){
     return results[max_idx].first;
 }
 
+//internal edges/external edges is a better ratio than edge density
 void showEdgeDensity(){
     //initialize or clear block edge count
     FOR(k,0,block_num){
-        blockEdgeCount[k]=0;
+        blockIntEdgeCount[k]=0;
+        blockExtEdgeCount[k]=0;
+        density[k]=0.0;
     }
     //traverse adjacency list and add counts
     FOR(i,0,nodes){
         FOR(j,0,adjList[i].size()){
-            //undirected graph prevent double counting
+            //undirected graph prevent double counting for internal edges
             //if they are in the same community
-            if(adjList[i][j]>i && prevShard[i]==prevShard[adjList[i][j]]) blockEdgeCount[prevShard[i]]++;
+            if(adjList[i][j]>i && prevShard[i]==prevShard[adjList[i][j]]) blockIntEdgeCount[prevShard[i]]++;
+            //if they are in different communities, need to double count when two communities share external edges
+            else if(prevShard[i]!=prevShard[adjList[i][j]]) blockExtEdgeCount[prevShard[i]]++;
         }
     }
     //print block size and edge density
     FOR(l,0,block_num){
-        if(blockSize[l]>0 && blockEdgeCount[l]>0) {
-            int64_t possible_edges = blockSize[l]*(blockSize[l]-1)/2;
-            double density = (double)blockEdgeCount[l]/possible_edges;
-            printf("(%d, %.3f) ",blockSize[l],density);
+        if(blockSize[l]>0 && blockExtEdgeCount[l]>0) {
+            density[l] = (double)blockIntEdgeCount[l]/(double)blockExtEdgeCount[l];
+            printf("(%d, %.3f) ",blockSize[l],density[l]);
         }
     }
     cout<<endl;
+}
+
+void saveSelectedComm(){
+    //apply selection criteria to keep suitable pebbles
+    int size_constraint = 50;
+    double density_constraint = 1.50;
+    
+    //write into files "clusters.txt" in the following format
+    //eligible_block_num
+    //size_1 nodeID_1, nodeID_2,....
+    //size_2 nodeID_1, nodeID_2,....
+    //...in total block_num lines follows....
+    FILE* outFile;
+    outFile=fopen("clusters.txt","wb");
+    
+    //filter out suitable communities
+    vector<int> block_indexes;
+    
+    FOR(i,0,block_num){
+        if(blockSize[i]<=size_constraint && density[i]>=density_constraint){
+            block_indexes.push_back(i);
+        }
+    }
+    
+    cout<<"After filtering size < "<<size_constraint<<", and edge int/ext ratio > "<<density_constraint<<". There are "<<block_indexes.size()<<" number of eligible communities."<<endl;
+    
+    //writing to file
+    fprintf(outFile,"%d", int(block_indexes.size()));
+    FOR(i,0,block_indexes.size()){
+        fprintf(outFile,"\n%d ", int(blocks[block_indexes[i]].size()));
+        FOR(j,0,blocks[block_indexes[i]].size()){
+            fprintf(outFile,"%d ", blocks[block_indexes[i]][j]);
+        }
+    }
+    fclose(outFile);
 }
 
 void reConstructBlocks(){
@@ -457,8 +498,10 @@ int main(int argc, const char * argv[]){
 
     //initialize prevShard for O(1) block assignment query
     prevShard = new int[nodes];
-    blockEdgeCount = new int[block_num];
-
+    blockIntEdgeCount = new int[block_num];
+    blockExtEdgeCount = new int[block_num];
+    density = new double[block_num];
+    
     //Bayesian Approach to identify block structure in the network
     //Variational method for approximate inference
     //Variant of BLP which takes a discounted vote over neighbors membership
@@ -536,6 +579,9 @@ int main(int argc, const char * argv[]){
         locality = new_locality;
     }
     printf("After %d iterations of posterior assignments, the final locality is: %.5f\n", iterations, locality);
+    
+    //save filtered communities to file
+    saveSelectedComm();
 //
 //    //write data to file for graph plotting
 //    FILE* outFile=fopen("graph_plotting_data.txt","w");
@@ -567,7 +613,9 @@ int main(int argc, const char * argv[]){
     delete [] adjList;
     delete [] h;
     delete [] vecN;
-    
+    delete [] blockIntEdgeCount;
+    delete [] blockExtEdgeCount;
+    delete [] density;
     /*
     FOR(i,0,nodes){
         delete [] adjMatrix[i];
@@ -582,6 +630,9 @@ int main(int argc, const char * argv[]){
     prevShard=nullptr;
     vecN=nullptr;
     h=nullptr;
+    blockIntEdgeCount=nullptr;
+    blockExtEdgeCount=nullptr;
+    density=nullptr;
     //adjMatrix=nullptr;
 //    fclose(outFile);
 //
