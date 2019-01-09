@@ -61,10 +61,11 @@ struct Greater
 
 //modified to pointers to allow dynamically allocate on heap
 vector<int>* shard;
-vector<pair<int,int>>* adjList;
+vector<int>* adjList;
+vector<pair<int,int>>* weighted_adjList;
 int* mass;
 int* nodesTranslation;//map nodes to its pivot if it a node in the community
-vector<PII>** sortedCountIJ;//in each ij pairs, stores sorted (gains,node)
+vector<pair<double,int>>** sortedCountIJ;//in each ij pairs, stores sorted (gains,node)
 int** neighbors; //[nodeID][shard] gives number of neighbors
 int* score;
 vector<int> Pcount;
@@ -126,28 +127,42 @@ void produceSortedCountIJ(){
             int from=prevShard[i];
             
             //directly filter out the top gain movement, by default was itself at current position
-            int maxGain=0;
+            double maxGain=0.0;
             int maxDest=from;
             
+            //check whether it is a cluster of more than 1 node
+            bool cluster=false;
+            if(mass[i]>1) cluster=true;
+            
+            //check which partition to move in order to gain the maximum increase in neighbor counts per node
             for(int to=0;to<partitions;to++){
                 //for any other shard other than the current node
                 if(from!=to){
                     //neighbors at other shard - neighbors at current shard
                     int incr_cnt=neighbors[i][to]-neighbors[i][from];
-                    if(incr_cnt>maxGain){
-                        maxGain=incr_cnt;
+                    double incr_per_node=(double)incr_cnt/(double)mass[i];
+                    if(incr_per_node>maxGain){
+                        maxGain=incr_per_node;
                         maxDest=to;
                     }
                 }
             }
             //check whether there is a effective move option, put directly into sortedcountIJ
-            if (maxGain!=0 && maxDest!=from){
+            if (maxGain>0.0 && maxDest!=from){
                 sortedCountIJ[from][maxDest].emplace_back(maxGain,i);
+                //if it is a cluster, push all its subordinate members into the linear queue to represent the weight of the node.
+                if(cluster){
+                    int cnt=mass[i]-1;
+                    FOR(j,0,cnt){
+                        sortedCountIJ[from][maxDest].emplace_back(maxGain,i);
+                    }
+                }
             }
         }
     }
 }
 
+//create original unweighted adjacency list from the input graph
 void createADJ(){
     int from,to;
     while(inFile>>from>>to){
@@ -175,11 +190,11 @@ void printShardSize(){
     cout<<endl;
 }
 
-//count how many nodes would like to move (gain in colocation count >=1)
+//count how many nodes would like to move (gain in colocation count per node > 0), count with total node weight
 int countP(int i, int j){
     int cnt=0;
     FOR(k,0,sortedCountIJ[i][j].size()){
-        if(sortedCountIJ[i][j][k].first>=1) cnt+=mass[sortedCountIJ[i][j][k].second];
+        if(sortedCountIJ[i][j][k].first>0.0) cnt+=mass[sortedCountIJ[i][j][k].second];
         else break;
     }
     return cnt;
@@ -194,11 +209,11 @@ void printCountPIJ(){
 // each dataset contains data of a piece-wise linear equation
 // where a is the gradient, sum is the y (total utility gain), no is the x (number of movement)
 struct dataset{
-    int a;
-    int sum;
+    double a;
+    double sum;
     int no;
     
-    dataset(int gradient, int s, int n){
+    dataset(double gradient, double s, int n){
         a=gradient;
         sum=s;
         no=n;
@@ -212,20 +227,23 @@ void printLinearInfo(int i,int j){
     vecD.clear();
     //k is the count of linear piece in each ij from to pairs
     int k=0;
-    int sum=0;
-    int a=INF;
+    double sum=0.0;
+    double a=INF;
     int num=0;
     
     //ordered (gain, nodeID) in sortedCountIJ
     FOR(z,0,sortedCountIJ[i][j].size()){
         if(sortedCountIJ[i][j][z].first<=0) break;
         
-        else if(sortedCountIJ[i][j][z].first!=a && sortedCountIJ[i][j][z].first>0){
+        //decide when to change gradient(a) on a linear piece
+        else if(sortedCountIJ[i][j][z].first<a && sortedCountIJ[i][j][z].first>0){
             a=sortedCountIJ[i][j][z].first;
             k++;
             vecD.emplace_back(a,a+sum,num+1); // the index will be k-1
         }
         
+        //no matter gradient is changed or not, sum is accumulated
+        //add to total sum and count
         sum+=a;
         num++;
     }
@@ -233,7 +251,7 @@ void printLinearInfo(int i,int j){
     cout<<vecD.size()<<endl;
     
     FOR(j,0,k){
-        printf("%d %d %d\n",vecD[j].a,vecD[j].sum,vecD[j].no);
+        printf("%f %f %d\n",vecD[j].a,vecD[j].sum,vecD[j].no);
     }
 }
 
@@ -267,13 +285,13 @@ void createNeighborList(){
         //reset the score array
         FOR(k,0,partitions) score[k]=0;
         //go through each neighbor of that node and add score count to the shard it is in
-        FOR(j,0,adjList[i].size()){
+        FOR(j,0,weighted_adjList[i].size()){
             //adjList[i][j].first is the connected nodeID, and second is the weights
-            int loc=prevShard[adjList[i][j].first];
+            int loc=prevShard[weighted_adjList[i][j].first];
             //unweighted graph add 1 to each count
             //score[loc]++;
             //weighted graph add edge weights as neighbor counts
-            score[loc]+=adjList[i][j].second;
+            score[loc]+=weighted_adjList[i][j].second;
         }
         //assign tempt result to neighbor array
         FOR(z,0,partitions){
@@ -409,9 +427,9 @@ int main(int argc, const char * argv[]) {
    
     
     //for showing movement of nodes between shards
-    sortedCountIJ=new vector<PII>*[partitions];
+    sortedCountIJ=new vector<pair<double,int>>*[partitions];
     for(int i=0;i<partitions;i++){
-        sortedCountIJ[i]=new vector<PII>[partitions];
+        sortedCountIJ[i]=new vector<pair<double,int>>[partitions];
     }
     
     //number of neighbors count for each node in each partition
@@ -425,9 +443,9 @@ int main(int argc, const char * argv[]) {
     //    printADJ();
     inFile.close();
     
-    //load node translation table
+    //load node translation table nodesTranslation[]
     loadTranslation();
-    //combine nodes using communities assignments and change adjList and mass
+    //combine nodes using communities assignments and produce weighted_adjList and mass[]
     combineCommunities();
     
     //load previous shard[partitions] & prevShard[nodes]
@@ -458,8 +476,10 @@ int main(int argc, const char * argv[]) {
         FOR(j,0,partitions){
             if(i!=j){
                 //sortedIJ only left with 1 top gain moving option
+                //the results are sorted by gain per node
                 sort(ALL(sortedCountIJ[i][j]),Greater());
                 //                printSortedCount(i,j);
+                //create the upper bound for number of nodes that would like to move with a positive gain per node
                 Pcount.push_back(countP(i,j));
                 printLinearInfo(i,j);//(lp_ingredient)
             }
