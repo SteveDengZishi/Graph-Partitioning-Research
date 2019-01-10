@@ -5,6 +5,7 @@
 //  Created by Steve DengZishi on 6/29/17.
 //  Copyright © 2017 Steve DengZishi. All rights reserved.
 //
+//  This file is to take in the linear infomation produced by lp_ingredient_producer and formulate & and print them into the input format required by lp_solver
 
 #include <iostream>
 
@@ -43,6 +44,7 @@ void printObjectiveFunc(string minOrMax){
     cout<<";"<<endl;
 }
 
+//print upper partition size bound(there is a sign error on paper)
 void printLC(){
     for(int i=0;i<shard;i++){
         for(int j=0;j<shard;j++){
@@ -64,6 +66,7 @@ void printLC(){
     }
 }
 
+//print lower size bound
 void printUC(){
     for(int i=0;i<shard;i++){
         for(int j=0;j<shard;j++){
@@ -84,6 +87,7 @@ void printUC(){
     }
 }
 
+//print left bound of move count >= 0
 void printLXP(){
     for(int i=0;i<shard;i++){
         for(int j=0;j<shard;j++){
@@ -97,6 +101,7 @@ void printLXP(){
     }
 }
 
+//print right bound of move count <= num(gain>0)
 void printRXP(){
     for(int i=0;i<shard;i++){
         for(int j=0;j<shard;j++){
@@ -113,6 +118,8 @@ void printRXP(){
     }
 }
 
+//printing all linear segments and their bounds
+//in -a(ijk)x(ij) + z(ij) <= b(ijk)
 void printIJK(){
     //for each ij (from,to) pairs && i!=j
     for(int i=0;i<shard;i++){
@@ -124,8 +131,8 @@ void printIJK(){
                     string string_i=convertToThreeDigit(i);
                     string string_j=convertToThreeDigit(j);
                     
-                    int a;cin>>a; // a is the gradient of each segments
-                    int b, sum, num;
+                    double a,b,sum; cin>>a; // a is the gradient of each segments
+                    int num;
                     cin>>sum>>num;
                     b=sum-num*a; // b is the y-intercept
 //                    printf("-%d x%d%d +z%d%d <= %d;\n",a,i,j,i,j,b);
@@ -144,12 +151,21 @@ int main(){
     //dynamically allocate memory
     size=new int[shard];
     
+    //print maximizing objective function
     printObjectiveFunc("max");
     
+    //printing all linear segments and their bounds
+    //in -a(ijk)x(ij) + z(ij) <= b(ijk)
     printIJK();
+    
+    //print left bound of move count >= 0
     printLXP();
+    //print right bound of move count <= num(gain>0)
     printRXP();
+    
+    //print upper partition size bound
     printLC();
+    //print lower size bound
     printUC();
     
     //clean dynamically allocated memory
