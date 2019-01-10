@@ -67,6 +67,7 @@ int* mass;
 int* nodesTranslation;//map nodes to its pivot if it a node in the community
 vector<pair<double,int>>** sortedCountIJ;//in each ij pairs, stores sorted (gains,node)
 int** neighbors; //[nodeID][shard] gives number of neighbors
+vector<int>* blocks;
 int* score;
 vector<int> Pcount;
 int partitions;
@@ -99,7 +100,7 @@ void printShard(){
 void printSortedCount(int i, int j){
     printf("The increase in colocation from shard %d to %d is: ",i,j);
     for(int k=0;k<sortedCountIJ[i][j].size();k++){
-        printf(" (%d,%d) ",sortedCountIJ[i][j][k].first,sortedCountIJ[i][j][k].second);
+        printf(" (%f,%d) ",sortedCountIJ[i][j][k].first,sortedCountIJ[i][j][k].second);
     }
     cout<<endl<<endl;
 }
@@ -371,11 +372,13 @@ void combineCommunities(){
 }
 
 //load node translations, if a node belongs to a comm, its translate to its pivot(first) node in the community
-void loadTranslation(){
+//blocks are the filtered block structures and its content
+void loadTranslationAndBlock(){
     //init array
     FOR(z,0,nodes){
         nodesTranslation[z]=z;
     }
+    
     inFile.open("clusters.txt",ios::in);
     
     if(!inFile){
@@ -384,15 +387,20 @@ void loadTranslation(){
     }
     //how many number of lines(communities)
     inFile>>block_num;
+    
+    //save blocks to be used in combineNodes
+    blocks=new vector<int>[block_num];
+    
     //each line start with a size, and size number of nodes with the first as the pivot
     FOR(i,0,block_num){
         int size;
         int pivot;
         inFile>>size;
-        inFile>>pivot;
+        inFile>>pivot; blocks[i].push_back(pivot);
         FOR(j,1,size){
             int sub_node; inFile>>sub_node;
             nodesTranslation[sub_node]=pivot;
+            blocks[i].push_back(sub_node);
         }
     }
     inFile.close();
@@ -444,7 +452,7 @@ int main(int argc, const char * argv[]) {
     inFile.close();
     
     //load node translation table nodesTranslation[]
-    loadTranslation();
+    loadTranslationAndBlock();
     //combine nodes using communities assignments and produce weighted_adjList and mass[]
     combineCommunities();
     
@@ -509,7 +517,7 @@ int main(int argc, const char * argv[]) {
         for(int j=0;j<partitions;j++){
             fprintf(outFile, "%d\n", (int)sortedCountIJ[i][j].size());
             for(int k=0;k<sortedCountIJ[i][j].size();k++){
-                fprintf(outFile, "%d %d ", sortedCountIJ[i][j][k].first, sortedCountIJ[i][j][k].second);
+                fprintf(outFile, "%f %d ", sortedCountIJ[i][j][k].first, sortedCountIJ[i][j][k].second);
             }
         }
     }

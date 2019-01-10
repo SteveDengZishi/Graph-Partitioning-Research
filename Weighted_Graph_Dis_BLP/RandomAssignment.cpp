@@ -35,25 +35,28 @@ vector<int>* adjList;
 fstream inFile;
 string fileName;
 int partitions;
+int block_num;
 int nodes;
 int edges;
 
 //functions here
 void randomAssignment(){
     srand(time(NULL));
+    
     //random sharding according using a integer hash then mod 8 to distribute to shards
     for(int i=0;i<nodes;i++){
         int pivot_id = nodesTranslation[i];
         //if this is a pivot node, give random assignment
         if(pivot_id==i){
             //        cout<<"i is: "<<i<<endl;
-            int block_assignment = rand() % block_num;
+            int shard_assignment = rand() % partitions;
             //        cout<<"shard ID is: "<<shardID<<endl;
-            shard[block_assignment].push_back(i);
+            shard[shard_assignment].push_back(i);
             //mark prevShard for the 1st random Sharding
-            prevShard[i] = block_assignment;
+            prevShard[i] = shard_assignment;
         }
     }
+    
     //else assign them to the same shard with their pivots
     //but we need to make sure pivot nodes get assigned before any other members so in a separate loop
     for(int i=0;i<nodes;i++){
@@ -87,6 +90,7 @@ void createADJ(){
         // comment out the following line if the graph is directed
         adjList[to].push_back(from);
     }
+    inFile.close();
 }
 
 void printShard(){
@@ -155,6 +159,7 @@ int main(int argc, const char * argv[]){
     loadTranslation();
     //random sharding
     randomAssignment();
+    cerr<<"finished random assignment"<<endl;
 //    printShard();
     //output locality info to shell
     double locality=printLocatlityFraction();
