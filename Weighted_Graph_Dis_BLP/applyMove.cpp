@@ -62,10 +62,13 @@ vector<int>* shard;
 string fileName;
 string x_file;
 fstream inFile;
+int* nodesTranslation;//map nodes to its pivot if it a node in the community
+vector<int>* blocks;
 int partitions;
 int nodes;
 int edges;
 int move_count;
+int block_num;
 
 void createADJ(){
     int from,to;
@@ -105,13 +108,19 @@ bool checkCut(int i, int j, int size){
     bool cut=false;
     
     //if the last node before the cut is a cluster node
-    int node_before_cut = sortedCountIJ[i][j][size-1].second;
-    int node_after_cut = sortedCountIJ[i][j][size].second;
-    
-    //only if they are the same, means they are both having the same pivot
-    if(node_before_cut==node_after_cut) cut=true;
-    
+    //the length of the array has to be at least 2 item to check cut
+    if(size!=0 && sortedCountIJ[i][j].size()>1){
+        int node_before_cut = sortedCountIJ[i][j][size-1].second;
+        int node_after_cut = sortedCountIJ[i][j][size].second;
+        
+        //only if they are the same, means they are both having the same pivot
+        if(node_before_cut==node_after_cut) cut=true;
+    }
     return cut;
+}
+
+int findEffectiveSize(int i, int j){
+    return sortedCountIJ[i][j].size();
 }
 
 // cut the ListSize after getting X(ij) values from the linear functions
@@ -123,8 +132,9 @@ void cutList(){
                 inFile>>x>>fromTo;
                 
                 //cast double to int, automatically run down
-                int size; inFile>>size;
-                
+                double move_cnt; inFile>>move_cnt;
+                int size = move_cnt;
+                cerr<<"size is: "<<size<<endl;
                 //before resizing, first need to check whether it cuts a cluster into two
                 //if it cuts, flip a coin with weighted probability to decide whether to move the whole cluster
                 bool cut=checkCut(i, j, size);
@@ -161,6 +171,10 @@ void cutList(){
                 }
                 //if it is not cutting a cluster, directly resize to leave only move options
                 //if cut, size is modified to include or exclude the whole cluster according to the coin flip
+                //if the size allowed to move is greater than total nodes in shard[i], take the effective size of p(ij)
+                if(size>shard[i].size()){
+                    size=findEffectiveSize(i,j);
+                }
                 sortedCountIJ[i][j].resize(size);
             }
         }
@@ -168,17 +182,64 @@ void cutList(){
 }
 
 //directly using cutted sortedCountIJ to apply movement and count movement at the same time
-void applyShift(vector<PII>** sortedIJ){
+void applyShift(){
     move_count=0;
     FOR(i,0,partitions){
         FOR(j,0,partitions){
+            //for each ij from to pair
             FOR(k,0,sortedCountIJ[i][j].size()){
-                //update the location of the previous node for next iteration
+                //update the move destination for the nodes in the queue
+                //be reminded that only pivot node get updated but not subordinate nodes
                 prevShard[sortedCountIJ[i][j][k].second]=(int)j;
                 move_count++;
             }
         }
     }
+    //after moving for all ij partitions pairs, loop through translation and update subordinate cluster nodes to their pivot node location
+    FOR(i,0,block_num){
+        //pivot destination is already updated
+        int pivot_destination=prevShard[blocks[i][0]];
+        //update the rest of the nodes to the same shard as the pivot node
+        FOR(j,1,blocks[i].size()){
+            prevShard[blocks[i][j]]=pivot_destination;
+        }
+    }
+}
+
+//load node translations, if a node belongs to a comm, its translate to its pivot(first) node in the community
+//blocks are the filtered block structures and its content
+void loadTranslationAndBlock(){
+    //init array
+    nodesTranslation=new int[nodes];
+    FOR(z,0,nodes){
+        nodesTranslation[z]=z;
+    }
+    
+    inFile.open("clusters.txt",ios::in);
+    
+    if(!inFile){
+        cerr<<"Error occurs while opening the file"<<endl;
+        exit(1);
+    }
+    //how many number of lines(communities)
+    inFile>>block_num;
+    
+    //save blocks to be used in combineNodes
+    blocks=new vector<int>[block_num];
+    
+    //each line start with a size, and size number of nodes with the first as the pivot
+    FOR(i,0,block_num){
+        int size;
+        int pivot;
+        inFile>>size;
+        inFile>>pivot; blocks[i].push_back(pivot);
+        FOR(j,1,size){
+            int sub_node; inFile>>sub_node;
+            nodesTranslation[sub_node]=pivot;
+            blocks[i].push_back(sub_node);
+        }
+    }
+    inFile.close();
 }
 
 void reConstructShard(){
@@ -220,8 +281,8 @@ void loadShard(){
             int size;
             fscanf(inFile,"%d",&size);
             for(int k=0;k<size;k++){
-                int first,second;
-                fscanf(inFile,"%f %d",&first,&second);
+                double first; int second;
+                fscanf(inFile,"%lf %d",&first,&second);
                 sortedCountIJ[i][j].emplace_back(first,second);
             }
         }
@@ -272,6 +333,9 @@ int main(int argc, const char * argv[]){
     //load previous shard[partitions], prevShard[nodes] & loadSortecCountIJ[partitions][partitions]
     loadShard();
     
+    //load node translation and cluster structure
+    loadTranslationAndBlock();
+    
     //close file and open x_result file
     inFile.open(x_file,ios::in);
     
@@ -282,8 +346,9 @@ int main(int argc, const char * argv[]){
 
     //Three steps to move nodes after the linear program returns constraints X(ij), input values with files injection in cutList()
     cutList();
-    
-    applyShift(sortedCountIJ);
+    inFile.close();
+    //apply the eligible shift after modified by moves
+    applyShift();
     reConstructShard();
 
     //print movement info
@@ -317,6 +382,8 @@ int main(int argc, const char * argv[]){
     delete [] shard;
     delete [] adjList;
     delete [] prevShard;
+    delete [] nodesTranslation;
+    delete [] blocks;
     
     for(int i=0;i<partitions;i++){
         delete [] sortedCountIJ[i];
@@ -328,4 +395,6 @@ int main(int argc, const char * argv[]){
     adjList=nullptr;
     prevShard=nullptr;
     sortedCountIJ=nullptr;
+    nodesTranslation=nullptr;
+    blocks=nullptr;
 }

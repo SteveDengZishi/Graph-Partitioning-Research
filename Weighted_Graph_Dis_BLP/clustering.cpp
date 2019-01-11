@@ -401,8 +401,8 @@ void showEdgeDensity(){
 
 void saveSelectedComm(){
     //apply selection criteria to keep suitable pebbles
-    int size_constraint = 50;
-    double density_constraint = 1.50;
+    int size_constraint = 30;
+    double density_constraint = 2.00;
     
     //write into files "clusters.txt" in the following format
     //eligible_block_num

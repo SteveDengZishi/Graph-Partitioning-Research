@@ -32,23 +32,46 @@ chmod +x checkConvergence.py
 echo -e "Running Clustering Algorithm...\n"
 ./cluster $FileName $cluster
 
-echo -e "Running Random Assignment of weighted graph...\n"
+#Random initialization with clusters
+echo -e "Starting random initialization...\n"
 ./RandomAssignment $FileName $shard
 
-echo -e "Running Balanced Label Propagation...\n"
+echo -e "Initialization completed\n"
+#init
+i=0
+#start of iteration
+while true
+
+do
+((++i))
+echo -e "\nIn iteration" $i
+
+if (($i>2))
+then
+result=($(./checkConvergence.py))
+#echo ${result[0]}
+#echo ${result[1]}
+
+if [ "${result[0]}" == "TRUE" ]
+
+then
+echo -e "Increase in locality converges, ending Balanced Label Propagation"
+break
+fi
+
+fi
+
 ./lp_ingredient_producer $FileName $shard > lp_ingred.txt
 
-./linear < lp_ingred.txt | lp_solve | ./clean | sort > x_result_0.txt
-x_file=x_result_0.txt
+./linear < lp_ingred.txt | lp_solve | ./clean | sort > x_result_$i.txt
+
+x_file=x_result_$i.txt
+
 ./applyMove $FileName $shard $x_file
 
-#./linear < lp_ingred.txt | lp_solve | ./clean | sort > x_result_$i.txt
-
-#x_file=x_result_$i.txt
-#too much time for large graph, map to move large time for many partitions
-#./applyMove $FileName $shard $x_file
+done
 
 #plotting graph after finish looping
-#chmod +x graph_plot.py
-#./graph_plot.py
+chmod +x graph_plot.py
+./graph_plot.py
 

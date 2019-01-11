@@ -62,7 +62,7 @@ struct Greater
 //modified to pointers to allow dynamically allocate on heap
 vector<int>* shard;
 vector<int>* adjList;
-vector<pair<int,int>>* weighted_adjList;
+unordered_map<int,int>* weighted_adjList;
 int* mass;
 int* nodesTranslation;//map nodes to its pivot if it a node in the community
 vector<pair<double,int>>** sortedCountIJ;//in each ij pairs, stores sorted (gains,node)
@@ -282,17 +282,18 @@ void loadShard(){
 }
 
 void createNeighborList(){
+    //for each node, has k buckets of destination
     FOR(i,0,nodes){
         //reset the score array
         FOR(k,0,partitions) score[k]=0;
         //go through each neighbor of that node and add score count to the shard it is in
-        FOR(j,0,weighted_adjList[i].size()){
+        for(auto& it:weighted_adjList[i]){
             //adjList[i][j].first is the connected nodeID, and second is the weights
-            int loc=prevShard[weighted_adjList[i][j].first];
+            int loc=prevShard[it.first];
             //unweighted graph add 1 to each count
             //score[loc]++;
             //weighted graph add edge weights as neighbor counts
-            score[loc]+=weighted_adjList[i][j].second;
+            score[loc]+=it.second;
         }
         //assign tempt result to neighbor array
         FOR(z,0,partitions){
@@ -346,25 +347,18 @@ void combineCommunities(){
     //pivot node means the first node of a community or an individual node
     FOR(y,0,nodes){
         FOR(z,0,adjList[y].size()){
-            //only count edges in single direction x-y if x<y
-            if(y<adjList[y][z]){
-                int pivot_x=nodesTranslation[y];
-                int pivot_y=nodesTranslation[adjList[y][z]];
-                //if they do not have the same pivot node, means it is an external edges
-                if(pivot_x!=pivot_y){
-                    //check whether this edge is already added with weight before
-                    bool found=false;
-                    FOR(x,0,weighted_adjList[nodesTranslation[y]].size()){
-                        //if we already pushed this edge, add 1 to its weight
-                        if(weighted_adjList[pivot_x][x].first==pivot_y){
-                            found=true;
-                            weighted_adjList[pivot_x][x].second++;
-                            break;
-                        }
-                    }
-                    if(found==false){
-                        weighted_adjList[pivot_x].emplace_back(pivot_y,1);
-                    }
+            int pivot_x=nodesTranslation[y];
+            int pivot_y=nodesTranslation[adjList[y][z]];
+            //if they do not have the same pivot node, means it is an external edges
+            if(pivot_x!=pivot_y){
+                //check whether this edge is already added with weight before
+                //if we already pushed this edge, add 1 to its weight
+                if(weighted_adjList[pivot_x].find(pivot_y)!=weighted_adjList[pivot_x].end()){
+                    weighted_adjList[pivot_x][pivot_y]++;
+                }
+                //else add this entry to the hash map
+                else {
+                    weighted_adjList[pivot_x][pivot_y]=1;
                 }
             }
         }
@@ -375,6 +369,7 @@ void combineCommunities(){
 //blocks are the filtered block structures and its content
 void loadTranslationAndBlock(){
     //init array
+    nodesTranslation=new int[nodes];
     FOR(z,0,nodes){
         nodesTranslation[z]=z;
     }
@@ -428,12 +423,10 @@ int main(int argc, const char * argv[]) {
     shard=new vector<int>[partitions];
     prevShard=new int[nodes];
     adjList=new vector<int>[nodes];
-    weighted_adjList=new vector<PII>[nodes];
+    weighted_adjList=new unordered_map<int,int>[nodes];
     score=new int[partitions];
     mass=new int[nodes];
-    nodesTranslation=new int[nodes];
    
-    
     //for showing movement of nodes between shards
     sortedCountIJ=new vector<pair<double,int>>*[partitions];
     for(int i=0;i<partitions;i++){
@@ -448,16 +441,20 @@ int main(int argc, const char * argv[]) {
     
     //create adjacency list from edge list
     createADJ();
+    //cerr<<"after creating ADJ"<<endl;
     //    printADJ();
     inFile.close();
     
     //load node translation table nodesTranslation[]
     loadTranslationAndBlock();
+    //cerr<<"after translating blocks"<<endl;
     //combine nodes using communities assignments and produce weighted_adjList and mass[]
     combineCommunities();
+    //cerr<<"after combineComm"<<endl;
     
     //load previous shard[partitions] & prevShard[nodes]
     loadShard();
+    //cerr<<"after loading shard"<<endl;
     //    printShard();
     
     //create neighbor list
@@ -532,6 +529,7 @@ int main(int argc, const char * argv[]) {
     delete [] score;
     delete [] mass;
     delete [] nodesTranslation;
+    delete [] blocks;
     
     for(int i=0;i<nodes;i++){
         delete [] neighbors[i];
@@ -554,6 +552,6 @@ int main(int argc, const char * argv[]) {
     neighbors=nullptr;
     mass=nullptr;
     nodesTranslation=nullptr;
-    
+    blocks=nullptr;
     return 0;
 }
