@@ -36,8 +36,11 @@ echo -e "Running Random Assignment of weighted graph...\n"
 ./RandomAssignment $FileName $shard
 
 echo -e "Running Balanced Label Propagation...\n"
-#./lp_ingredient_producer $FileName $shard > lp_ingred.txt
-#./linear < lp_ingred.txt | lp_solve | ./clean | sort
+./lp_ingredient_producer $FileName $shard > lp_ingred.txt
+
+./linear < lp_ingred.txt | lp_solve | ./clean | sort > x_result_0.txt
+x_file=x_result_0.txt
+./applyMove $FileName $shard $x_file
 
 #./linear < lp_ingred.txt | lp_solve | ./clean | sort > x_result_$i.txt
 

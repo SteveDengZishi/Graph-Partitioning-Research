@@ -101,6 +101,19 @@ double printLocatlityFraction(){
     return fraction;
 }
 
+bool checkCut(int i, int j, int size){
+    bool cut=false;
+    
+    //if the last node before the cut is a cluster node
+    int node_before_cut = sortedCountIJ[i][j][size-1].second;
+    int node_after_cut = sortedCountIJ[i][j][size].second;
+    
+    //only if they are the same, means they are both having the same pivot
+    if(node_before_cut==node_after_cut) cut=true;
+    
+    return cut;
+}
+
 // cut the ListSize after getting X(ij) values from the linear functions
 void cutList(){
     FOR(i,0,partitions){
@@ -108,7 +121,46 @@ void cutList(){
             if(i!=j){
                 int fromTo; char x;
                 inFile>>x>>fromTo;
+                
+                //cast double to int, automatically run down
                 int size; inFile>>size;
+                
+                //before resizing, first need to check whether it cuts a cluster into two
+                //if it cuts, flip a coin with weighted probability to decide whether to move the whole cluster
+                bool cut=checkCut(i, j, size);
+                if(cut){
+                    //last node
+                    int node_before_cut = sortedCountIJ[i][j][size-1].second;
+                    
+                    //uninitialized appearances
+                    int first_appearance=-1;
+                    int last_appearance=-1;
+                    FOR(x,0,sortedCountIJ[i][j].size()){
+                        if(sortedCountIJ[i][j][x].second==node_before_cut){
+                            last_appearance=sortedCountIJ[i][j][x].second;
+                            //if not found before
+                            if(first_appearance==-1) first_appearance=last_appearance;
+                        }
+                    }
+                    //The total span of community is (last-first+1)
+                    int distance=last_appearance-first_appearance+1;
+                    int included=size-first_appearance;
+                    
+                    //do a weighted coin flip whether to move cluster
+                    srand(time(NULL));
+                    bool move_cut_cluster=(rand()%distance)<included;
+                    
+                    //include the whole cluster
+                    if(move_cut_cluster){
+                        size=last_appearance+1;
+                    }
+                    //exclude the whole cluster
+                    else{
+                        size=first_appearance;
+                    }
+                }
+                //if it is not cutting a cluster, directly resize to leave only move options
+                //if cut, size is modified to include or exclude the whole cluster according to the coin flip
                 sortedCountIJ[i][j].resize(size);
             }
         }
@@ -169,7 +221,7 @@ void loadShard(){
             fscanf(inFile,"%d",&size);
             for(int k=0;k<size;k++){
                 int first,second;
-                fscanf(inFile,"%d %d",&first,&second);
+                fscanf(inFile,"%f %d",&first,&second);
                 sortedCountIJ[i][j].emplace_back(first,second);
             }
         }
@@ -210,7 +262,9 @@ int main(int argc, const char * argv[]){
     for(int i=0;i<partitions;i++){
         sortedCountIJ[i]=new vector<PII> [partitions];
     }
-    //create adjacency List
+    
+    //create unweighted adjacency List
+    //it is used to output local edge ratio
     createADJ();
     inFile.close();
     
