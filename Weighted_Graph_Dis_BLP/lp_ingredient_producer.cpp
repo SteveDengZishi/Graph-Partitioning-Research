@@ -40,7 +40,6 @@
 #define CINLINE(a) getline(cin,a)
 #define FILL(a,b) memset(a, b , sizeof(a)) //fill array a with all bs
 #define INIT(a) FILL(a,0) //initialize array a with all 0s
-#define INF 2147483647
 
 //name space here
 using namespace std;
@@ -195,7 +194,7 @@ void printShardSize(){
 int countP(int i, int j){
     int cnt=0;
     FOR(k,0,sortedCountIJ[i][j].size()){
-        if(sortedCountIJ[i][j][k].first>0.0) cnt+=mass[sortedCountIJ[i][j][k].second];
+        if(sortedCountIJ[i][j][k].first>0.0) cnt+=1;
         else break;
     }
     return cnt;
@@ -227,31 +226,41 @@ vector<dataset> vecD;
 void printLinearInfo(int i,int j){
     vecD.clear();
     //k is the count of linear piece in each ij from to pairs
-    int k=0;
+    double a=0.0;
     double sum=0.0;
-    double a=INF;
     int num=0;
+    
+    if(sortedCountIJ[i][j].size()>0) a=sortedCountIJ[i][j][0].first;
     
     //ordered (gain, nodeID) in sortedCountIJ
     FOR(z,0,sortedCountIJ[i][j].size()){
-        if(sortedCountIJ[i][j][z].first<=0) break;
-        
+        //if(sortedCountIJ[i][j][z].first<=0) break;
+        //from the second term
+        if(z>0){
         //decide when to change gradient(a) on a linear piece
-        else if(sortedCountIJ[i][j][z].first<a && sortedCountIJ[i][j][z].first>0){
-            a=sortedCountIJ[i][j][z].first;
-            k++;
-            vecD.emplace_back(a,a+sum,num+1); // the index will be k-1
+        //if this gain has a change in gradient, and the previous gain > 0
+        //record previous linear function
+            if(sortedCountIJ[i][j][z].first<a && sortedCountIJ[i][j][z-1].first>0){
+                vecD.emplace_back(a,sum,num); // the index will be k-1
+                a=sortedCountIJ[i][j][z].first;
+                if(a<0) break;
+            }
         }
-        
         //no matter gradient is changed or not, sum is accumulated
         //add to total sum and count
         sum+=a;
         num++;
+        
+        //if this term is the last one
+        if(z==sortedCountIJ[i][j].size()-1){
+            //if gradient is positive
+            if(a>0) vecD.emplace_back(a,sum,num);
+        }
     }
     
     cout<<vecD.size()<<endl;
     
-    FOR(j,0,k){
+    FOR(j,0,vecD.size()){
         printf("%f %f %d\n",vecD[j].a,vecD[j].sum,vecD[j].no);
     }
 }

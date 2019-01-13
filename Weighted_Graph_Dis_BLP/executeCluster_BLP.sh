@@ -61,9 +61,9 @@ fi
 
 fi
 
-./lp_ingredient_producer $FileName $shard > lp_ingred.txt
+./lp_ingredient_producer $FileName $shard > lp_ingred_$i.txt
 
-./linear < lp_ingred.txt | lp_solve | ./clean | sort > x_result_$i.txt
+./linear < lp_ingred_$i.txt | lp_solve | ./clean | sort > x_result_$i.txt
 
 x_file=x_result_$i.txt
 
