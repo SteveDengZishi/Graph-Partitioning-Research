@@ -1,10 +1,11 @@
 #!/bin/bash
 
-#  Cluster_BLP.sh
+#  Cluster_CLP.sh
+#  Clustering plus linear programming on clusters (CLP)
 #  Boost
 #
-#  Created by Steve DengZishi on 4/7/18.
-#  Copyright © 2017 Steve DengZishi. All rights reserved.
+#  Created by Steve DengZishi on 1/7/19.
+#  Copyright © 2019 Steve DengZishi. All rights reserved.
 echo -e "\nClustered Prob-Disruptive Balanced Label Propagation  Version 1.6"
 echo -e "       Copyright © 2019 Steve DengZishi  New York University\n"
 #prompt user for input
@@ -15,8 +16,8 @@ read -p "Please enter the number of partition: " shard
 #compile all .cpp files to executables
 g++ -o cluster clustering.cpp -std=c++11
 echo -e "\ng++ compiled clustering.cpp successfully"
-g++ -o RandomAssignment RandomAssignment.cpp -std=c++11
-echo -e "g++ compiled RandomAssignment.cpp successfully"
+g++ -o randomAssignment randomAssignment.cpp -std=c++11
+echo -e "g++ compiled randomAssignment.cpp successfully"
 g++ -o clean clean.cpp -std=c++11
 echo -e "g++ compiled clean.cpp successfully"
 g++ -o lp_ingredient_producer lp_ingredient_producer.cpp -std=c++11
@@ -34,7 +35,7 @@ echo -e "Running Clustering Algorithm...\n"
 
 #Random initialization with clusters
 echo -e "Starting random initialization...\n"
-./RandomAssignment $FileName $shard
+./randomAssignment $FileName $shard
 
 echo -e "Initialization completed\n"
 #init

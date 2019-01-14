@@ -25,8 +25,8 @@ g++ -o applyMove applyMove.cpp -std=c++11
 echo "g++ compiled applyMove.cpp successfully"
 g++ -o probDisruptiveMove probDisruptiveMove.cpp -std=c++11
 echo "g++ compiled disruptiveMove.cpp successfully"
-g++ -o RandomAssignment RandomAssignment.cpp -std=c++11
-echo -e "g++ compiled RandomAssignment.cpp successfully"
+g++ -o randomAssignment randomAssignment.cpp -std=c++11
+echo -e "g++ compiled randomAssignment.cpp successfully"
 g++ -o replicate replicate.cpp -std=c++11
 echo -e "g++ compiled replicate.cpp successfully\n"
 chmod +x checkConvergence.py
@@ -35,7 +35,7 @@ chmod +x checkConvergence.py
 time(
 #initialize using random assignment outside of iteration
 echo -e "Starting random initialization...\n"
-./RandomAssignment $FileName $shard
+./randomAssignment $FileName $shard
 
 
 echo -e "Initialization completed\n"
