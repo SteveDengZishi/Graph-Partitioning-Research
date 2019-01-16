@@ -400,11 +400,13 @@ void loadTranslationAndBlock(){
         int size;
         int pivot;
         inFile>>size;
-        inFile>>pivot; blocks[i].push_back(pivot);
-        FOR(j,1,size){
-            int sub_node; inFile>>sub_node;
-            nodesTranslation[sub_node]=pivot;
-            blocks[i].push_back(sub_node);
+        if(size){
+            inFile>>pivot; blocks[i].push_back(pivot);
+            FOR(j,1,size){
+                int sub_node; inFile>>sub_node;
+                nodesTranslation[sub_node]=pivot;
+                blocks[i].push_back(sub_node);
+            }
         }
     }
     inFile.close();

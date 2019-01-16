@@ -122,10 +122,12 @@ void loadTranslation(){
         int size;
         int pivot;
         inFile>>size;
-        inFile>>pivot;
-        FOR(j,1,size){
-            int sub_node; inFile>>sub_node;
-            nodesTranslation[sub_node]=pivot;
+        if(size){
+            inFile>>pivot;
+            FOR(j,1,size){
+                int sub_node; inFile>>sub_node;
+                nodesTranslation[sub_node]=pivot;
+            }
         }
     }
     inFile.close();

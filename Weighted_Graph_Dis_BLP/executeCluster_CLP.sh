@@ -20,8 +20,8 @@ g++ -o randomAssignment randomAssignment.cpp -std=c++11
 echo -e "g++ compiled randomAssignment.cpp successfully"
 g++ -o clean clean.cpp -std=c++11
 echo -e "g++ compiled clean.cpp successfully"
-g++ -o lp_ingredient_producer lp_ingredient_producer.cpp -std=c++11
-echo -e "g++ compiled lp_ingredient_producer.cpp successfully"
+g++ -o lp_ingredient_producer_clus lp_ingredient_producer_clus.cpp -std=c++11
+echo -e "g++ compiled lp_ingredient_producer_clus.cpp successfully"
 g++ -o linear linear.cpp -std=c++11
 echo -e "g++ compiled linear.cpp successfully"
 g++ -o applyMove applyMove.cpp -std=c++11
@@ -62,7 +62,7 @@ fi
 
 fi
 
-./lp_ingredient_producer $FileName $shard > lp_ingred_$i.txt
+./lp_ingredient_producer_clus $FileName $shard > lp_ingred_$i.txt
 
 ./linear < lp_ingred_$i.txt | lp_solve | ./clean | sort > x_result_$i.txt
 

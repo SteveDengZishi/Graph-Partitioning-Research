@@ -20,8 +20,10 @@ g++ -o greedyAssignment greedyAssignment.cpp -std=c++11
 echo -e "g++ compiled RandomAssignment.cpp successfully"
 g++ -o clean clean.cpp -std=c++11
 echo -e "g++ compiled clean.cpp successfully"
-g++ -o lp_ingredient_producer lp_ingredient_producer.cpp -std=c++11
-echo -e "g++ compiled lp_ingredient_producer.cpp successfully"
+g++ -o lp_ingredient_producer_clus lp_ingredient_producer_clus.cpp -std=c++11
+echo -e "g++ compiled lp_ingredient_producer_clus.cpp successfully"
+g++ -o lp_ingredient_producer_individual lp_ingredient_producer_individual.cpp -std=c++11
+echo -e "g++ compiled lp_ingredient_producer_individual.cpp successfully"
 g++ -o linear linear.cpp -std=c++11
 echo -e "g++ compiled linear.cpp successfully"
 g++ -o applyMove applyMove.cpp -std=c++11
@@ -34,59 +36,59 @@ echo -e "Running Clustering Algorithm...\n"
 ./clus $FileName $cluster
 
 #Random initialization with clusters
-echo -e "Starting random initialization...\n"
+echo -e "Starting greedy initialization...\n"
 ./greedyAssignment $FileName $shard
 
 echo -e "Initialization completed\n"
-#init
-i=0
-#start of iteration
-while true
-
-do
-((++i))
-echo -e "\nIn iteration" $i
-
-#double round brackets performs arithmetic operation and enable you to drop the $
-if ((i>2))
-then
-result=($(./checkConvergence.py))
-#echo ${result[0]}
-#echo ${result[1]}
-
-if [ "${result[0]}" == "TRUE" ]
-
-then
-echo -e "Increase in locality converges, ending Algorithm"
-break
-fi
-
-fi
-
-#run clustered iteration on every 3rd round
-if ((i%3==0))
-then
-echo -e "Running clustered moving round\n"
-./lp_ingredient_producer $FileName $shard > lp_ingred_$i.txt
-
-./linear < lp_ingred_$i.txt | lp_solve | ./clean | sort > x_result_$i.txt
-
-x_file=x_result_$i.txt
-
-./applyMove $FileName $shard $x_file
-
-else
-echo -e "Running individual moving round\n"
-./lp_ingredient_producer $FileName $shard > lp_ingred_$i.txt
-
-./linear < lp_ingred_$i.txt | lp_solve | ./clean | sort > x_result_$i.txt
-
-x_file=x_result_$i.txt
-
-./applyMove $FileName $shard $x_file
-fi
-
-done
+##init
+#i=0
+##start of iteration
+#while true
+#
+#do
+#((++i))
+#echo -e "\nIn iteration" $i
+#
+##double round brackets performs arithmetic operation and enable you to drop the $
+#if ((i>2))
+#then
+#result=($(./checkConvergence.py))
+##echo ${result[0]}
+##echo ${result[1]}
+#
+#if [ "${result[0]}" == "TRUE" ]
+#
+#then
+#echo -e "Increase in locality converges, ending Algorithm"
+#break
+#fi
+#
+#fi
+#
+##run clustered iteration on every 3rd round
+#if ((i%3==0))
+#then
+#echo -e "Running clustered moving round\n"
+#./lp_ingredient_producer_clus $FileName $shard > lp_ingred_$i.txt
+#
+#./linear < lp_ingred_$i.txt | lp_solve | ./clean | sort > x_result_$i.txt
+#
+#x_file=x_result_$i.txt
+#
+#./applyMove $FileName $shard $x_file
+#
+#else
+#echo -e "Running individual moving round\n"
+#./lp_ingredient_producer_individual $FileName $shard > lp_ingred_$i.txt
+#
+#./linear < lp_ingred_$i.txt | lp_solve | ./clean | sort > x_result_$i.txt
+#
+#x_file=x_result_$i.txt
+#
+#./applyMove $FileName $shard $x_file
+#fi
+#
+#done
 
 #plotting graph after finish looping
 #chmod +x graph_plot.py
