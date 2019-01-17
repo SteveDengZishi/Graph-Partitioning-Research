@@ -1,9 +1,10 @@
 //
-//  lp_ingredient_producer.cpp
+//  lp_ingredient_producer_clus.cpp
 //  Boost
+//  lp_ingredient_producer for HCLP
 //
-//  Created by Steve DengZishi on 7/10/17.
-//  Copyright © 2017 Steve DengZishi. All rights reserved.
+//  Created by Steve DengZishi on 1/15/19.
+//  Copyright © 2019 Steve DengZishi. All rights reserved.
 //
 
 #include <iostream>
@@ -77,6 +78,7 @@ fstream inFile;
 string fileName;
 // Stores the first choices of all nodes after each iteration
 int* prevShard;
+vector<int> compatible_blocks;
 
 unsigned int int_hash(unsigned int x) {
     x = ((x >> 16) ^ x) * 0x45d9f3b;
@@ -344,12 +346,13 @@ void combineCommunities(){
         mass[i]=1;
     }
     //transform mass according to comm
-    FOR(j,0,block_num){
+    FOR(j,0,compatible_blocks.size()){
+        int compatible=compatible_blocks[j];
         //pivot node mass increases to community size if the comm size is not 0
-        if(blocks[j].size()>0) mass[blocks[j][0]]=blocks[j].size();
+        if(blocks[compatible].size()>0) mass[blocks[compatible][0]]=blocks[compatible].size();
         //reduce the mass of subordinate nodes
-        FOR(k,1,blocks[j].size()){
-            mass[blocks[j][k]]=0;
+        FOR(k,1,blocks[compatible].size()){
+            mass[blocks[compatible][k]]=0;
         }
     }
     //form weighted adjList
@@ -376,13 +379,7 @@ void combineCommunities(){
 
 //load node translations, if a node belongs to a comm, its translate to its pivot(first) node in the community
 //blocks are the filtered block structures and its content
-void loadTranslationAndBlock(){
-    //init array
-    nodesTranslation=new int[nodes];
-    FOR(z,0,nodes){
-        nodesTranslation[z]=z;
-    }
-    
+void loadBlocks(){
     inFile.open("clusters.txt",ios::in);
     
     if(!inFile){
@@ -404,12 +401,46 @@ void loadTranslationAndBlock(){
             inFile>>pivot; blocks[i].push_back(pivot);
             FOR(j,1,size){
                 int sub_node; inFile>>sub_node;
-                nodesTranslation[sub_node]=pivot;
                 blocks[i].push_back(sub_node);
             }
         }
     }
     inFile.close();
+}
+
+void loadTranslation(){
+    //init array
+    nodesTranslation=new int[nodes];
+    FOR(z,0,nodes){
+        nodesTranslation[z]=z;
+    }
+    //match all other nodes in a block to its pivot node(first node in that cluster)
+    FOR(i,0,compatible_blocks.size()){
+        int compatible=compatible_blocks[i];
+        if(blocks[compatible].size()){
+            int pivot=blocks[compatible][0];
+            FOR(j,1,blocks[compatible].size()){
+                int sub_node=blocks[compatible][j];
+                nodesTranslation[sub_node]=pivot;
+            }
+        }
+    }
+}
+
+void filterCompatibleClusters(){
+    FOR(i,0,block_num){
+        unordered_map<int,int> location_count;
+        FOR(j,0,blocks[i].size()){
+            int location=prevShard[blocks[i][j]];
+            if(location_count.find(location)==location_count.end()) location_count[location]=1;
+            else{
+                location_count[location]++;
+            }
+        }
+        //if there is only one partition means they are not splitted at all
+        if(location_count.size()==1) compatible_blocks.push_back(i);
+    }
+    cerr<<"Number of compatible clusters after filtering is: "<<compatible_blocks.size()<<endl;
 }
 
 //start of main()
@@ -456,17 +487,19 @@ int main(int argc, const char * argv[]) {
     //    printADJ();
     inFile.close();
     
-    //load node translation table nodesTranslation[]
-    loadTranslationAndBlock();
-    //cerr<<"after translating blocks"<<endl;
-    //combine nodes using communities assignments and produce weighted_adjList and mass[]
-    combineCommunities();
-    //cerr<<"after combineComm"<<endl;
-    
     //load previous shard[partitions] & prevShard[nodes]
     loadShard();
     //cerr<<"after loading shard"<<endl;
     //    printShard();
+    
+    //load blocks first, then filter out compatible clusters that are 100% not separated then form node translation table nodesTranslation[]
+    loadBlocks();
+    filterCompatibleClusters();
+    loadTranslation();
+    //cerr<<"after translating blocks"<<endl;
+    //combine nodes using communities assignments and produce weighted_adjList and mass[]
+    combineCommunities();
+    //cerr<<"after combineComm"<<endl;
     
     //create neighbor list
     //    printADJ();

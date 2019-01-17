@@ -402,6 +402,7 @@ void showEdgeDensity(){
     cout<<endl;
 }
 
+//save all clusters except those of size 0
 void saveAllComm(){
     
     //write into files "clusters.txt" in the following format
@@ -412,14 +413,23 @@ void saveAllComm(){
     FILE* outFile;
     outFile=fopen("clusters.txt","wb");
     
-    cout<<"There are "<<block_num<<" number of communities."<<endl;
+    //filter out suitable communities
+    vector<int> block_indexes;
+    
+    FOR(i,0,block_num){
+        if(blockSize[i]>0){
+            block_indexes.push_back(i);
+        }
+    }
+    
+    cout<<"After filtering out 0 sized clusters, there are "<<block_indexes.size()<<" number of eligible communities."<<endl;
     
     //writing to file
-    fprintf(outFile,"%d", block_num);
-    FOR(i,0,block_num){
-        fprintf(outFile,"\n%d ", int(blocks[i].size()));
-        FOR(j,0,blocks[i].size()){
-            fprintf(outFile,"%d ", blocks[i][j]);
+    fprintf(outFile,"%d", int(block_indexes.size()));
+    FOR(i,0,block_indexes.size()){
+        fprintf(outFile,"\n%d ", int(blocks[block_indexes[i]].size()));
+        FOR(j,0,blocks[block_indexes[i]].size()){
+            fprintf(outFile,"%d ", blocks[block_indexes[i]][j]);
         }
     }
     fclose(outFile);

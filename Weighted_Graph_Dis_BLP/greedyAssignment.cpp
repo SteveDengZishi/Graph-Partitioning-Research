@@ -68,19 +68,35 @@ int countEdgesBetweenPartitionAndBlock(int y, int z){
     return count;
 }
 
+int chooseLargestUnallocatedBlock(int* allocation){
+    //then chose the largest unassigned_block
+    FOR(i,0,block_num){
+        int next_largest_block=block_sizes[i].second;
+        if(allocation[next_largest_block]==0) {
+            cerr<<"the largest unallocated block is: "<<next_largest_block<<endl;
+            int block_to_assign=next_largest_block;
+            return block_to_assign;
+        }
+    }
+    return -1;
+}
 //greedy assignment to assign blocks to partitions
 void greedyAssignment(){
     //sort blocks by decreasing size |Bk|
+    //put into pairs of (size_k, k)
     FOR(i,0,block_num){
         block_sizes.emplace_back((int)blocks[i].size(),i);
     }
     
-    //test whether they are sorted
+    sort(block_sizes.begin(), block_sizes.end(), Greater());
+    
+    //test whether they are sorted and check sum
+    int sum=0;
     FOR(i,0,block_num){
         cerr<<block_sizes[i].first<<" "<<block_sizes[i].second<<endl;
+        sum+=block_sizes[i].first;
     }
-    
-    sort(block_sizes.begin(), block_sizes.end(), Greater());
+    cerr<<"sum of the nodes are: "<<sum<<endl<<endl;
     
     //while there is unallocated blocks
     bool unallocated=true;
@@ -97,30 +113,31 @@ void greedyAssignment(){
         int block_to_assign=-1;
         //start with the first shard, if it is empty
         if(shard[current_partition].size()==0){
+            cerr<<"current shard is empty, select largest unallocated block"<<endl;
             //then chose the largest unassigned_block
-            FOR(i,0,block_num){
-                int next_largest_block=block_sizes[i].second;
-                if(allocation[next_largest_block]==0) {
-                    block_to_assign=next_largest_block;
-                    allocation[next_largest_block]=1;
-                }
-            }
+            block_to_assign=chooseLargestUnallocatedBlock(allocation);
         }
         
-        //else select the block with largest average in-degree
+        //else select the block with largest average in-degree & unallocated
         else{
+            cerr<<"select largest average in-degree block"<<endl;
             //need to clear previous edge counts as after new assignment it is changing
             FOR(i,0,block_num){
                 edgeCountAvg[i]=0.0;
             }
             FOR(i,0,block_num){
-                edgeCountAvg[i]=(double)countEdgesBetweenPartitionAndBlock(current_partition,i)/(double)blocks[i].size();
+                //if still unallocated
+                if(allocation[i]==0){
+                    edgeCountAvg[i]=(double)countEdgesBetweenPartitionAndBlock(current_partition,i)/(double)blocks[i].size();
+                }
             }
             int max=0;
             FOR(i,0,block_num){
-                if(edgeCountAvg[max]>edgeCountAvg[i]) max=i;
+                if(edgeCountAvg[i]!=0.0 && edgeCountAvg[max]<edgeCountAvg[i]) max=i;
             }
-            block_to_assign=max;
+            if(edgeCountAvg[max]!=0.0) block_to_assign=max;
+            //if there is no in-degree edges
+            if(block_to_assign==-1) block_to_assign=chooseLargestUnallocatedBlock(allocation);
         }
         
         //all blocks have been allocated
@@ -161,9 +178,15 @@ void greedyAssignment(){
                 shard[current_partition].push_back(moving_node);
             }
         }
+        allocation[block_to_assign]=1;
         cerr<<"block to allocate is: "<<block_to_assign<<endl;
         cerr<<"space left in current shard is: "<<current_space<<endl;
     }
+    
+    //check sizes
+    cerr<<endl<<"Sizes of partitions after greedy assignments: "<<endl;
+    FOR(i,0,partitions) cerr<<shard[i].size()<<" "<<endl;
+    
     //clear dynamic allocated memory
     delete [] edgeCountAvg;
     edgeCountAvg=nullptr;
@@ -268,7 +291,7 @@ int main(int argc, const char * argv[]){
     loadTranslationAndBlock();
     //random sharding
     greedyAssignment();
-    cerr<<"finished greedy assignment"<<endl;
+    cerr<<"\nFinished greedy assignment"<<endl;
     //    printShard();
     //output locality info to shell
     double locality=printLocatlityFraction();

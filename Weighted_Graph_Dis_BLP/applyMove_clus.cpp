@@ -62,10 +62,13 @@ vector<int>* shard;
 string fileName;
 string x_file;
 fstream inFile;
+int* nodesTranslation;//map nodes to its pivot if it a node in the community
+vector<int>* blocks;
 int partitions;
 int nodes;
 int edges;
 int move_count;
+int block_num;
 
 void createADJ(){
     int from,to;
@@ -101,6 +104,25 @@ double printLocatlityFraction(){
     return fraction;
 }
 
+bool checkCut(int i, int j, int size){
+    bool cut=false;
+    
+    //if the last node before the cut is a cluster node
+    //the length of the array has to be at least 2 item to check cut
+    if(size!=0 && sortedCountIJ[i][j].size()>1){
+        int node_before_cut = sortedCountIJ[i][j][size-1].second;
+        int node_after_cut = sortedCountIJ[i][j][size].second;
+        
+        //only if they are the same, means they are both having the same pivot
+        if(node_before_cut==node_after_cut) cut=true;
+    }
+    return cut;
+}
+
+int findEffectiveSize(int i, int j){
+    return sortedCountIJ[i][j].size();
+}
+
 // cut the ListSize after getting X(ij) values from the linear functions
 void cutList(){
     FOR(i,0,partitions){
@@ -108,8 +130,51 @@ void cutList(){
             if(i!=j){
                 int fromTo; char x;
                 inFile>>x>>fromTo;
-                int size; inFile>>size;
+                
+                //cast double to int, automatically run down
+                double move_cnt; inFile>>move_cnt;
+                int size = move_cnt;
                 cerr<<"size ("<<i<<","<<j<<") is: "<<size<<endl;
+                //before resizing, first need to check whether it cuts a cluster into two
+                //if it cuts, flip a coin with weighted probability to decide whether to move the whole cluster
+                bool cut=checkCut(i, j, size);
+                if(cut){
+                    //last node
+                    int node_before_cut = sortedCountIJ[i][j][size-1].second;
+                    
+                    //uninitialized appearances
+                    int first_appearance=-1;
+                    int last_appearance=-1;
+                    FOR(x,0,sortedCountIJ[i][j].size()){
+                        if(sortedCountIJ[i][j][x].second==node_before_cut){
+                            last_appearance=sortedCountIJ[i][j][x].second;
+                            //if not found before
+                            if(first_appearance==-1) first_appearance=last_appearance;
+                        }
+                    }
+                    //The total span of community is (last-first+1)
+                    int distance=last_appearance-first_appearance+1;
+                    int included=size-first_appearance;
+                    
+                    //do a weighted coin flip whether to move cluster
+                    srand(time(NULL));
+                    bool move_cut_cluster=(rand()%distance)<included;
+                    
+                    //include the whole cluster
+                    if(move_cut_cluster){
+                        size=last_appearance+1;
+                    }
+                    //exclude the whole cluster
+                    else{
+                        size=first_appearance;
+                    }
+                }
+                //if it is not cutting a cluster, directly resize to leave only move options
+                //if cut, size is modified to include or exclude the whole cluster according to the coin flip
+                //if the size allowed to move is greater than total nodes in shard[i], take the effective size of p(ij)
+                if(size>shard[i].size()){
+                    size=findEffectiveSize(i,j);
+                }
                 sortedCountIJ[i][j].resize(size);
             }
         }
@@ -121,17 +186,60 @@ void applyShift(){
     move_count=0;
     FOR(i,0,partitions){
         FOR(j,0,partitions){
-            if(i!=j){
-                cerr<<i<<j<<" the number of nodes movement are: "<<sortedCountIJ[i][j].size()<<endl;
-                FOR(k,0,sortedCountIJ[i][j].size()){
-                    //update the location of the previous node for next iteration
-                    cerr<<prevShard[sortedCountIJ[i][j][k].second]<<" becomes "<<j<<endl;
-                    prevShard[sortedCountIJ[i][j][k].second]=(int)j;
-                    move_count++;
-                }
+            //for each ij from to pair
+            FOR(k,0,sortedCountIJ[i][j].size()){
+                //update the move destination for the nodes in the queue
+                //be reminded that only pivot node get updated but not subordinate nodes
+                prevShard[sortedCountIJ[i][j][k].second]=(int)j;
+                move_count++;
             }
         }
     }
+    //after moving for all ij partitions pairs, loop through translation and update subordinate cluster nodes to their pivot node location
+    FOR(i,0,block_num){
+        //pivot destination is already updated
+        int pivot_destination=prevShard[blocks[i][0]];
+        //update the rest of the nodes to the same shard as the pivot node
+        FOR(j,1,blocks[i].size()){
+            prevShard[blocks[i][j]]=pivot_destination;
+        }
+    }
+}
+
+//load node translations, if a node belongs to a comm, its translate to its pivot(first) node in the community
+//blocks are the filtered block structures and its content
+void loadTranslationAndBlock(){
+    //init array
+    nodesTranslation=new int[nodes];
+    FOR(z,0,nodes){
+        nodesTranslation[z]=z;
+    }
+    
+    inFile.open("clusters.txt",ios::in);
+    
+    if(!inFile){
+        cerr<<"Error occurs while opening the file"<<endl;
+        exit(1);
+    }
+    //how many number of lines(communities)
+    inFile>>block_num;
+    
+    //save blocks to be used in combineNodes
+    blocks=new vector<int>[block_num];
+    
+    //each line start with a size, and size number of nodes with the first as the pivot
+    FOR(i,0,block_num){
+        int size;
+        int pivot;
+        inFile>>size;
+        inFile>>pivot; blocks[i].push_back(pivot);
+        FOR(j,1,size){
+            int sub_node; inFile>>sub_node;
+            nodesTranslation[sub_node]=pivot;
+            blocks[i].push_back(sub_node);
+        }
+    }
+    inFile.close();
 }
 
 void reConstructShard(){
@@ -173,8 +281,8 @@ void loadShard(){
             int size;
             fscanf(inFile,"%d",&size);
             for(int k=0;k<size;k++){
-                int first,second;
-                fscanf(inFile,"%d %d",&first,&second);
+                double first; int second;
+                fscanf(inFile,"%lf %d",&first,&second);
                 sortedCountIJ[i][j].emplace_back(first,second);
             }
         }
@@ -215,13 +323,18 @@ int main(int argc, const char * argv[]){
     for(int i=0;i<partitions;i++){
         sortedCountIJ[i]=new vector<PII> [partitions];
     }
-    //create adjacency List
+    
+    //create unweighted adjacency List
+    //it is used to output local edge ratio
     createADJ();
     inFile.close();
     
     //load sharding and previously calculated results
     //load previous shard[partitions], prevShard[nodes] & loadSortecCountIJ[partitions][partitions]
     loadShard();
+    
+    //load node translation and cluster structure
+    loadTranslationAndBlock();
     
     //close file and open x_result file
     inFile.open(x_file,ios::in);
@@ -233,7 +346,8 @@ int main(int argc, const char * argv[]){
 
     //Three steps to move nodes after the linear program returns constraints X(ij), input values with files injection in cutList()
     cutList();
-    
+    inFile.close();
+    //apply the eligible shift after modified by moves
     applyShift();
     reConstructShard();
 
@@ -272,6 +386,8 @@ int main(int argc, const char * argv[]){
     delete [] shard;
     delete [] adjList;
     delete [] prevShard;
+    delete [] nodesTranslation;
+    delete [] blocks;
     
     for(int i=0;i<partitions;i++){
         delete [] sortedCountIJ[i];
@@ -283,4 +399,6 @@ int main(int argc, const char * argv[]){
     adjList=nullptr;
     prevShard=nullptr;
     sortedCountIJ=nullptr;
+    nodesTranslation=nullptr;
+    blocks=nullptr;
 }
