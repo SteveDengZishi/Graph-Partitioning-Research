@@ -61,7 +61,10 @@ void printLC(){
         printf("<= ");
         cin>>size[i];
         int lowerBound=(nodes/shard)*(1-f);
-        int diff=size[i]-lowerBound;
+        int diff=0;
+        if(size[i]>lowerBound){
+            diff=size[i]-lowerBound;
+        }
         printf("%d;\n",diff);
     }
 }
@@ -82,7 +85,10 @@ void printUC(){
         }
         printf(">= ");
         int upperBound=(nodes/shard)*(1+f);
-        int diff=size[i]-upperBound;
+        int diff=0;
+        if(size[i]<upperBound){
+            diff=size[i]-upperBound;
+        }
         printf("%d;\n",diff);
     }
 }

@@ -43,7 +43,10 @@ echo -e "Starting greedy initialization...\n"
 
 echo -e "Initialization completed\n"
 #init
+skip=0
+last=0
 i=0
+th2=0.003
 #start of iteration
 while true
 
@@ -52,7 +55,7 @@ do
 echo -e "\nIn iteration" $i
 
 #double round brackets performs arithmetic operation and enable you to drop the $
-if ((i>2))
+if ((i>2)) && ((skip==0))
 then
 result=($(./checkConvergence.py))
 #echo ${result[0]}
@@ -61,16 +64,23 @@ result=($(./checkConvergence.py))
 if [ "${result[0]}" == "TRUE" ]
 
 then
-echo -e "Increase in locality converges, ending Algorithm"
-break
-fi
+echo -e "Increase in locality converges"
 
-fi
-
-#run clustered iteration on every 3rd round
-if ((i%3==0))
+if(( $(echo "$last <= 0" | bc -l) ))
 then
-echo -e "Running clustered moving round\n"
+#the new peak improvement percentage as compared to the prior peak
+converge_imp_ratio=1
+else
+converge_imp_ratio=$(echo "(${result[1]} - $last) / $last" | bc -l)
+fi
+#echo $converge_imp_ratio
+
+
+if (( $(echo "$converge_imp_ratio > $th2" | bc -l) ))
+
+then
+echo "Disruptive condition met, Running clustered moving round"
+
 ./lp_ingredient_producer_clus $FileName $shard > lp_ingred_$i.txt
 
 ./linear < lp_ingred_$i.txt | lp_solve | ./clean | sort > x_result_$i.txt
@@ -78,6 +88,23 @@ echo -e "Running clustered moving round\n"
 x_file=x_result_$i.txt
 
 ./applyMove_clus $FileName $shard $x_file
+
+skip=1
+
+last=${result[1]}
+
+else
+echo -e "Converges, ending Balanced Label Propagation"
+if (( $(echo "$last > ${result[1]}" | bc -l) ))
+then
+echo "The highest locality is: $last"
+else
+echo "The highest locality is: ${result[1]}"
+fi
+
+break
+
+fi
 
 else
 echo -e "Running individual moving round\n"
@@ -88,6 +115,21 @@ echo -e "Running individual moving round\n"
 x_file=x_result_$i.txt
 
 ./applyMove $FileName $shard $x_file
+
+skip=0
+fi
+
+else
+echo -e "Running individual moving round\n"
+./lp_ingredient_producer_individual $FileName $shard > lp_ingred_$i.txt
+
+./linear < lp_ingred_$i.txt | lp_solve | ./clean | sort > x_result_$i.txt
+
+x_file=x_result_$i.txt
+
+./applyMove $FileName $shard $x_file
+
+skip=0
 fi
 
 done

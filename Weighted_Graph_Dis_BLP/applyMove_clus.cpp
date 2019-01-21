@@ -134,7 +134,7 @@ void cutList(){
                 //cast double to int, automatically run down
                 double move_cnt; inFile>>move_cnt;
                 int size = move_cnt;
-                cerr<<"size ("<<i<<","<<j<<") is: "<<size<<endl;
+                //cerr<<"size ("<<i<<","<<j<<") is: "<<size<<endl;
                 //before resizing, first need to check whether it cuts a cluster into two
                 //if it cuts, flip a coin with weighted probability to decide whether to move the whole cluster
                 bool cut=checkCut(i, j, size);

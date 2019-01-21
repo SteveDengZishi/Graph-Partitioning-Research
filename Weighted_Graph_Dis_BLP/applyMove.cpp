@@ -109,7 +109,7 @@ void cutList(){
                 int fromTo; char x;
                 inFile>>x>>fromTo;
                 int size; inFile>>size;
-                cerr<<"size ("<<i<<","<<j<<") is: "<<size<<endl;
+                //cerr<<"size ("<<i<<","<<j<<") is: "<<size<<endl;
                 sortedCountIJ[i][j].resize(size);
             }
         }
@@ -122,10 +122,10 @@ void applyShift(){
     FOR(i,0,partitions){
         FOR(j,0,partitions){
             if(i!=j){
-                cerr<<i<<j<<" the number of nodes movement are: "<<sortedCountIJ[i][j].size()<<endl;
+                //cerr<<i<<j<<" the number of nodes movement are: "<<sortedCountIJ[i][j].size()<<endl;
                 FOR(k,0,sortedCountIJ[i][j].size()){
                     //update the location of the previous node for next iteration
-                    cerr<<prevShard[sortedCountIJ[i][j][k].second]<<" becomes "<<j<<endl;
+                    //cerr<<prevShard[sortedCountIJ[i][j][k].second]<<" becomes "<<j<<endl;
                     prevShard[sortedCountIJ[i][j][k].second]=(int)j;
                     move_count++;
                 }
