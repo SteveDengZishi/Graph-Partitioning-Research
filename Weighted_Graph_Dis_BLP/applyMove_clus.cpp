@@ -187,11 +187,15 @@ void applyShift(){
     FOR(i,0,partitions){
         FOR(j,0,partitions){
             //for each ij from to pair
-            FOR(k,0,sortedCountIJ[i][j].size()){
-                //update the move destination for the nodes in the queue
-                //be reminded that only pivot node get updated but not subordinate nodes
-                prevShard[sortedCountIJ[i][j][k].second]=(int)j;
-                move_count++;
+            //cerr<<sortedCountIJ[i][j].size()<<endl;
+            if(i!=j){
+                FOR(k,0,sortedCountIJ[i][j].size()){
+                    //update the move destination for the nodes in the queue
+                    //be reminded that only pivot node get updated but not subordinate nodes
+                    prevShard[sortedCountIJ[i][j][k].second]=(int)j;
+                    move_count++;
+                    //cerr<<move_count<<endl;
+                }
             }
         }
     }
@@ -358,7 +362,12 @@ int main(int argc, const char * argv[]){
     
     //check sizes
     cerr<<endl<<"Sizes of partitions after linear programming: "<<endl;
-    FOR(i,0,partitions) cerr<<shard[i].size()<<" "<<endl;
+    int sum=0;
+    FOR(i,0,partitions) {
+        cerr<<shard[i].size()<<" "<<endl;
+        sum+=shard[i].size();
+    }
+    cerr<<"the sum of the sizes is: "<<sum<<endl;
     
     //write data to file for graph plotting
     FILE* outFile=fopen("graph_plotting_data.txt","a");

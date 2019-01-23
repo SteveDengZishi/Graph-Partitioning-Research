@@ -149,35 +149,34 @@ void greedyAssignment(){
         //first need to do boundary check
         //if block size is greater than remaining space
         //overflowing to the next shard
-        if(blocks[block_to_assign].size()>current_space){
+        int sizeOfBlock=blocks[block_to_assign].size();
+        //record the position of current movement
+        int startingIndex=0;
+        while(sizeOfBlock>current_space){
             int current_shard=current_space;
-            int next_shard=blocks[block_to_assign].size()-current_space;
+            sizeOfBlock-=current_space;
             //moving nodes to this shard
             FOR(i,0,current_shard){
-                int moving_node=blocks[block_to_assign][i];
+                int moving_node=blocks[block_to_assign][startingIndex];
                 prevShard[moving_node]=current_partition;
                 shard[current_partition].push_back(moving_node);
+                startingIndex++;
             }
-            //overflowing to the next shard
-            current_space=size_limit-next_shard;
+            //update info to the next partition
             current_partition++;
-            FOR(i,current_shard,blocks[block_to_assign].size()){
-                int moving_node=blocks[block_to_assign][i];
-                prevShard[moving_node]=current_partition;
-                shard[current_partition].push_back(moving_node);
-            }
+            current_space=size_limit;
         }
-        //else still in this shard
-        else{
-            int current_shard=blocks[block_to_assign].size();
-            current_space-=current_shard;
-            //moving nodes
-            FOR(i,0,blocks[block_to_assign].size()){
-                int moving_node=blocks[block_to_assign][i];
-                prevShard[moving_node]=current_partition;
-                shard[current_partition].push_back(moving_node);
-            }
+        //able to fit in this shard
+        int current_shard=sizeOfBlock;
+        current_space-=current_shard;
+        //moving nodes
+        FOR(i,0,current_shard){
+            int moving_node=blocks[block_to_assign][startingIndex];
+            prevShard[moving_node]=current_partition;
+            shard[current_partition].push_back(moving_node);
+            startingIndex++;
         }
+        
         allocation[block_to_assign]=1;
         cerr<<"block to allocate is: "<<block_to_assign<<endl;
         cerr<<"space left in current shard is: "<<current_space<<endl;
@@ -190,6 +189,14 @@ void greedyAssignment(){
     //clear dynamic allocated memory
     delete [] edgeCountAvg;
     edgeCountAvg=nullptr;
+}
+
+void buildPrevShard(){
+    FOR(i,0,partitions){
+        FOR(j,0,shard[i].size()){
+            prevShard[shard[i][j]]=(int)i;
+        }
+    }
 }
 
 double printLocatlityFraction(){
@@ -291,6 +298,7 @@ int main(int argc, const char * argv[]){
     loadTranslationAndBlock();
     //random sharding
     greedyAssignment();
+    
     cerr<<"\nFinished greedy assignment"<<endl;
     //    printShard();
     //output locality info to shell
@@ -321,7 +329,7 @@ int main(int argc, const char * argv[]){
     }
     
     fclose(outFile);
-    
+  
     //delete dynamic allocation
     delete [] shard;
     delete [] prevShard;

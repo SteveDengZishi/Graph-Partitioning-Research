@@ -440,7 +440,7 @@ void filterCompatibleClusters(){
         //if there is only one partition means they are not splitted at all
         if(location_count.size()==1) compatible_blocks.push_back(i);
     }
-    cerr<<"Number of compatible clusters after filtering is: "<<compatible_blocks.size()<<endl;
+    cerr<<"\nNumber of compatible clusters after filtering is: "<<compatible_blocks.size()<<endl;
 }
 
 //start of main()

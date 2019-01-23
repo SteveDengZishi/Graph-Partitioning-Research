@@ -163,10 +163,12 @@ void loadShard(){
             shard[i].push_back(data);
         }
     }
+    
     //prevShard
     for(int i=0;i<nodes;i++){
         fscanf(inFile,"%d",&prevShard[i]);
     }
+    
     //sortedCountIJ
     for(int i=0;i<partitions;i++){
         for(int j=0;j<partitions;j++){
@@ -233,7 +235,6 @@ int main(int argc, const char * argv[]){
 
     //Three steps to move nodes after the linear program returns constraints X(ij), input values with files injection in cutList()
     cutList();
-    
     applyShift();
     reConstructShard();
 
@@ -244,7 +245,12 @@ int main(int argc, const char * argv[]){
     
     //check sizes
     cerr<<endl<<"Sizes of partitions after linear programming: "<<endl;
-    FOR(i,0,partitions) cerr<<shard[i].size()<<" "<<endl;
+    int sum=0;
+    FOR(i,0,partitions) {
+        cerr<<shard[i].size()<<" "<<endl;
+        sum+=shard[i].size();
+    }
+    cerr<<"the sum of the sizes is: "<<sum<<endl;
     
     //write data to file for graph plotting
     FILE* outFile=fopen("graph_plotting_data.txt","a");
