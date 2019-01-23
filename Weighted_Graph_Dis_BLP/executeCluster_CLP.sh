@@ -26,6 +26,8 @@ g++ -o linear linear.cpp -std=c++11
 echo -e "g++ compiled linear.cpp successfully"
 g++ -o applyMove applyMove.cpp -std=c++11
 echo -e "g++ compiled applyMove.cpp successfully"
+g++ -o applyMove_clus applyMove_clus.cpp -std=c++11
+echo -e "g++ compiled applyMove_clus.cpp successfully"
 g++ -o probDisruptiveMove probDisruptiveMove.cpp -std=c++11
 echo -e "g++ compiled disruptiveMove.cpp successfully\n"
 chmod +x checkConvergence.py
@@ -68,7 +70,7 @@ fi
 
 x_file=x_result_$i.txt
 
-./applyMove $FileName $shard $x_file
+./applyMove_clus $FileName $shard $x_file
 
 done
 

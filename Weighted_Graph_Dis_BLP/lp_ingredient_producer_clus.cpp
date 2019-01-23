@@ -443,6 +443,28 @@ void filterCompatibleClusters(){
     cerr<<"\nNumber of compatible clusters after filtering is: "<<compatible_blocks.size()<<endl;
 }
 
+//save compatible clusters
+void saveCompatibleComm(){
+    
+    //write into files "clusters_compatible.txt" in the following format
+    //compatible_block_num
+    //size_1 nodeID_1, nodeID_2,....
+    //size_2 nodeID_1, nodeID_2,....
+    //...in total block_num lines follows....
+    FILE* outFile;
+    outFile=fopen("clusters_compatible.txt","wb");
+    
+    //writing to file
+    fprintf(outFile,"%d", int(compatible_blocks.size()));
+    FOR(i,0,compatible_blocks.size()){
+        fprintf(outFile,"\n%d ", int(blocks[compatible_blocks[i]].size()));
+        FOR(j,0,blocks[compatible_blocks[i]].size()){
+            fprintf(outFile,"%d ", blocks[compatible_blocks[i]][j]);
+        }
+    }
+    fclose(outFile);
+}
+
 //start of main()
 int main(int argc, const char * argv[]) {
     
@@ -538,6 +560,9 @@ int main(int argc, const char * argv[]) {
     //print out the number of nodes wanted to move line by line
     printCountPIJ();//(lp_ingredient)
     printShardSize();//(lp_ingredient)
+    
+    //save compatible communities
+    saveCompatibleComm();
     
     //fprint structured data to files to be reload later in applyMove
     FILE* outFile;

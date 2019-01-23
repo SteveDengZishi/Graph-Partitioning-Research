@@ -37,7 +37,6 @@
 #define CINLINE(a) getline(cin,a)
 #define FILL(a,b) memset(a, b , sizeof(a)) //fill array a with all bs
 #define INIT(a) FILL(a,0) //initialize array a with all 0s
-#define INF 2e9
 //#define lp_ingredient_5th
 
 //name space here
@@ -137,6 +136,7 @@ void cutList(){
                 
                 //before resizing, first need to check whether it cuts a cluster into two
                 //if it cuts, flip a coin with weighted probability to decide whether to move the whole cluster
+                //cerr<<"From "<<i<<" to "<<j<<endl;
                 //FOR(k,0,sortedCountIJ[i][j].size()) cerr<<"("<<sortedCountIJ[i][j][k].first<<","<<sortedCountIJ[i][j][k].second<<") ";
                 //cerr<<"\nThe cut size is: "<<size<<endl;
                 
@@ -187,6 +187,7 @@ void cutList(){
                 if(size>shard[i].size()){
                     size=findEffectiveSize(i,j);
                 }
+                //cerr<<"size is: "<<size<<endl;
                 sortedCountIJ[i][j].resize(size);
             }
         }
@@ -214,6 +215,7 @@ void applyShift(){
         }
     }
     //after moving for all ij partitions pairs, loop through translation and update subordinate cluster nodes to their pivot node location
+    //only eligible clusters follows the rest remain
     FOR(i,0,block_num){
         //pivot destination is already updated
         int pivot_destination=prevShard[blocks[i][0]];
@@ -233,7 +235,7 @@ void loadTranslationAndBlock(){
         nodesTranslation[z]=z;
     }
     
-    inFile.open("clusters.txt",ios::in);
+    inFile.open("clusters_compatible.txt",ios::in);
     
     if(!inFile){
         cerr<<"Error occurs while opening the file"<<endl;
