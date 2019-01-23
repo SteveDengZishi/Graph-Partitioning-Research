@@ -141,6 +141,8 @@ void printIJK(){
                     int num;
                     cin>>sum>>num;
                     b=sum-num*a; // b is the y-intercept
+                    //b should not be negative or a very small number due to double precision
+                    if(b<0.01) b=0;
 //                    printf("-%d x%d%d +z%d%d <= %d;\n",a,i,j,i,j,b);
                     cout<<"-"<<a<<" "<<"x"<<string_i<<string_j<<" "<<"+z"<<string_i<<string_j<<" <= "<<b<<";"<<endl;
                 }

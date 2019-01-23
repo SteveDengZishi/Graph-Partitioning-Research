@@ -22,7 +22,6 @@
 #include <unordered_set> //To remove duplicates and count size
 #include <functional> //To use std::hash
 #include <fstream> // To input and output to files
-#include <boost/interprocess/shared_memory_object.hpp>
 
 
 //macro here
@@ -109,7 +108,7 @@ bool checkCut(int i, int j, int size){
     
     //if the last node before the cut is a cluster node
     //the length of the array has to be at least 2 item to check cut
-    if(size!=0 && sortedCountIJ[i][j].size()>1){
+    if(size!=0 && sortedCountIJ[i][j].size()>1 && sortedCountIJ[i][j].size()>size){
         int node_before_cut = sortedCountIJ[i][j][size-1].second;
         int node_after_cut = sortedCountIJ[i][j][size].second;
         
@@ -135,19 +134,25 @@ void cutList(){
                 double move_cnt; inFile>>move_cnt;
                 int size = move_cnt;
                 //cerr<<"size ("<<i<<","<<j<<") is: "<<size<<endl;
+                
                 //before resizing, first need to check whether it cuts a cluster into two
                 //if it cuts, flip a coin with weighted probability to decide whether to move the whole cluster
+                //FOR(k,0,sortedCountIJ[i][j].size()) cerr<<"("<<sortedCountIJ[i][j][k].first<<","<<sortedCountIJ[i][j][k].second<<") ";
+                //cerr<<"\nThe cut size is: "<<size<<endl;
+                
                 bool cut=checkCut(i, j, size);
                 if(cut){
+                    //cerr<<"It is a cut during move from "<<i<<" to "<<j<<endl;
                     //last node
                     int node_before_cut = sortedCountIJ[i][j][size-1].second;
+                    //cerr<<"Node before cut is: "<<node_before_cut<<endl;
                     
                     //uninitialized appearances
                     int first_appearance=-1;
                     int last_appearance=-1;
                     FOR(x,0,sortedCountIJ[i][j].size()){
                         if(sortedCountIJ[i][j][x].second==node_before_cut){
-                            last_appearance=sortedCountIJ[i][j][x].second;
+                            last_appearance=x;
                             //if not found before
                             if(first_appearance==-1) first_appearance=last_appearance;
                         }
@@ -160,12 +165,19 @@ void cutList(){
                     srand(time(NULL));
                     bool move_cut_cluster=(rand()%distance)<included;
                     
+                    //cerr<<"Whether to move the whole cluster: "<<move_cut_cluster<<endl;
                     //include the whole cluster
                     if(move_cut_cluster){
+                        //cerr<<"size is: "<<size<<endl;
+                        //cerr<<"first_appearance is: "<<first_appearance<<endl;
+                        //cerr<<"last_appearance is: "<<last_appearance<<endl;
                         size=last_appearance+1;
                     }
                     //exclude the whole cluster
                     else{
+                        //cerr<<"size is: "<<size<<endl;
+                        //cerr<<"first_appearance is: "<<first_appearance<<endl;
+                        //cerr<<"last_appearance is: "<<last_appearance<<endl;
                         size=first_appearance;
                     }
                 }
@@ -183,12 +195,14 @@ void cutList(){
 
 //directly using cutted sortedCountIJ to apply movement and count movement at the same time
 void applyShift(){
+    //cerr<<"In applying shift"<<endl;
     move_count=0;
     FOR(i,0,partitions){
         FOR(j,0,partitions){
             //for each ij from to pair
             //cerr<<sortedCountIJ[i][j].size()<<endl;
             if(i!=j){
+                //cerr<<"move from "<<i<<" to "<<j<<endl;
                 FOR(k,0,sortedCountIJ[i][j].size()){
                     //update the move destination for the nodes in the queue
                     //be reminded that only pivot node get updated but not subordinate nodes

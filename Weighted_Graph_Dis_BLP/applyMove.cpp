@@ -22,7 +22,6 @@
 #include <unordered_set> //To remove duplicates and count size
 #include <functional> //To use std::hash
 #include <fstream> // To input and output to files
-#include <boost/interprocess/shared_memory_object.hpp>
 
 
 //macro here
