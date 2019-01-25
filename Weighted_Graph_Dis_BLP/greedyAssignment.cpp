@@ -30,16 +30,18 @@ using namespace std;
 vector<int>* shard;
 int* prevShard;
 int* nodesTranslation;
-double* edgeCountAvg;//edgeCount[block_num] represent average edges between current partition and block i
 vector<int>* adjList;
 vector<int>* blocks;
 vector<pair<int,int>> block_sizes;
+unordered_map<int,int>* weighted_adjList;
+priority_queue<pair<double,int>> maxQueue;
 fstream inFile;
 string fileName;
 int partitions;
 int block_num;
 int nodes;
 int edges;
+int* mass;
 
 struct Greater
 {
@@ -80,6 +82,27 @@ int chooseLargestUnallocatedBlock(int* allocation){
     }
     return -1;
 }
+
+void buildQueue(int* allocation, int* edgeCount, int current_partition){
+    FOR(i,0,block_num){
+        //if still unallocated
+        if(allocation[i]==0){
+            //edgeCount is to save previous result for update
+            edgeCount[i]=countEdgesBetweenPartitionAndBlock(current_partition,i);
+            double edgeCountAvg=(double)edgeCount[i]/(double)blocks[i].size();
+            pair<double, int> p(edgeCountAvg, (int)i);
+            maxQueue.push(p);
+        }
+    }
+}
+
+int nodeFindBlock(int pivot_id){
+    FOR(i,0,block_num){
+        if(blocks[i][0]==pivot_id) return i;
+    }
+    return -1;
+}
+
 //greedy assignment to assign blocks to partitions
 void greedyAssignment(){
     //sort blocks by decreasing size |Bk|
@@ -101,11 +124,16 @@ void greedyAssignment(){
     //while there is unallocated blocks
     bool unallocated=true;
     int* allocation=new int[block_num];
-    FOR(i,0,block_num) allocation[i]=0;
+    //edgeCount[block_num] represent edges between current partition and block i
+    int* edgeCount=new int[block_num];
+    FOR(i,0,block_num){
+        allocation[i]=0;
+        edgeCount[i]=0;
+    }
     int current_partition=0;
     int size_limit=nodes/partitions+1;
     int current_space=size_limit;
-    edgeCountAvg=new double[block_num];
+    bool buildQueueFlag=false;
     
     while(unallocated && current_partition<partitions){
         cerr<<"In allocation loop"<<endl;
@@ -116,27 +144,25 @@ void greedyAssignment(){
             cerr<<"current shard is empty, select largest unallocated block"<<endl;
             //then chose the largest unassigned_block
             block_to_assign=chooseLargestUnallocatedBlock(allocation);
+            //build heap(priority queue after the assignment)
+            buildQueueFlag=true;
         }
         
         //else select the block with largest average in-degree & unallocated
         else{
             cerr<<"select largest average in-degree block"<<endl;
-            //need to clear previous edge counts as after new assignment it is changing
-            FOR(i,0,block_num){
-                edgeCountAvg[i]=0.0;
-            }
-            FOR(i,0,block_num){
-                //if still unallocated
-                if(allocation[i]==0){
-                    edgeCountAvg[i]=(double)countEdgesBetweenPartitionAndBlock(current_partition,i)/(double)blocks[i].size();
+            //if it is not empty, we can pop the largest item
+            if(!maxQueue.empty()){
+                cerr<<"("<<maxQueue.top().first<<","<<maxQueue.top().second<<")"<<endl;
+                int block_id=maxQueue.top().second;
+                maxQueue.pop();
+                //if it has been allocated already, means it is a deprecated item in the heap
+                while(allocation[block_id]==1 && !maxQueue.empty()){
+                    block_id=maxQueue.top().second;
+                    maxQueue.pop();
                 }
+                if(!maxQueue.empty()) block_to_assign=block_id;
             }
-            int max=0;
-            FOR(i,0,block_num){
-                if(edgeCountAvg[i]!=0.0 && edgeCountAvg[max]<edgeCountAvg[i]) max=i;
-            }
-            if(edgeCountAvg[max]!=0.0) block_to_assign=max;
-            //if there is no in-degree edges
             if(block_to_assign==-1) block_to_assign=chooseLargestUnallocatedBlock(allocation);
         }
         
@@ -165,6 +191,10 @@ void greedyAssignment(){
             //update info to the next partition
             current_partition++;
             current_space=size_limit;
+            
+            //Re-building priority queue after partition changes
+            maxQueue=priority_queue<pair<double,int>>();
+            buildQueueFlag=true;
         }
         //able to fit in this shard
         int current_shard=sizeOfBlock;
@@ -177,7 +207,34 @@ void greedyAssignment(){
             startingIndex++;
         }
         
+        //mark allocation of the cluster once assigned
         allocation[block_to_assign]=1;
+        
+        //do heap update when new cluster is assigned to partition
+        if(!buildQueueFlag){
+            int pivot=blocks[block_to_assign][0];
+            for(auto& iter : weighted_adjList[pivot]){
+                int node=iter.first;
+                int weight=iter.second;
+                //add weight to their respective block
+                int block_id=nodeFindBlock(node);
+                if(block_id!=-1){
+                    edgeCount[block_id]+=weight;
+                    double edgeCountAvg=(double)edgeCount[block_id]/(double)blocks[block_id].size();
+                    pair<double,int> p(edgeCountAvg, block_id);
+                    maxQueue.push(p);
+                }
+                else cerr<<"This is not a pivot node, and this should not happen."<<endl;
+            }
+        }
+        
+        //check whether need to rebuild the heap(priority queue) after the assignmemnt
+        if(buildQueueFlag){
+            FOR(i,0,block_num) edgeCount[i]=0;
+            buildQueue(allocation, edgeCount, current_partition);
+            buildQueueFlag=false;
+        }
+        //output debugging process
         cerr<<"block to allocate is: "<<block_to_assign<<endl;
         cerr<<"space left in current shard is: "<<current_space<<endl;
     }
@@ -185,10 +242,7 @@ void greedyAssignment(){
     //check sizes
     cerr<<endl<<"Sizes of partitions after greedy assignments: "<<endl;
     FOR(i,0,partitions) cerr<<shard[i].size()<<" "<<endl;
-    
-    //clear dynamic allocated memory
-    delete [] edgeCountAvg;
-    edgeCountAvg=nullptr;
+
 }
 
 void buildPrevShard(){
@@ -270,6 +324,43 @@ void loadTranslationAndBlock(){
     inFile.close();
 }
 
+//using translation table and eligible communities assignments(blocks) to form node weights(mass) and edge weights(weighted_adjList) to combine communities into a single node
+void combineCommunities(){
+    //initialize mass to 1
+    FOR(i,0,nodes){
+        mass[i]=1;
+    }
+    //transform mass according to comm
+    FOR(j,0,block_num){
+        //pivot node mass increases to community size if the comm size is not 0
+        if(blocks[j].size()>0) mass[blocks[j][0]]=blocks[j].size();
+        //reduce the mass of subordinate nodes
+        FOR(k,1,blocks[j].size()){
+            mass[blocks[j][k]]=0;
+        }
+    }
+    //form weighted adjList
+    //pivot node means the first node of a community or an individual node
+    FOR(y,0,nodes){
+        FOR(z,0,adjList[y].size()){
+            int pivot_x=nodesTranslation[y];
+            int pivot_y=nodesTranslation[adjList[y][z]];
+            //if they do not have the same pivot node, means it is an external edges
+            if(pivot_x!=pivot_y){
+                //check whether this edge is already added with weight before
+                //if we already pushed this edge, add 1 to its weight
+                if(weighted_adjList[pivot_x].find(pivot_y)!=weighted_adjList[pivot_x].end()){
+                    weighted_adjList[pivot_x][pivot_y]++;
+                }
+                //else add this entry to the hash map
+                else {
+                    weighted_adjList[pivot_x][pivot_y]=1;
+                }
+            }
+        }
+    }
+}
+
 //start of main program
 int main(int argc, const char * argv[]){
     
@@ -292,10 +383,14 @@ int main(int argc, const char * argv[]){
     prevShard=new int[nodes];
     adjList=new vector<int>[nodes];
     nodesTranslation=new int[nodes];
+    mass=new int[nodes];
+    weighted_adjList=new unordered_map<int,int>[nodes];
     
     //produce adjList
     createADJ();
     loadTranslationAndBlock();
+    combineCommunities();
+    
     //random sharding
     greedyAssignment();
     

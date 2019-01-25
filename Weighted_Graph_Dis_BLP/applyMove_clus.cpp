@@ -67,6 +67,7 @@ int nodes;
 int edges;
 int move_count;
 int block_num;
+int seed;
 
 void createADJ(){
     int from,to;
@@ -162,7 +163,7 @@ void cutList(){
                     int included=size-first_appearance;
                     
                     //do a weighted coin flip whether to move cluster
-                    srand(time(NULL));
+                    srand(seed);
                     bool move_cut_cluster=(rand()%distance)<included;
                     
                     //cerr<<"Whether to move the whole cluster: "<<move_cut_cluster<<endl;
@@ -323,6 +324,7 @@ int main(int argc, const char * argv[]){
     fileName=argv[1];
     partitions=atoi(argv[2]);
     x_file=argv[3];
+    seed=atoi(argv[4]);
     
     inFile.open(fileName,ios::in);
     

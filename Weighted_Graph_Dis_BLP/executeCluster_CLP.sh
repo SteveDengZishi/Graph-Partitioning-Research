@@ -11,7 +11,8 @@ echo -e "       Copyright © 2019 Steve DengZishi  New York University\n"
 #prompt user for input
 read -p "Please enter the fileName: " FileName
 read -p "Please enter the number of clusters: " cluster
-read -p "Please enter the number of partition: " shard
+read -p "Please enter the number of partition k (k<1000): " shard
+read -p "Enter the seed of random probability: " seed
 
 #compile all .cpp files to executables
 g++ -o cluster clustering.cpp -std=c++11
@@ -33,11 +34,11 @@ echo -e "g++ compiled disruptiveMove.cpp successfully\n"
 chmod +x checkConvergence.py
 
 echo -e "Running Clustering Algorithm...\n"
-./cluster $FileName $cluster
+./cluster $FileName $cluster $seed
 
 #Random initialization with clusters
 echo -e "Starting random initialization...\n"
-./randomAssignment $FileName $shard
+./randomAssignment $FileName $shard $seed
 
 echo -e "Initialization completed\n"
 #init
@@ -70,7 +71,7 @@ fi
 
 x_file=x_result_$i.txt
 
-./applyMove_clus $FileName $shard $x_file
+./applyMove_clus $FileName $shard $x_file $seed
 
 done
 

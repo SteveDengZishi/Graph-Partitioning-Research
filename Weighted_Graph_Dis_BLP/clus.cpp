@@ -54,9 +54,10 @@ double J;
 double JL;
 double* h;
 string verbose;
+int seed;
 
 void randomAssignment(){
-    srand(time(NULL));
+    srand(seed);
     //random sharding according using a integer hash then mod 8 to distribute to shards
     for(int i=0;i<nodes;i++){
         //        cout<<"i is: "<<i<<endl;
@@ -271,7 +272,7 @@ void printBlockSize(){
 
 /* void generate_pi_weights(){
  int sum = 0;
- srand(time(NULL));
+ srand(seed);
  for(int i=0;i<block_num;i++){
  pi_weights[i] = rand()%1000;
  sum+=pi_weights[i];
@@ -472,9 +473,10 @@ int main(int argc, const char * argv[]){
     //get stdin from shell script
     fileName=argv[1];
     block_num=atoi(argv[2]);
+    seed=atoi(argv[3]);
     iterations=0;
     
-    if(argc==4) verbose=argv[3];
+    if(argc==5) verbose=argv[4];
     
     //initialize n using block numbers
     vecN = new double[block_num];

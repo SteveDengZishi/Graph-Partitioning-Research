@@ -11,13 +11,14 @@ echo -e "       Copyright © 2019 Steve DengZishi  New York University\n"
 #prompt user for input
 read -p "Please enter the fileName: " FileName
 read -p "Please enter the number of clusters: " cluster
-read -p "Please enter the number of partition: " shard
+read -p "Please enter the number of partition k (k<1000): " shard
+read -p "Enter the seed of random probability: " seed
 
 #compile all .cpp files to executables
 g++ -o clus clus.cpp -std=c++11
 echo -e "\ng++ compiled clus.cpp successfully"
 g++ -o greedyAssignment greedyAssignment.cpp -std=c++11
-echo -e "g++ compiled RandomAssignment.cpp successfully"
+echo -e "g++ compiled greedyAssignment.cpp successfully"
 g++ -o clean clean.cpp -std=c++11
 echo -e "g++ compiled clean.cpp successfully"
 g++ -o lp_ingredient_producer_clus lp_ingredient_producer_clus.cpp -std=c++11
@@ -35,7 +36,7 @@ echo -e "g++ compiled disruptiveMove.cpp successfully\n"
 chmod +x checkConvergence.py
 
 echo -e "Running Clustering Algorithm...\n"
-./clus $FileName $cluster
+./clus $FileName $cluster $seed
 
 #Random initialization with clusters
 echo -e "Starting greedy initialization...\n"
@@ -46,7 +47,7 @@ echo -e "Initialization completed\n"
 skip=0
 last=0
 i=0
-th2=0.003
+th2=0.0005
 #start of iteration
 while true
 
@@ -87,7 +88,7 @@ echo "Disruptive condition met, Running clustered moving round"
 
 x_file=x_result_$i.txt
 
-./applyMove_clus $FileName $shard $x_file
+./applyMove_clus $FileName $shard $x_file $seed
 
 skip=1
 
