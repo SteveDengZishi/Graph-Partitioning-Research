@@ -35,8 +35,9 @@ g++ -o probDisruptiveMove probDisruptiveMove.cpp -std=c++11
 echo -e "g++ compiled disruptiveMove.cpp successfully\n"
 chmod +x checkConvergence.py
 
+verbose=""
 echo -e "Running Clustering Algorithm...\n"
-./clus $FileName $cluster $seed
+./clus $FileName $cluster $seed $verbose
 
 #Random initialization with clusters
 echo -e "Starting greedy initialization...\n"
