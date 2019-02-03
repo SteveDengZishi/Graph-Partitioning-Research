@@ -43,6 +43,7 @@ int nodes;
 int edges;
 int* mass;
 int* nodeBlockMap;
+string verbose;
 
 struct Greater
 {
@@ -60,7 +61,7 @@ int check_connection(int i, int j){
 }
 
 int countEdgesBetweenPartitionAndBlock(int y, int z){
-    cerr<<"counting edges between partition "<<y<<" and block "<<z<<endl;
+    if(verbose=="v") cerr<<"counting edges between partition "<<y<<" and block "<<z<<endl;
     int count = 0;
     //each of the nodes in block[z] check it adjMatrix with each node in partition y whether edge exists
     FOR(i,0,blocks[z].size()){
@@ -69,7 +70,7 @@ int countEdgesBetweenPartitionAndBlock(int y, int z){
             if(check_connection(shard[y][j],node)) count++;
         }
     }
-    cerr<<"the count is: "<<count<<endl;
+    if(verbose=="v") cerr<<"the count is: "<<count<<endl;
     return count;
 }
 
@@ -78,7 +79,7 @@ int chooseLargestUnallocatedBlock(int* allocation){
     FOR(i,0,block_num){
         int next_largest_block=block_sizes[i].second;
         if(allocation[next_largest_block]==0) {
-            cerr<<"the largest unallocated block is: "<<next_largest_block<<endl;
+            if(verbose=="v") cerr<<"the largest unallocated block is: "<<next_largest_block<<endl;
             int block_to_assign=next_largest_block;
             return block_to_assign;
         }
@@ -128,7 +129,7 @@ void greedyAssignment(){
         cerr<<block_sizes[i].first<<" "<<block_sizes[i].second<<endl;
         sum+=block_sizes[i].first;
     }
-    cerr<<"sum of the nodes are: "<<sum<<endl<<endl;
+    if(verbose=="v") cerr<<"sum of the nodes are: "<<sum<<endl<<endl;
     
     //while there is unallocated blocks
     bool unallocated=true;
@@ -146,12 +147,14 @@ void greedyAssignment(){
     maxQueue=priority_queue<pair<double,int>>();
     
     while(unallocated && current_partition<partitions){
-        cerr<<"In allocation loop"<<endl;
-        cerr<<"current partition is: "<<current_partition<<endl;
+        if(verbose=="v"){
+            cerr<<"In allocation loop"<<endl;
+            cerr<<"current partition is: "<<current_partition<<endl;
+        }
         int block_to_assign=-1;
         //start with the first shard, if it is empty
         if(shard[current_partition].size()==0){
-            cerr<<"current shard is empty, select largest unallocated block"<<endl;
+            if(verbose=="v") cerr<<"current shard is empty, select largest unallocated block"<<endl;
             //then chose the largest unassigned_block
             block_to_assign=chooseLargestUnallocatedBlock(allocation);
             //build heap(priority queue after the assignment)
@@ -160,7 +163,7 @@ void greedyAssignment(){
         
         //else select the block with largest average in-degree & unallocated
         else{
-            cerr<<"select largest average in-degree block"<<endl;
+            if(verbose=="v") cerr<<"select largest average in-degree block"<<endl;
             //if it is not empty, we can pop the largest item
             if(!maxQueue.empty()){
                 //cerr<<"("<<maxQueue.top().first<<","<<maxQueue.top().second<<")"<<endl;
@@ -186,11 +189,11 @@ void greedyAssignment(){
         //if block size is greater than remaining space
         //overflowing to the next shard
         int sizeOfBlock=blocks[block_to_assign].size();
-        cerr<<"The size of block is: "<<sizeOfBlock<<endl;
+        if(verbose=="v") cerr<<"The size of block is: "<<sizeOfBlock<<endl;
         //record the position of current movement
         int startingIndex=0;
         while(sizeOfBlock>current_space){
-            cerr<<"Not able to fit in this shard"<<endl;
+            if(verbose=="v") cerr<<"Not able to fit in this shard"<<endl;
             int current_shard=current_space;
             sizeOfBlock-=current_space;
             //moving nodes to this shard
@@ -206,13 +209,13 @@ void greedyAssignment(){
             current_space=size_limit;
             
             //Re-building priority queue after partition changes
-            cerr<<"Rebuilding priority queue"<<endl;
+            if(verbose=="v") cerr<<"Rebuilding priority queue"<<endl;
             maxQueue=priority_queue<pair<double,int>>();
             FOR(i,0,block_num) edgeCount[i]=0;
             //buildQueueFlag=true;
         }
         //able to fit in this shard
-        cerr<<"Able to fit in current shard"<<endl;
+        if(verbose=="v") cerr<<"Able to fit in current shard"<<endl;
         int current_shard=sizeOfBlock;
         current_space-=current_shard;
         //moving nodes
@@ -223,15 +226,15 @@ void greedyAssignment(){
             shard[current_partition].push_back(moving_node);
             startingIndex++;
         }
-        cerr<<"finished moving nodes"<<endl;
+        if(verbose=="v") cerr<<"finished moving nodes"<<endl;
         
         //mark allocation of the cluster once assigned
         allocation[block_to_assign]=1;
-        cerr<<"Marked allocation for block "<<block_to_assign<<endl;
+        if(verbose=="v") cerr<<"Marked allocation for block "<<block_to_assign<<endl;
         
         //do heap update when new cluster is assigned to partition
         //if(!buildQueueFlag){
-        cerr<<"Doing heap updates"<<endl;
+        if(verbose=="v") cerr<<"Doing heap updates"<<endl;
         int pivot=blocks[block_to_assign][0];
         for(auto& iter : weighted_adjList[pivot]){
             int node=iter.first;
@@ -257,12 +260,12 @@ void greedyAssignment(){
 //            buildQueueFlag=false;
 //        }
         //output debugging process
-        cerr<<"block to allocate is: "<<block_to_assign<<endl;
-        cerr<<"space left in current shard is: "<<current_space<<endl;
+        if(verbose=="v") cerr<<"block to allocate is: "<<block_to_assign<<endl;
+        if(verbose=="v") cerr<<"space left in current shard is: "<<current_space<<endl;
     }
     
     //check sizes
-    cerr<<endl<<"Sizes of partitions after greedy assignments: "<<endl;
+    if(verbose=="v") cerr<<endl<<"Sizes of partitions after greedy assignments: "<<endl;
     FOR(i,0,partitions) cerr<<shard[i].size()<<" "<<endl;
 
 }
@@ -389,6 +392,8 @@ int main(int argc, const char * argv[]){
     //get stdin from shell script
     fileName=argv[1];
     partitions=atoi(argv[2]);
+    
+    if(argc==4) verbose=argv[3];
     
     inFile.open(fileName,ios::in);
     

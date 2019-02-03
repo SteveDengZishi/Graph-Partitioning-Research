@@ -459,10 +459,10 @@ void printWeights(){
 }
 
 //prior values for a+0, b+0, a-0, b-0, vec{n0}
-double ap0=2;
+double ap0=3;
 double bp0=1;
 double am0=1;
-double bm0=2;
+double bm0=3;
 
 double* vecN;
 
@@ -472,17 +472,10 @@ int main(int argc, const char * argv[]){
     
     //get stdin from shell script
     fileName=argv[1];
-    block_num=atoi(argv[2]);
-    seed=atoi(argv[3]);
+    seed=atoi(argv[2]);
     iterations=0;
     
-    if(argc==5) verbose=argv[4];
-    
-    //initialize n using block numbers
-    vecN = new double[block_num];
-    FOR(i,0,block_num){
-        vecN[i]=1.0;
-    }
+    if(argc==4) verbose=argv[3];
     
     //Reading from graphs
     inFile.open(fileName,ios::in);
@@ -494,6 +487,14 @@ int main(int argc, const char * argv[]){
     
     //read number of nodes and edges
     inFile>>nodes>>edges;
+    
+    //block_num = 1/10 nodes;
+    block_num=nodes/10;
+    //initialize n using block numbers
+    vecN = new double[block_num];
+    FOR(i,0,block_num){
+        vecN[i]=1.0;
+    }
     
     //produce adjList && adjMatrix
     createADJ();

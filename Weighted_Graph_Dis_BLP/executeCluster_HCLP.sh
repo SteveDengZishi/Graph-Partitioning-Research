@@ -10,9 +10,9 @@ echo -e "\nClustered Prob-Disruptive Balanced Label Propagation  Version 1.6"
 echo -e "       Copyright © 2019 Steve DengZishi  New York University\n"
 #prompt user for input
 read -p "Please enter the fileName: " FileName
-read -p "Please enter the number of clusters: " cluster
 read -p "Please enter the number of partition k (k<1000): " shard
 read -p "Enter the seed of random probability: " seed
+read -p "Enter 'v' to verbose clustering movement outputs or press enter to skip: " verbose
 
 #compile all .cpp files to executables
 g++ -o clus clus.cpp -std=c++11
@@ -35,13 +35,12 @@ g++ -o probDisruptiveMove probDisruptiveMove.cpp -std=c++11
 echo -e "g++ compiled disruptiveMove.cpp successfully\n"
 chmod +x checkConvergence.py
 
-verbose=""
 echo -e "Running Clustering Algorithm...\n"
-./clus $FileName $cluster $seed $verbose
+./clus $FileName $seed $verbose
 
 #Random initialization with clusters
 echo -e "Starting greedy initialization...\n"
-./greedyAssignment $FileName $shard
+./greedyAssignment $FileName $shard $verbose
 
 echo -e "Initialization completed\n"
 #init
