@@ -126,7 +126,7 @@ void greedyAssignment(){
     //test whether they are sorted and check sum
     int sum=0;
     FOR(i,0,block_num){
-        cerr<<block_sizes[i].first<<" "<<block_sizes[i].second<<endl;
+        if(verbose=="v") cerr<<block_sizes[i].first<<" "<<block_sizes[i].second<<endl;
         sum+=block_sizes[i].first;
     }
     if(verbose=="v") cerr<<"sum of the nodes are: "<<sum<<endl<<endl;
@@ -265,7 +265,7 @@ void greedyAssignment(){
     }
     
     //check sizes
-    if(verbose=="v") cerr<<endl<<"Sizes of partitions after greedy assignments: "<<endl;
+    cerr<<endl<<"Sizes of partitions after greedy assignments: "<<endl;
     FOR(i,0,partitions) cerr<<shard[i].size()<<" "<<endl;
 
 }

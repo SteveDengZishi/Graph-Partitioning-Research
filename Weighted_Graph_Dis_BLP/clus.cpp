@@ -355,6 +355,7 @@ int findBestAssignmentK(int i,double J, double JL, double* h){
     for(auto itr=target_shards.begin(); itr!=target_shards.end(); itr++){
         //count wk = |E(i,Bk)| + |E(Bk,i)|
         int w_k = countEdgesBetweenNodeAndBlock(i, *itr);
+        //cerr<<"edges are: "<<w_k<<endl;
         //weigh on the block sizes
         int effective_size_k = blockSize[*itr];
         if(prevShard[i]==*itr) effective_size_k = blockSize[*itr] - 1;
@@ -488,8 +489,8 @@ int main(int argc, const char * argv[]){
     //read number of nodes and edges
     inFile>>nodes>>edges;
     
-    //block_num = 1/10 nodes;
-    block_num=nodes/10;
+    //block_num = 1/5 nodes;
+    block_num=nodes/5;
     //initialize n using block numbers
     vecN = new double[block_num];
     FOR(i,0,block_num){
