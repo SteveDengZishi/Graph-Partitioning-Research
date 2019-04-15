@@ -37,14 +37,6 @@ int partitions;
 int nodes;
 int edges;
 
-//functions here
-unsigned int int_hash(unsigned int x) {
-    x = ((x >> 16) ^ x) * 0x45d9f3b;
-    x = ((x >> 16) ^ x) * 0x45d9f3b;
-    x = (x >> 16) ^ x;
-    return x;
-}
-
 double printLocatlityFraction(){
     int localEdge=0;
     FOR(i,0,nodes){
@@ -69,16 +61,16 @@ void createADJ(){
 }
 
 void randomShard(){
+    srand(-1);
+    
     //random sharding according using a integer hash then mod 8 to distribute to shards
     for(int i=0;i<nodes;i++){
         //        cout<<"i is: "<<i<<endl;
-        unsigned hash_val = int_hash(i);
-        //        cout<<"hash is: "<<hash_val<<endl;
-        int shardID = hash_val % partitions;
+        int shard_assignment = rand() % partitions;
         //        cout<<"shard ID is: "<<shardID<<endl;
-        shard[shardID].push_back(i);
+        shard[shard_assignment].push_back(i);
         //mark prevShard for the 1st random Sharding
-        prevShard[i]=shardID;
+        prevShard[i] = shard_assignment;
     }
 }
 
