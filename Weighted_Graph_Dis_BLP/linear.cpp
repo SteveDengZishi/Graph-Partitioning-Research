@@ -14,7 +14,7 @@ using namespace std;
 int shard;
 int nodes;
 int* size;
-double f=0.10;
+double f=0.03;
 
 //convert number to 3 digit to format lp_eqns
 //we assume there are less than 1000 partitions, so maximum is 999 which has 3 number of digits, eg 1 becomes 001, 49 becomes 049

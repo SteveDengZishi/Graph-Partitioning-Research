@@ -320,7 +320,8 @@ void loadTranslationAndBlock(){
         nodesTranslation[z]=z;
     }
     
-    inFile.open("clusters.txt",ios::in);
+    string clusterFile = fileName.substr(0,fileName.find(".")) + "_clusters.txt";
+    inFile.open(clusterFile,ios::in);
     
     if(!inFile){
         cerr<<"Error occurs while opening the file"<<endl;

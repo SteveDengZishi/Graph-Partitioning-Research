@@ -16,8 +16,8 @@ read -p "Enter the number of partitions k (k<1000): " shard
 #compile all .cpp files to executables
 g++ -o clean clean.cpp -std=c++11
 echo -e "\ng++ compiled clean.cpp successfully"
-g++ -o lp_ingredient_producer lp_ingredient_producer.cpp -std=c++11
-echo "g++ compiled lp_ingredient_producer.cpp successfully"
+g++ -o lp_ingredient_producer lp_ingredient_producer_individual.cpp -std=c++11
+echo "g++ compiled lp_ingredient_producer_individual.cpp successfully"
 g++ -o linear linear.cpp -std=c++11
 echo "g++ compiled linear.cpp successfully"
 g++ -o applyMove applyMove.cpp -std=c++11

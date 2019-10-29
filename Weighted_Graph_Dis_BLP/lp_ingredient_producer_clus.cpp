@@ -380,7 +380,8 @@ void combineCommunities(){
 //load node translations, if a node belongs to a comm, its translate to its pivot(first) node in the community
 //blocks are the filtered block structures and its content
 void loadBlocks(){
-    inFile.open("clusters.txt",ios::in);
+    string clusterFile = fileName.substr(0,fileName.find(".")) + "_clusters.txt";
+    inFile.open(clusterFile,ios::in);
     
     if(!inFile){
         cerr<<"Error occurs while opening the file"<<endl;

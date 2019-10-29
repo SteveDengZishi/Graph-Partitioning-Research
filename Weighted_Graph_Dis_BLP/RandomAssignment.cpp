@@ -38,11 +38,10 @@ int partitions;
 int block_num;
 int nodes;
 int edges;
-int seed;
 
 //functions here
 void randomAssignment(){
-    srand(seed);
+    srand(-1);
     
     //random sharding according using a integer hash then mod 8 to distribute to shards
     for(int i=0;i<nodes;i++){
@@ -140,7 +139,6 @@ int main(int argc, const char * argv[]){
     //get stdin from shell script
     fileName=argv[1];
     partitions=atoi(argv[2]);
-    seed=atoi(argv[3]);
     
     inFile.open(fileName,ios::in);
     

@@ -35,8 +35,17 @@ g++ -o probDisruptiveMove probDisruptiveMove.cpp -std=c++11
 echo -e "g++ compiled disruptiveMove.cpp successfully\n"
 chmod +x checkConvergence.py
 
+IFS="." read -ra file <<< "$FileName"
+clusterFile="${file[0]}_clusters.txt"
+echo -e "Searching for clustered community file: $clusterFile\n"
+
+if [ ! -f "$clusterFile" ]
+then
 echo -e "Running Clustering Algorithm...\n"
 ./clus $FileName $seed $verbose
+else
+echo -e "Skipping Clustering as file exists...\n"
+fi
 
 #Random initialization with clusters
 echo -e "Starting greedy initialization...\n"

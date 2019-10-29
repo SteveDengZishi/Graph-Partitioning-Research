@@ -413,7 +413,8 @@ void saveAllComm(){
     //size_2 nodeID_1, nodeID_2,....
     //...in total block_num lines follows....
     FILE* outFile;
-    outFile=fopen("clusters.txt","wb");
+    string clusterFile = fileName.substr(0,fileName.find(".")) + "_clusters.txt";
+    outFile=fopen(clusterFile.c_str(), "wb");
     
     //filter out suitable communities
     vector<int> block_indexes;
