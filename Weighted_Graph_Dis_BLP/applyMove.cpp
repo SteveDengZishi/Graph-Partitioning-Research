@@ -107,7 +107,10 @@ void cutList(){
                 int fromTo; char x;
                 inFile>>x>>fromTo;
                 int size; inFile>>size;
+                if(size<0) size=0;
                 //cerr<<"size ("<<i<<","<<j<<") is: "<<size<<endl;
+                //cerr<<"vector size: "<<sortedCountIJ[i][j].size()<<endl;
+                //cerr<<"resize is: "<<size<<endl;
                 sortedCountIJ[i][j].resize(size);
             }
         }
