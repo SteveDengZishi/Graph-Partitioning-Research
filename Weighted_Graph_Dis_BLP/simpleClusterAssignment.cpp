@@ -22,7 +22,6 @@
 #include <unordered_set> //To remove duplicates and count size
 #include <functional> //To use std::hash
 #include <fstream> // To use c++ input and output to files
-#include <boost/log/trivial.hpp> // logging
 
 using namespace std;
 
@@ -53,44 +52,6 @@ struct Greater
 };
 
 //functions here
-//replace adjMatrix using adjList in checking edge connection
-int check_connection(int i, int j){
-    FOR(k,0,adjList[i].size()){
-        if(adjList[i][k] == j) return 1;
-    }
-    return 0;
-}
-
-int countEdgesBetweenPartitionAndBlock(int y, int z){
-    if(verbose=="v") BOOST_LOG_TRIVIAL(debug)<<"counting edges between partition "<<y<<" and block "<<z<<endl;
-    int count = 0;
-    //each of the nodes in block[z] check it adjMatrix with each node in partition y whether edge exists
-    FOR(i,0,blocks[z].size()){
-        int node = blocks[z][i];
-        FOR(j,0,shard[y].size()){
-            if(check_connection(shard[y][j],node)) count++;
-        }
-    }
-    if(verbose=="v") BOOST_LOG_TRIVIAL(debug)<<"the count is: "<<count<<endl;
-    return count;
-}
-
-int chooseLargestUnallocatedBlock(int* allocation){
-    //then chose the largest unassigned_block
-    FOR(i,0,block_num){
-        int next_largest_block=block_sizes[i].second;
-        if(allocation[next_largest_block]==0) {
-            if(verbose=="v") BOOST_LOG_TRIVIAL(debug)<<"the largest unallocated block is: "<<next_largest_block<<endl;
-            int block_to_assign=next_largest_block;
-            return block_to_assign;
-        }
-    }
-    return -1;
-}
-
-int nodeFindBlock(int pivot_id){
-    return nodeBlockMap[pivot_id];
-}
 
 void buildNodeBlockMap(){
     FOR(i,0,block_num){
@@ -114,10 +75,10 @@ void serpentineAssignment(){
     //test whether they are sorted and check sum
     int sum=0;
     FOR(i,0,block_num){
-        if(verbose=="v") BOOST_LOG_TRIVIAL(debug)<<block_sizes[i].first<<" "<<block_sizes[i].second<<endl;
+        if(verbose=="v") cout<<block_sizes[i].first<<" "<<block_sizes[i].second<<endl;
         sum+=block_sizes[i].first;
     }
-    if(verbose=="v") BOOST_LOG_TRIVIAL(debug)<<"sum of the nodes are: "<<sum<<endl<<endl;
+    if(verbose=="v") cout<<"sum of the nodes are: "<<sum<<endl<<endl;
     
     //caculate size celling for all partitions and intialize them
     int size_limit=nodes/partitions+1;
@@ -133,11 +94,11 @@ void serpentineAssignment(){
     //shard[partitions] vector is the partitions container
     FOR(i,0,block_num){
         if(verbose=="v"){
-            BOOST_LOG_TRIVIAL(debug)<<"In allocation loop"<<endl;
-            BOOST_LOG_TRIVIAL(debug)<<"current assigning block is: "<<i<<endl;
+            cout<<"In allocation loop"<<endl;
+            cout<<"current assigning block is: "<<i<<endl;
         }
         
-        if(verbose=="v") BOOST_LOG_TRIVIAL(debug)<<"The size of block is: "<<block_sizes[i]<<endl;
+        if(verbose=="v") cout<<"The size of block is: "<<block_sizes[i].first<<endl;
         
         //assign first then decide increase or decrease
         int ranked_block_size = block_sizes[i].first;
@@ -167,13 +128,13 @@ void serpentineAssignment(){
         }
         //this case should never happen
         else {
-            BOOST_LOG_TRIVIAL(error)<<"Error with shard id: "<<shard_id<<endl;
+            cout<<"Error with shard id: "<<shard_id<<endl;
         }
     }
     
     //check sizes
-    BOOST_LOG_TRIVIAL(debug)<<endl<<"Sizes of partitions after serpentine assignments: "<<endl;
-    FOR(i,0,partitions) BOOST_LOG_TRIVIAL(debug)<<shard[i].size()<<" "<<endl;
+    cout<<endl<<"Sizes of partitions after serpentine assignments: "<<endl;
+    FOR(i,0,partitions) cout<<shard[i].size()<<" "<<endl;
 
 }
 
@@ -231,7 +192,7 @@ void loadTranslationAndBlock(){
     inFile.open(clusterFile,ios::in);
     
     if(!inFile){
-        BOOST_LOG_TRIVIAL(debug)<<"Error occurs while opening the file"<<endl;
+        cout<<"Error occurs while opening the file"<<endl;
         exit(1);
     }
     //how many number of lines(communities)
@@ -306,7 +267,7 @@ int main(int argc, const char * argv[]){
     inFile.open(fileName,ios::in);
     
     if(!inFile){
-        BOOST_LOG_TRIVIAL(debug)<<"Error occurs while opening the file"<<endl;
+        cout<<"Error occurs while opening the file"<<endl;
         exit(1);
     }
     
@@ -329,9 +290,9 @@ int main(int argc, const char * argv[]){
     buildNodeBlockMap();
     
     //random sharding
-    greedyAssignment();
+    serpentineAssignment();
     
-    BOOST_LOG_TRIVIAL(debug)<<"\nFinished simple cluster assignment"<<endl;
+    cout<<"\nFinished simple cluster assignment"<<endl;
     //    printShard();
     //output locality info to shell
     double locality=printLocatlityFraction();
