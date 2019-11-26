@@ -33,6 +33,8 @@ g++ -o applyMove_clus applyMove_clus.cpp -std=c++11
 echo -e "g++ compiled applyMove_clus.cpp successfully"
 g++ -o probDisruptiveMove probDisruptiveMove.cpp -std=c++11
 echo -e "g++ compiled disruptiveMove.cpp successfully\n"
+g++ -o pairwise_partition_swap pairwise_partition_swap.cpp -std=c++11
+echo -e "g++ compiled pairwise_partition_swap.cpp successfully\n"
 chmod +x checkConvergence.py
 
 IFS="." read -ra file <<< "$FileName"
@@ -111,6 +113,9 @@ echo "The highest locality is: $last"
 else
 echo "The highest locality is: ${result[1]}"
 fi
+
+echo -e "Before ending, running pairwise partition swaps to exploit more locality"
+./pairwise_partition_swap $FileName $shard $verbose
 
 break
 
