@@ -17,8 +17,8 @@ read -p "Enter 'v' to verbose clustering movement outputs or press enter to skip
 #compile all .cpp files to executables
 g++ -o clus clus.cpp -std=c++11
 echo -e "\ng++ compiled clus.cpp successfully"
-g++ -o simpleClusterAssignment simpleClusterAssignment.cpp -std=c++11
-echo -e "g++ compiled greedyAssignment.cpp successfully"
+g++ -o serpentineClusterAssignment serpentineClusterAssignment.cpp -std=c++11
+echo -e "g++ compiled serpentineClusterAssignment.cpp successfully"
 g++ -o clean clean.cpp -std=c++11
 echo -e "g++ compiled clean.cpp successfully"
 g++ -o lp_ingredient_producer_clus lp_ingredient_producer_clus.cpp -std=c++11
@@ -49,13 +49,13 @@ fi
 
 #Random initialization with clusters
 echo -e "Starting serpentine initialization...\n"
-./simpleClusterAssignment $FileName $shard $verbose
+./serpentineClusterAssignment $FileName $shard $verbose
 
 echo -e "Initialization completed\n"
 #init
-individualMove=0
+#number of convergence reached
+convergence=0
 i=0
-th2=0.0005
 #start of iteration
 while true
     do
@@ -65,12 +65,18 @@ while true
     #double round brackets performs arithmetic operation and enable you to drop the $
     #after the first 2 rounds to start checking convergence, no longer need to skip consecutive rounds
     if ((i>2))
-        then
+    then
         result=($(./checkConvergence.py))
     fi
     
-    if [ "${result[0]}" == "FALSE" ] || [ $individualMove -eq 0 ]
-        then
+    if [ "${result[0]}" == "TRUE" ]
+    then
+        ((convergence++))
+    fi
+    echo -e "\nConvergence number is $convergence"
+    
+    if [ $convergence -eq 0 ]
+    then
         echo -e "Running clustered moving round\n"
         
         ./lp_ingredient_producer_clus $FileName $shard > lp_ingred_$i.txt
@@ -82,8 +88,8 @@ while true
         ./applyMove_clus $FileName $shard $x_file $seed
 
 
-    elif [ $individualMove -eq 1 ] && [ "${result[0]}" == "TRUE" ]
-        then
+    elif [ $convergence -eq 2 ]
+    then
         echo -e "Converges, ending Balanced Label Propagation"
         
         echo "The highest locality is: ${result[1]}"
@@ -93,15 +99,14 @@ while true
 
     else
         echo -e "Increase in locality converges for clustered movements, moving individual rounds onwards"
-        individualMove=1
         
-        ./lp_ingredient_producer_clus $FileName $shard > lp_ingred_$i.txt
+        ./lp_ingredient_producer_individual $FileName $shard > lp_ingred_$i.txt
 
         ./linear < lp_ingred_$i.txt | lp_solve | ./clean | sort > x_result_$i.txt
 
         x_file=x_result_$i.txt
 
-        ./applyMove_clus $FileName $shard $x_file $seed
+        ./applyMove $FileName $shard $x_file $seed
         
     fi
 
