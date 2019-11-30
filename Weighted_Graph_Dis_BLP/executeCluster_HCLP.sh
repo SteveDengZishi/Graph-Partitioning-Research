@@ -2,11 +2,12 @@
 
 #  Cluster_HCLP.sh
 #  Hybrid clustered plus linear programming (HCLP)
+#  With pairwise partitions swapping at the end of convergence
 #  Boost
 #
-#  Created by Steve DengZishi on 1/7/19.
+#  Created by Steve DengZishi on 11/28/19.
 #  Copyright © 2019 Steve DengZishi. All rights reserved.
-echo -e "\nClustered Prob-Disruptive Balanced Label Propagation  Version 1.6"
+echo -e "\nClustered Prob-Disruptive Balanced Label Propagation  Version 2.0"
 echo -e "       Copyright © 2019 Steve DengZishi  New York University\n"
 #prompt user for input
 read -p "Please enter the fileName: " FileName
@@ -32,7 +33,7 @@ echo -e "g++ compiled applyMove.cpp successfully"
 g++ -o applyMove_clus applyMove_clus.cpp -std=c++11
 echo -e "g++ compiled applyMove_clus.cpp successfully"
 g++ -o probDisruptiveMove probDisruptiveMove.cpp -std=c++11
-echo -e "g++ compiled disruptiveMove.cpp successfully\n"
+echo -e "g++ compiled disruptiveMove.cpp successfully"
 g++ -o pairwise_partition_swap pairwise_partition_swap.cpp -std=c++11
 echo -e "g++ compiled pairwise_partition_swap.cpp successfully\n"
 chmod +x checkConvergence.py
@@ -114,8 +115,8 @@ else
 echo "The highest locality is: ${result[1]}"
 fi
 
-echo -e "Before ending, running pairwise partition swaps to exploit more locality"
-./pairwise_partition_swap $FileName $shard $verbose
+echo -e "\nBefore ending, running pairwise partition swaps to exploit more locality"
+./pairwise_partition_swap $FileName $shard
 
 break
 
