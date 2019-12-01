@@ -250,7 +250,7 @@ void swapNodes(int i, int j, int count){
         }
         else cerr<<"Critical Error: swapping partitions "<<i<<" "<<j<<" are in wrong state. This should never happen"<<endl;
     }
-    cout<<count+1<<" number of node pairs swapped"<<endl;
+    cout<<count<<" number of node pairs swapped"<<endl;
 }
 
 //swapping nodes from pairwise partitions to kick out more nodes and make space for the swaps
