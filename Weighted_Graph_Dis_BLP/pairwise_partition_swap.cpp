@@ -253,6 +253,13 @@ void swapNodes(int i, int j, int count){
     cout<<count<<" number of node pairs swapped"<<endl;
 }
 
+int check_connection(int i, int j){
+    FOR(k,0,adjList[i].size()){
+        if(adjList[i][k] == j) return 1;
+    }
+    return 0;
+}
+
 //swapping nodes from pairwise partitions to kick out more nodes and make space for the swaps
 void pairwiseSwap(){
     move_count=0;
@@ -267,14 +274,16 @@ void pairwiseSwap(){
                 int total_gain=0;
                 //within move size, only move top k pairs with pair net_gain > 0
                 FOR(k,0,move_size){
-                    int net_gain = send_vec[k].first + rec_vec[k].first;
+                    int net_gain = send_vec[k].first + rec_vec[k].first - 2 * check_connection(send_vec[k].second,rec_vec[k].first);
                     //cout<<"net_gain for moving "<<k+1<<" pair is: "<<net_gain<<endl;
                     if(net_gain<=0){
                         //cout<<"stop swapping between partitions "<<i<<" "<<j<<endl;
                         //cout<<"number of nodes swapped is: "<<k+1<<endl;
                         //swap top k nodes among partition i & j
-                        swapNodes(i,j,k);
-                        cout<<"total gain is: "<<total_gain<<endl;
+                        if(k!=0){
+                            swapNodes(i,j,k);
+                            cout<<"total gain is: "<<total_gain<<endl;
+                        }
                         move_count+=k;
                         break;
                     }
@@ -285,6 +294,7 @@ void pairwiseSwap(){
             }
         }
     }
+    cout<<"There are "<<move_count<<" nodes moved in pairwise partition swaps"<<endl;
 }
 
 void reConstructShard(){

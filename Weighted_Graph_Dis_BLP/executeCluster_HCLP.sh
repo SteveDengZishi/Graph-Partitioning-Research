@@ -106,6 +106,9 @@ skip=1
 
 last=${result[1]}
 
+echo -e "\nRunning pairwise partition swaps to exploit more locality"
+./pairwise_partition_swap $FileName $shard
+
 else
 echo -e "Converges, ending Balanced Label Propagation"
 if (( $(echo "$last > ${result[1]}" | bc -l) ))

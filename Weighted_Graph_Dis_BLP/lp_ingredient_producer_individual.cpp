@@ -122,28 +122,47 @@ void printSortedCount(int i, int j){
 
 //directly produce SortedCount to save time mapping and sorting
 void produceSortedCountIJ(){
+    cerr<<"In produceSortedCountIJ"<<endl;
     for(int i=0;i<nodes;i++){
         //the position (shardID) of the current node
         int from=prevShard[i];
         
-        //directly filter out the top gain movement, by default was itself at current position
-        int maxGain=0;
-        int maxDest=from;
+        //filter out the top 3 gains movement using priority queue, and assign them with probabilities 50%, 30%, 20%
+        priority_queue<pair<int,int>> top_gain_queue;
         
         for(int to=0;to<partitions;to++){
             //for any other shard other than the current node
             if(from!=to){
                 //neighbors at other shard - neighbors at current shard
                 int incr_cnt=neighbors[i][to]-neighbors[i][from];
-                if(incr_cnt>maxGain){
-                    maxGain=incr_cnt;
-                    maxDest=to;
+                //only put positive gain into the queue
+                if(incr_cnt>0){
+                    top_gain_queue.emplace(incr_cnt,to);
                 }
             }
         }
+        
+        //random integer from 0-99, (0-49) first move option, (50-79) second option, (80-99) third option
+        int choice;
+        int rand_num = rand()%100;
+        //cerr<<"The random number is: "<<rand_num<<endl;
+        if(rand_num<=49) choice=1;
+        else if(rand_num<=79) choice=2;
+        else choice=3;
+        
+        //cerr<<"The chosen choice is: "<<choice<<endl;
+        
+        //get the top move option according to probability
+        pair<int,int> best_move(0,0);
+        while(choice>0 && !top_gain_queue.empty()){
+            best_move=top_gain_queue.top();
+            //cerr<<"Choice is : "<<choice<<" . Best move now is : "<<best_move.first<<" "<<best_move.second<<endl;
+            top_gain_queue.pop();
+            choice--;
+        }
         //check whether there is a effective move option, put directly into sortedcountIJ
-        if (maxGain!=0 && maxDest!=from){
-            sortedCountIJ[from][maxDest].emplace_back(maxGain,i);
+        if (best_move.first>0 && best_move.second!=from){
+            sortedCountIJ[from][best_move.second].emplace_back(best_move.first, i);
         }
     }
 }
