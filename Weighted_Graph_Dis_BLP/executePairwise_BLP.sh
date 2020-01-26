@@ -114,7 +114,7 @@ fi
 
 else
 echo -e "Running individual moving round\n"
-./lp_ingredient_producer_individual $FileName $shard > lp_ingred_$i.txt
+./lp_ingredient_producer_individual $FileName $shard > lp_ingred.txt
 
 ./linear < lp_ingred.txt > lp_source.txt
 lp_solve < lp_source.txt > lp_rawResult.txt
@@ -129,7 +129,7 @@ fi
 
 else
 echo -e "Running individual moving round\n"
-./lp_ingredient_producer_individual $FileName $shard > lp_ingred_$i.txt
+./lp_ingredient_producer_individual $FileName $shard > lp_ingred.txt
 
 ./linear < lp_ingred.txt > lp_source.txt
 lp_solve < lp_source.txt > lp_rawResult.txt
