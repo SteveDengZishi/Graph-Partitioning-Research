@@ -8,7 +8,7 @@ Created on Sat Jul 22 13:41:59 2017
 from bokeh.plotting import figure, show, output_file
 from bokeh.layouts import column
 
-output_file('BLPG_result_graph.html')
+output_file('output/BLPG_result_graph.html')
 
 iteration=[]
 nodes=[]

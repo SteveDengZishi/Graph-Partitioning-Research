@@ -136,12 +136,14 @@ void produceSortedCountIJ(){
                 //neighbors at other shard - neighbors at current shard
                 int incr_cnt=neighbors[i][to]-neighbors[i][from];
                 //only put positive gain into the queue
+                //adding zero gains for relaxation of lp constraints
                 if(incr_cnt>0){
                     top_gain_queue.emplace(incr_cnt,to);
                 }
             }
         }
         
+        //assign move with probability according to top 3 move options
         //random integer from 0-99, (0-49) first move option, (50-79) second option, (80-99) third option
         int choice;
         int rand_num = rand()%100;
@@ -153,7 +155,7 @@ void produceSortedCountIJ(){
         //cerr<<"The chosen choice is: "<<choice<<endl;
         
         //get the top move option according to probability
-        pair<int,int> best_move(0,0);
+        pair<int,int> best_move(-1,-1);
         while(choice>0 && !top_gain_queue.empty()){
             best_move=top_gain_queue.top();
             //cerr<<"Choice is : "<<choice<<" . Best move now is : "<<best_move.first<<" "<<best_move.second<<endl;
@@ -165,6 +167,7 @@ void produceSortedCountIJ(){
             sortedCountIJ[from][best_move.second].emplace_back(best_move.first, i);
         }
     }
+    cerr<<"Finished produceSortedCountIJ"<<endl;
 }
 
 //create original unweighted adjacency list from the input graph
@@ -339,7 +342,8 @@ void printTotal(){
 
 //start of main()
 int main(int argc, const char * argv[]) {
-    
+    cerr<<"In lp_ingredient_producer_individual"<<endl;
+    cerr<<"------------------------------------"<<endl;
     //get stdin from shell script
     fileName=argv[1];
     partitions=atoi(argv[2]);
@@ -406,6 +410,7 @@ int main(int argc, const char * argv[]) {
     //directly produce SortedCountIJ by looping all nodes and selecting top gain movements
     produceSortedCountIJ();
     
+    cerr<<"Sorting gains in all inpartition pairs i, j"<<endl;
     FOR(i,0,partitions){
         FOR(j,0,partitions){
             if(i!=j){
@@ -482,5 +487,7 @@ int main(int argc, const char * argv[]) {
     mass=nullptr;
     nodesTranslation=nullptr;
     blocks=nullptr;
+
+    cerr<<"------------------------------------"<<endl;
     return 0;
 }

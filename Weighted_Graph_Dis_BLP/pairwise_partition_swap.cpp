@@ -79,6 +79,7 @@ string fileName;
 // Stores the first choices of all nodes after each iteration
 int* prevShard;
 int move_count;
+string verbose;
 
 void printShard(){
     for(int i=0;i<partitions;i++){
@@ -238,7 +239,7 @@ void printTotal(){
 }
 
 void swapNodes(int i, int j, int count){
-    cout<<"In Swaping Nodes between partitions "<<i<<" "<<j<<endl;
+    if(verbose=='v') cout<<"In Swaping Nodes between partitions "<<i<<" "<<j<<endl;
     FOR(z,0,count){
         //find each of the node swapping pairs
         int node_i_j = sortedCountIJ[i][j][z].second;
@@ -250,7 +251,7 @@ void swapNodes(int i, int j, int count){
         }
         else cerr<<"Critical Error: swapping partitions "<<i<<" "<<j<<" are in wrong state. This should never happen"<<endl;
     }
-    cout<<count<<" number of node pairs swapped"<<endl;
+    if(verbose=='v') cout<<count<<" number of node pairs swapped"<<endl;
 }
 
 int check_connection(int i, int j){
@@ -260,41 +261,111 @@ int check_connection(int i, int j){
     return 0;
 }
 
-//swapping nodes from pairwise partitions to kick out more nodes and make space for the swaps
-void pairwiseSwap(){
-    move_count=0;
-    FOR(i,0,partitions){
-        //only looping through when j > i for ij pair, to prevent duplicates
-        FOR(j,i,partitions){
-            if(i!=j){
-                //send and rec vectors are all sorted with gains
-                vector<PII> send_vec = sortedCountIJ[i][j];
-                vector<PII> rec_vec = sortedCountIJ[j][i];
-                int move_size = min(send_vec.size(), rec_vec.size());
-                int total_gain=0;
-                //within move size, only move top k pairs with pair net_gain > 0
-                FOR(k,0,move_size){
-                    int net_gain = send_vec[k].first + rec_vec[k].first - 2 * check_connection(send_vec[k].second,rec_vec[k].first);
-                    //cout<<"net_gain for moving "<<k+1<<" pair is: "<<net_gain<<endl;
-                    if(net_gain<=0){
-                        //cout<<"stop swapping between partitions "<<i<<" "<<j<<endl;
-                        //cout<<"number of nodes swapped is: "<<k+1<<endl;
-                        //swap top k nodes among partition i & j
-                        if(k!=0){
-                            swapNodes(i,j,k);
-                            cout<<"total gain is: "<<total_gain<<endl;
-                        }
-                        move_count+=k;
-                        break;
-                    }
-                    else{
-                        total_gain+=net_gain;
-                    }
+void printPairSchedule(int** schedule, int size){
+    FOR(i,0,2){
+        FOR(j,0,size){
+            cout<<schedule[i][j]<<" ";
+        }
+        cout<<endl;
+    }
+}
+
+void pairwiseSwap(int** schedule, int size){
+    //if the partitions number is odd, the last one will not swap in the round
+    int swappingPairs=size;
+    if(partitions%2!=0){
+        swappingPairs=size-1;
+    }
+    //doing swapping for each pairs
+    FOR(i,0,swappingPairs){
+        int part_1 = schedule[0][i];
+        int part_2 = schedule[1][i];
+        //send and rec vectors are all sorted with gains
+        vector<PII> send_vec = sortedCountIJ[part_1][part_2];
+        vector<PII> rec_vec = sortedCountIJ[part_2][part_1];
+        
+        int move_size = min(send_vec.size(), rec_vec.size());
+        int total_gain=0;
+        //within move size, only move top k pairs with pair net_gain > 0
+        FOR(k,0,move_size){
+            int net_gain = send_vec[k].first + rec_vec[k].first - 2 * check_connection(send_vec[k].second,rec_vec[k].first);
+            //cout<<"net_gain for moving "<<k+1<<" pair is: "<<net_gain<<endl;
+            //below block only get executed one time when we find the stopping threshold and will get break out of the loop.
+            if(net_gain<=0){
+                //cout<<"stop swapping between partitions "<<i<<" "<<j<<endl;
+                //cout<<"number of nodes swapped is: "<<k+1<<endl;
+                //swap top k nodes among partition i & j
+                if(k!=0){
+                    swapNodes(part_1,part_2,k);
+                    if(verbose=='v') cout<<"total gain is: "<<total_gain<<endl;
                 }
+                move_count+=k;
+                break;
+            }
+            else{
+                total_gain+=net_gain;
             }
         }
     }
+}
+
+//swapping nodes from pairwise partitions to kick out more nodes and make space for the swaps
+void roundRobinPairSwap(){
+    move_count=0;
+    //create pairing array
+    int** pairSchedule;
+    pairSchedule = new int*[2];
+    int halfCeiling = partitions/2 + (partitions%2!=0);
+    
+    for(int i=0;i<2;i++){
+        pairSchedule[i] = new int[halfCeiling];
+    }
+    
+    //initialize schedules
+    int start=0;
+    FOR(i,0,2){
+        FOR(j,0,halfCeiling){
+            pairSchedule[i][j]=start;
+            start++;
+        }
+    }
+    //debug
+    printPairSchedule(pairSchedule, halfCeiling);
+    
+    //starting first time swaps according to the schedule
+    pairwiseSwap(pairSchedule, halfCeiling);
+    
+    //starting rotations, odd or even, odd need to have one dummy empty shift
+    FOR(i,0,partitions-2){
+        
+        //fix the schedule[0][1] pos and then shift clock-wise (partitions-2) times to meet all other partitions
+        //first row movement
+        int firstLast=pairSchedule[0][halfCeiling-1];
+        for(int j=halfCeiling-1;j>1;j--){
+            pairSchedule[0][j]=pairSchedule[0][j-1];
+        }
+        pairSchedule[0][1]=pairSchedule[1][0];
+        
+        //second row movement
+        for(int j=0;j<halfCeiling-1;j++){
+            pairSchedule[1][j]=pairSchedule[1][j+1];
+        }
+        pairSchedule[1][halfCeiling-1]=firstLast;
+        
+        //debug
+        printPairSchedule(pairSchedule, halfCeiling);
+        //do swap after schedule shift is done
+        pairwiseSwap(pairSchedule, halfCeiling);
+    }
     cout<<"There are "<<move_count<<" nodes moved in pairwise partition swaps"<<endl;
+    
+    //de-allocate memory space
+    for(int i=0;i<2;i++){
+        delete [] pairSchedule[i];
+    }
+    
+    delete [] pairSchedule;
+    pairSchedule=nullptr;
 }
 
 void reConstructShard(){
@@ -327,6 +398,7 @@ int main(int argc, const char * argv[]) {
     //get stdin from shell script
     fileName=argv[1];
     partitions=atoi(argv[2]);
+    if(argc==4) verbose=argv[3];
     
     inFile.open(fileName,ios::in);
     
@@ -391,7 +463,7 @@ int main(int argc, const char * argv[]) {
         }
     }
     
-    pairwiseSwap();
+    roundRobinPairSwap();
     reConstructShard();
     double locality = printLocatlityFraction();
     
