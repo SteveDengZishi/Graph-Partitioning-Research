@@ -239,7 +239,7 @@ void printTotal(){
 }
 
 void swapNodes(int i, int j, int count){
-    if(verbose=='v') cout<<"In Swaping Nodes between partitions "<<i<<" "<<j<<endl;
+    if(verbose=="v") cout<<"In Swaping Nodes between partitions "<<i<<" "<<j<<endl;
     FOR(z,0,count){
         //find each of the node swapping pairs
         int node_i_j = sortedCountIJ[i][j][z].second;
@@ -251,7 +251,7 @@ void swapNodes(int i, int j, int count){
         }
         else cerr<<"Critical Error: swapping partitions "<<i<<" "<<j<<" are in wrong state. This should never happen"<<endl;
     }
-    if(verbose=='v') cout<<count<<" number of node pairs swapped"<<endl;
+    if(verbose=="v") cout<<count<<" number of node pairs swapped"<<endl;
 }
 
 int check_connection(int i, int j){
@@ -297,7 +297,7 @@ void pairwiseSwap(int** schedule, int size){
                 //swap top k nodes among partition i & j
                 if(k!=0){
                     swapNodes(part_1,part_2,k);
-                    if(verbose=='v') cout<<"total gain is: "<<total_gain<<endl;
+                    if(verbose=="v") cout<<"total gain is: "<<total_gain<<endl;
                 }
                 move_count+=k;
                 break;

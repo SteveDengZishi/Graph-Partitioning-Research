@@ -102,8 +102,10 @@ echo -e "Converges, ending Balanced Label Propagation"
 if (( $(echo "$last > ${result[1]}" | bc -l) ))
 then
 echo "The highest locality is: $last"
+echo "($FileName, $shard, $last)" >> output/result_data.txt
 else
 echo "The highest locality is: ${result[1]}"
+echo "($FileName, $shard, ${result[1]})" >> output/result_data.txt
 fi
 
 break
@@ -114,7 +116,9 @@ else
 echo -e "Running individual moving round\n"
 ./lp_ingredient_producer_individual $FileName $shard > lp_ingred_$i.txt
 
-./linear < lp_ingred_$i.txt | lp_solve | ./clean | sort > x_result_$i.txt
+./linear < lp_ingred.txt > lp_source.txt
+lp_solve < lp_source.txt > lp_rawResult.txt
+./clean < lp_rawResult.txt | sort > x_result_$i.txt
 
 x_file=x_result_$i.txt
 
@@ -127,7 +131,9 @@ else
 echo -e "Running individual moving round\n"
 ./lp_ingredient_producer_individual $FileName $shard > lp_ingred_$i.txt
 
-./linear < lp_ingred_$i.txt | lp_solve | ./clean | sort > x_result_$i.txt
+./linear < lp_ingred.txt > lp_source.txt
+lp_solve < lp_source.txt > lp_rawResult.txt
+./clean < lp_rawResult.txt | sort > x_result_$i.txt
 
 x_file=x_result_$i.txt
 
