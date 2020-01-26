@@ -270,40 +270,39 @@ void printPairSchedule(int** schedule, int size){
     }
 }
 
-void pairwiseSwap(int** schedule, int size){
-    //if the partitions number is odd, the last one will not swap in the round
-    int swappingPairs=size;
-    if(partitions%2!=0){
-        swappingPairs=size-1;
-    }
+void pairwiseSwap(int** schedule, int swappingPairs){
     //doing swapping for each pairs
     FOR(i,0,swappingPairs){
         int part_1 = schedule[0][i];
         int part_2 = schedule[1][i];
-        //send and rec vectors are all sorted with gains
-        vector<PII> send_vec = sortedCountIJ[part_1][part_2];
-        vector<PII> rec_vec = sortedCountIJ[part_2][part_1];
-        
-        int move_size = min(send_vec.size(), rec_vec.size());
-        int total_gain=0;
-        //within move size, only move top k pairs with pair net_gain > 0
-        FOR(k,0,move_size){
-            int net_gain = send_vec[k].first + rec_vec[k].first - 2 * check_connection(send_vec[k].second,rec_vec[k].first);
-            //cout<<"net_gain for moving "<<k+1<<" pair is: "<<net_gain<<endl;
-            //below block only get executed one time when we find the stopping threshold and will get break out of the loop.
-            if(net_gain<=0){
-                //cout<<"stop swapping between partitions "<<i<<" "<<j<<endl;
-                //cout<<"number of nodes swapped is: "<<k+1<<endl;
-                //swap top k nodes among partition i & j
-                if(k!=0){
-                    swapNodes(part_1,part_2,k);
-                    if(verbose=="v") cout<<"total gain is: "<<total_gain<<endl;
+
+        //if the partitions number is odd, the boundary one will not swap in the round
+        if(part_1 != partitions && part_2 != partitions){
+            //send and rec vectors are all sorted with gains
+            vector<PII> send_vec = sortedCountIJ[part_1][part_2];
+            vector<PII> rec_vec = sortedCountIJ[part_2][part_1];
+            
+            int move_size = min(send_vec.size(), rec_vec.size());
+            int total_gain=0;
+            //within move size, only move top k pairs with pair net_gain > 0
+            FOR(k,0,move_size){
+                int net_gain = send_vec[k].first + rec_vec[k].first - 2 * check_connection(send_vec[k].second,rec_vec[k].first);
+                //cout<<"net_gain for moving "<<k+1<<" pair is: "<<net_gain<<endl;
+                //below block only get executed one time when we find the stopping threshold and will get break out of the loop.
+                if(net_gain<=0){
+                    //cout<<"stop swapping between partitions "<<i<<" "<<j<<endl;
+                    //cout<<"number of nodes swapped is: "<<k+1<<endl;
+                    //swap top k nodes among partition i & j
+                    if(k!=0){
+                        swapNodes(part_1,part_2,k);
+                        if(verbose=="v") cout<<"total gain is: "<<total_gain<<endl;
+                    }
+                    move_count+=k;
+                    break;
                 }
-                move_count+=k;
-                break;
-            }
-            else{
-                total_gain+=net_gain;
+                else{
+                    total_gain+=net_gain;
+                }
             }
         }
     }
