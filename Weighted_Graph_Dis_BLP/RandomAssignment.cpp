@@ -30,7 +30,6 @@ using namespace std;
 //global variables here
 vector<int>* shard;
 int* prevShard;
-int* nodesTranslation;
 vector<int>* adjList;
 fstream inFile;
 string fileName;
@@ -45,27 +44,12 @@ void randomAssignment(){
     
     //random sharding according using a integer hash then mod 8 to distribute to shards
     for(int i=0;i<nodes;i++){
-        int pivot_id = nodesTranslation[i];
-        //if this is a pivot node, give random assignment
-        if(pivot_id==i){
-            //        cout<<"i is: "<<i<<endl;
-            int shard_assignment = rand() % partitions;
-            //        cout<<"shard ID is: "<<shardID<<endl;
-            shard[shard_assignment].push_back(i);
-            //mark prevShard for the 1st random Sharding
-            prevShard[i] = shard_assignment;
-        }
-    }
-    
-    //else assign them to the same shard with their pivots
-    //but we need to make sure pivot nodes get assigned before any other members so in a separate loop
-    for(int i=0;i<nodes;i++){
-        int pivot_id = nodesTranslation[i];
-        //assign non-pivot nodes to the same shards as their pivot
-        if(pivot_id!=i){
-            prevShard[i]=prevShard[pivot_id];
-            shard[prevShard[pivot_id]].push_back(i);
-        }
+        //        cout<<"i is: "<<i<<endl;
+        int shard_assignment = rand() % partitions;
+        //        cout<<"shard ID is: "<<shardID<<endl;
+        shard[shard_assignment].push_back(i);
+        //mark prevShard for the 1st random Sharding
+        prevShard[i] = shard_assignment;
     }
 }
 
@@ -104,35 +88,6 @@ void printShard(){
     cout<<endl;
 }
 
-void loadTranslation(){
-    //init array
-    FOR(z,0,nodes){
-        nodesTranslation[z]=z;
-    }
-    inFile.open("clusters.txt",ios::in);
-    
-    if(!inFile){
-        cerr<<"Error occurs while opening the file"<<endl;
-        exit(1);
-    }
-    //how many number of lines(communities)
-    inFile>>block_num;
-    //each line start with a size, and size number of nodes with the first as the pivot
-    FOR(i,0,block_num){
-        int size;
-        int pivot;
-        inFile>>size;
-        if(size){
-            inFile>>pivot;
-            FOR(j,1,size){
-                int sub_node; inFile>>sub_node;
-                nodesTranslation[sub_node]=pivot;
-            }
-        }
-    }
-    inFile.close();
-}
-
 //start of main program
 int main(int argc, const char * argv[]){
     
@@ -154,11 +109,9 @@ int main(int argc, const char * argv[]){
     shard=new vector<int>[partitions];
     prevShard=new int[nodes];
     adjList=new vector<int>[nodes];
-    nodesTranslation=new int[nodes];
     
     //produce adjList
     createADJ();
-    loadTranslation();
     //random sharding
     randomAssignment();
     cerr<<"finished random assignment"<<endl;
@@ -196,13 +149,11 @@ int main(int argc, const char * argv[]){
     delete [] shard;
     delete [] prevShard;
     delete [] adjList;
-    delete [] nodesTranslation;
     
     //remove dangling pointers
     shard=nullptr;
     adjList=nullptr;
     prevShard=nullptr;
-    nodesTranslation=nullptr;
     
     return 0;
 }
