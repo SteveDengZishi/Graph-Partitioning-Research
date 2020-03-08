@@ -17,7 +17,7 @@ read -p "Enter the seed of random probability: " seed
 #compile all .cpp files to executables
 g++ -o clean clean.cpp -std=c++11
 echo -e "\ng++ compiled clean.cpp successfully"
-g++ -o lp_ingredient_producer lp_ingredient_producer.cpp -std=c++11
+g++ -o lp_ingredient_producer_individual lp_ingredient_producer_individual.cpp -std=c++11
 echo "g++ compiled lp_ingredient_producer.cpp successfully"
 g++ -o linear linear.cpp -std=c++11
 echo "g++ compiled linear.cpp successfully"
@@ -27,8 +27,6 @@ g++ -o probDisruptiveMove probDisruptiveMove.cpp -std=c++11
 echo "g++ compiled disruptiveMove.cpp successfully"
 g++ -o randomAssignment randomAssignment.cpp -std=c++11
 echo -e "g++ compiled randomAssignment.cpp successfully"
-g++ -o replicate replicate.cpp -std=c++11
-echo -e "g++ compiled replicate.cpp successfully\n"
 chmod +x checkConvergence.py
 
 #time the effective execution
@@ -105,7 +103,7 @@ fi
 
 else
 #taking too much time for large graph
-./lp_ingredient_producer $FileName $shard > lp_ingred.txt
+./lp_ingredient_producer_individual $FileName $shard > lp_ingred.txt
 
 ./linear < lp_ingred.txt | lp_solve | ./clean | sort > x_result_$i.txt
 
@@ -117,7 +115,7 @@ skip=0
 fi
 
 else
-./lp_ingredient_producer $FileName $shard > lp_ingred.txt
+./lp_ingredient_producer_individual $FileName $shard > lp_ingred.txt
 
 ./linear < lp_ingred.txt | lp_solve | ./clean | sort > x_result_$i.txt
 
@@ -129,9 +127,6 @@ skip=0
 fi
 
 done
-
-echo -e "\nAdding replication of popular nodes"
-./replicate $FileName $shard
 )
 
 #plotting graph after finish looping

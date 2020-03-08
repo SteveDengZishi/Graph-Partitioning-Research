@@ -59,7 +59,7 @@ echo -e "Initialization completed\n"
 skip=0
 last=0
 i=0
-th2=0.0005
+th2=0.001
 #start of iteration
 while true
 
@@ -94,9 +94,11 @@ if (( $(echo "$converge_imp_ratio > $th2" | bc -l) ))
 then
 echo "Disruptive condition met, Running clustered moving round"
 
-./lp_ingredient_producer_clus $FileName $shard > lp_ingred_$i.txt
+./lp_ingredient_producer_clus $FileName $shard > lp_ingred.txt
 
-./linear < lp_ingred_$i.txt | lp_solve | ./clean | sort > x_result_$i.txt
+./linear < lp_ingred.txt > lp_source.txt
+lp_solve < lp_source.txt > lp_rawResult.txt
+./clean < lp_rawResult.txt | sort > x_result_$i.txt
 
 x_file=x_result_$i.txt
 
@@ -105,9 +107,6 @@ x_file=x_result_$i.txt
 skip=1
 
 last=${result[1]}
-
-echo -e "\nRunning pairwise partition swaps to exploit more locality"
-./pairwise_partition_swap $FileName $shard
 
 else
 echo -e "Converges, ending Balanced Label Propagation"
@@ -118,18 +117,17 @@ else
 echo "The highest locality is: ${result[1]}"
 fi
 
-echo -e "\nBefore ending, running pairwise partition swaps to exploit more locality"
-./pairwise_partition_swap $FileName $shard
-
 break
 
 fi
 
 else
 echo -e "Running individual moving round\n"
-./lp_ingredient_producer_individual $FileName $shard > lp_ingred_$i.txt
+./lp_ingredient_producer_individual $FileName $shard > lp_ingred.txt
 
-./linear < lp_ingred_$i.txt | lp_solve | ./clean | sort > x_result_$i.txt
+./linear < lp_ingred.txt > lp_source.txt
+lp_solve < lp_source.txt > lp_rawResult.txt
+./clean < lp_rawResult.txt | sort > x_result_$i.txt
 
 x_file=x_result_$i.txt
 
@@ -140,9 +138,11 @@ fi
 
 else
 echo -e "Running individual moving round\n"
-./lp_ingredient_producer_individual $FileName $shard > lp_ingred_$i.txt
+./lp_ingredient_producer_individual $FileName $shard > lp_ingred.txt
 
-./linear < lp_ingred_$i.txt | lp_solve | ./clean | sort > x_result_$i.txt
+./linear < lp_ingred.txt > lp_source.txt
+lp_solve < lp_source.txt > lp_rawResult.txt
+./clean < lp_rawResult.txt | sort > x_result_$i.txt
 
 x_file=x_result_$i.txt
 

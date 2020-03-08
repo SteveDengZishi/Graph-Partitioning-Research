@@ -2,7 +2,7 @@
 # experimentRunner.sh
 
 fileName=('livejournal.txt' 'orkut.txt')
-partitions=(10 20 30 40 50)
+partitions=(20 40 60 80 100)
 seed=-1
 
 for file in "${fileName[@]}"

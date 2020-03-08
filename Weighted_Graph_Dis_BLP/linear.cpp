@@ -152,7 +152,8 @@ void printIJK(){
 }
 
 int main(){
-
+    cerr<<"In linear"<<endl;
+    cerr<<"------------------------------------"<<endl;
     cin>>nodes>>shard;
 //    cout<<nodes<<" "<<shard<<endl;
     
@@ -180,5 +181,7 @@ int main(){
     delete [] size;
     size=nullptr;
     
+    cerr<<"------------------------------------"<<endl;
+    cerr<<"Starting lp_solver"<<endl;
     return 0;
 }

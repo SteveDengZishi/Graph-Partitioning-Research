@@ -16,6 +16,9 @@ using namespace std;
 int partitions;
 
 int main(){
+	cerr<<"Finished lp_solver"<<endl;
+	cerr<<"In cleaning results"<<endl;
+    cerr<<"------------------------------------"<<endl;
 //    cin>>partitions;
     string line;
 //    for(int i=0;i<(4+partitions*(partitions-1));i++){
@@ -24,5 +27,6 @@ int main(){
     while(getline(cin,line)){
         if(line[0]=='x') cout<<line<<endl;
     }
+    cerr<<"------------------------------------"<<endl;
     return 0;
 }

@@ -17,7 +17,7 @@ read -p "Enter the seed of random probability: " seed
 #compile all .cpp files to executables
 g++ -o cluster clustering.cpp -std=c++11
 echo -e "\ng++ compiled clustering.cpp successfully"
-g++ -o randomAssignment randomAssignment.cpp -std=c++11
+g++ -o randomClusterAssignment randomClusterAssignment.cpp -std=c++11
 echo -e "g++ compiled randomAssignment.cpp successfully"
 g++ -o clean clean.cpp -std=c++11
 echo -e "g++ compiled clean.cpp successfully"
@@ -38,7 +38,7 @@ echo -e "Running Clustering Algorithm...\n"
 
 #Random initialization with clusters
 echo -e "Starting random initialization...\n"
-./randomAssignment $FileName $shard $seed
+./randomClusterAssignment $FileName $shard $seed
 
 echo -e "Initialization completed\n"
 #init

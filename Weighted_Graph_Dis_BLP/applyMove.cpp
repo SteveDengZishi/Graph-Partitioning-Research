@@ -193,7 +193,8 @@ void printTotalMovement(){
 
 
 int main(int argc, const char * argv[]){
-
+    cerr<<"In applyMove"<<endl;
+    cerr<<"------------------------------------"<<endl;
     //get stdin from shell script
     fileName=argv[1];
     partitions=atoi(argv[2]);
@@ -290,4 +291,6 @@ int main(int argc, const char * argv[]){
     adjList=nullptr;
     prevShard=nullptr;
     sortedCountIJ=nullptr;
+    
+    cerr<<"------------------------------------"<<endl;
 }
