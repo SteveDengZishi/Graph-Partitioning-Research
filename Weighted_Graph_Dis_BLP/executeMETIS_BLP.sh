@@ -52,20 +52,15 @@ for((i=1;i<iter+1;i++))
 do
 echo "In iteration" $i
 
-./lp_ingredient_producer_individual > lp_ingred.txt <<EOF
-$FileName
-$partition
-EOF
+./lp_ingredient_producer_individual $FileName $partition > lp_ingred.txt
 
-./linear < lp_ingred.txt | lp_solve | ./clean | sort > x_result_$i.txt
+./linear < lp_ingred.txt > lp_source.txt
+lp_solve < lp_source.txt > lp_rawResult.txt
+./clean < lp_rawResult.txt | sort > x_result_$i.txt
 
 x_file=x_result_$i.txt
 
-./applyMove <<EOF
-$FileName
-$partition
-$x_file
-EOF
+./applyMove $FileName $partition $x_file
 done
 )
 
