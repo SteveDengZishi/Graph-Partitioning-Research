@@ -101,11 +101,11 @@ void loadShard(){
 }
 
 //start of main program
-int main(){
+int main(int argc, const char * argv[]){
     
     //get stdin from shell script
-    cin>>fileName;
-    cin>>partitions;
+    fileName=argv[1];
+    partitions=atoi(argv[2]);
     
     inFile.open(fileName,ios::in);
     

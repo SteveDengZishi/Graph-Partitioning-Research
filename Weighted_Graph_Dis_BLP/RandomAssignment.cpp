@@ -39,8 +39,8 @@ int nodes;
 int edges;
 
 //functions here
-void randomAssignment(){
-    srand(-1);
+void randomAssignment(int seed){
+    srand(seed);
     
     //random sharding according using a integer hash then mod 8 to distribute to shards
     for(int i=0;i<nodes;i++){
@@ -94,11 +94,12 @@ int main(int argc, const char * argv[]){
     //get stdin from shell script
     fileName=argv[1];
     partitions=atoi(argv[2]);
+    seed=atoi(argv[3]);
     
     inFile.open(fileName,ios::in);
     
     if(!inFile){
-        cerr<<"Error occurs while opening the file"<<endl;
+        cerr<<"Error occurs while opening the file "<<fileName<<endl;
         exit(1);
     }
     
@@ -113,8 +114,8 @@ int main(int argc, const char * argv[]){
     //produce adjList
     createADJ();
     //random sharding
-    randomAssignment();
-    cerr<<"finished random assignment"<<endl;
+    randomAssignment(seed);
+    cout<<"finished random assignment"<<endl;
 //    printShard();
     //output locality info to shell
     double locality=printLocatlityFraction();

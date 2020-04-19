@@ -384,7 +384,8 @@ void loadBlocks(){
     inFile.open(clusterFile,ios::in);
     
     if(!inFile){
-        cerr<<"Error occurs while opening the file"<<endl;
+        cerr<<"Error occurs while opening the file "<<clusterFile<<endl;
+        cerr<<"You probably are not running from commGreedy init, need to run it to write clusters file to use"<<endl;
         exit(1);
     }
     //how many number of lines(communities)
@@ -476,7 +477,7 @@ int main(int argc, const char * argv[]) {
     inFile.open(fileName,ios::in);
     
     if(!inFile){
-        cerr<<"Error occurs while opening the file"<<endl;
+        cerr<<"Error occurs while opening the file "<<fileName<<endl;
         exit(1);
     }
     

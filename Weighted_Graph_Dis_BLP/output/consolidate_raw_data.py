@@ -5,6 +5,8 @@ Created on Fri Jan 31 16:40:00 2020
 
 @author: stevedeng
 """
+#this script is only used for consolidating all data into a readable .txt file not related to graph plotting
+
 file_header='graph_plotting_'
 file_extension='.txt'
 

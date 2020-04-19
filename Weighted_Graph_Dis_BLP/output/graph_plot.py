@@ -16,6 +16,7 @@ dataset={}
 #for each line plot, x should be the iterations, y should be the locality
 
 def readGeneratedFile(filename, methodname):
+    print(filename)
     inFile=open(filename, 'r')
     title=inFile.readline()
     itr=0
@@ -55,16 +56,21 @@ def readManualFile(filename):
 
 
 def main():
-    #gpmetis and comm + greedy are straight lines data that sit in the manual file
-    generatedResults = ['cluster_move', 'pairwise_swap', 'Ugandar', 'disruptive']
-    colors = {'cluster_move':'red', 'pairwise_swap':'blue', 'comm + greedy':'green', 'gpmetis':'orange', 'Ugandar':'grey', 'disruptive':'pink'}
+    
+    #ALL PLOTS
+    #generatedResults = ['cluster_move', 'pairwise_swap', 'Ugandar', 'disruptive', 'commGreedy_Ugandar', 'gpmetis_Ugandar']
+    
+    generatedResults = ['commGreedy_clusterMove', 'commGreedy_pairwiseSwap', 'commGreedy_Ugandar', 'gpmetis_Ugandar', 'gpmetis_pairwiseSwap', 'gpmetis_clusterMove']
+    colors = {'commGreedy_clusterMove':'red', 'commGreedy_pairwiseSwap':'blue', 'commGreedy':'brown', 'gpmetis_clusterMove':'gold','gpmetis':'orange', 'random_Ugandar':'grey', 'random_disruptive':'pink', 'gpmetis_Ugandar':'purple', 'commGreedy_Ugandar':'black', 'gpmetis_pairwiseSwap':'green'}
     for method in generatedResults:
         filename = file_header + method + file_extension
         readGeneratedFile(filename, method)
     
-    readManualFile('graph_plotting_comm_BLP.txt')
+    #gpmetis and comm + greedy are straight lines data that sit in the manual file
+    #can be used for other manual graphs
+    readManualFile('graph_plotting_manual.txt')
     
-    plot1=figure(plot_width=400, plot_height=400, title="Locality against number of iterations")
+    plot1=figure(plot_width=600, plot_height=600, title="Locality against number of iterations")
     
     #dataset layout dataset['methodName']=[ [Y(locality)] , [X(iterations)] ]
     for key, value in dataset.items():

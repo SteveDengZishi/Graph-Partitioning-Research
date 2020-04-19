@@ -10,16 +10,22 @@
 echo -e "\nPairwise paritions swap enhanced Balanced Label Propagation  Version 3.0"
 echo -e "       Copyright © 2019 Steve DengZishi  New York University\n"
 
-if ["$#" -ne 4]; then
-echo "Wrong number of args provided: Use Case 1.Filename 2.partitions 3.seed 4.verbose"
+if [ "$#" -eq 4 ]; then
+
+verbose=$4
+
+elif [ "$#" -eq 3 ]; then
+
+verbose=''
+
+else
+echo "Wrong number of args provided: Use Case 1.Filename 2.partitions 3.seed 4.verbose(optional)"
 exit 1
 fi
 
-#prompt user for input
-FileName = $1
-shard = $2
-seed = $3
-verbose = $4
+FileName=$1
+shard=$2
+seed=$3
 
 #compile all .cpp files to executables
 g++ -o clean clean.cpp -std=c++11

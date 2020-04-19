@@ -31,14 +31,21 @@ verbose=''
 else
 echo "illegal arguments, please check use cases, either give two or six arguments as below"
 echo "./experimentRunner [init method] [improvement method] (graphFile) (partition_num_start) (increment) (n_increment)"
+echo "init method list: [random, commGreedy, gpmetis]"
+echo "improvement/refinement method list: [Ugandar, clusterMove, pairwiseSwap]"
 exit 1
 fi
 
-chmod +x execute"$initMethod"_init.sh
-chmod +x "$impMethod".sh
+#cleaning up all past execution intermediate files
+rm -rf lp_ingred*.txt
+rm -rf x_result*.txt
+rm -rf metis.graph*
+
+chmod +x execute_"$initMethod".sh
+chmod +x execute_"$impMethod".sh
 
 #initialization method
-./execute"$initMethod"_init.sh FileName shard seed verbose
+./execute_"$initMethod".sh $FileName $shard $seed $verbose
 
 if [ $? -gt 0 ] ; then
      echo "Execution of initialization method has failed please check"
@@ -47,7 +54,7 @@ if [ $? -gt 0 ] ; then
 fi
 
 #improvement/refinement method
-./execute"$impMethod".sh FileName shard seed verbose
+./execute_"$impMethod".sh $FileName $shard $seed $verbose
 
 if [ $? -gt 0 ] ; then
      echo "Execution of improvement method has failed please check"
@@ -58,6 +65,8 @@ fi
 #plotting graph after finish looping
 chmod +x graph_plot.py
 ./graph_plot.py
+
+cp graph_plotting_data.txt output/graph_plotting_"$initMethod"_"$impMethod".txt
 
 
 

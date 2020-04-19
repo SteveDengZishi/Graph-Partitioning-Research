@@ -91,7 +91,7 @@ void printADJ(){
 int main(int argc, const char * argv[]) {
 
     //read nodes and edges
-    cin>>fileName;
+    fileName=argv[1];
     
     inFile.open(fileName,ios::in);
     
@@ -107,8 +107,21 @@ int main(int argc, const char * argv[]) {
     
     //create adjacency list from edge list
     createADJ();
-    cout<<nodes<<" "<<edges<<endl;
-    printADJ();
+    
+    //write data to file for graph plotting
+    FILE* outFile=fopen("metis.graph","w");
+    fprintf(outFile,"%d %d\n",nodes,edges);
+    
+    //printADJ();
+    for(int i=0;i<nodes;i++){
+    //        cout<<i<<": ";
+            for(int j=0;j<adjList[i].size();j++){
+                fprintf(outFile,"%d ",adjList[i][j]);
+            }
+            fprintf(outFile,"\n");
+        }
+    
+    fclose(outFile);
     
     //free up memory
     delete [] adjList;
