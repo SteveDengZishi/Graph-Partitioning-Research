@@ -492,6 +492,14 @@ int main(int argc, const char * argv[]){
     
     //block_num = 1/5 nodes;
     block_num=nodes/5;
+    
+    if(verbose=="v"){
+        //Debugging weights
+        cout<<"Node number is: "<<nodes<<endl;
+        cout<<"Block number is (1/5 of nodes): "<<block_num<<endl;
+        cout<<"Edge number is: "<<edges<<endl;
+    }
+    
     //initialize n using block numbers
     vecN = new double[block_num];
     FOR(i,0,block_num){

@@ -19,20 +19,18 @@ read -p "Please enter the number of partition k (k<1000): " shard
 read -p "Enter the seed of random probability: " seed
 read -p "Enter 'v' to verbose clustering movement outputs or press enter to skip: " verbose
 
-elif [ "$#" -eq 6 ]
+elif [ "$#" -eq 4 ]
 then
 FileName=$3
 shard=$4
-increment=$5
-n_increment=$6
 seed=-1
 verbose=''
 
 else
-echo "illegal arguments, please check use cases, either give two or six arguments as below"
-echo "./experimentRunner [init method] [improvement method] (graphFile) (partition_num_start) (increment) (n_increment)"
-echo "init method list: [random, commGreedy, gpmetis]"
-echo "improvement/refinement method list: [Ugandar, clusterMove, pairwiseSwap]"
+echo -e "illegal number of arguments, please check use cases and give two or four arguments as below, * are mandantory\n"
+echo -e "./experimentRunner (init_method *) (improvement_method *) (graphFile) (partition_num)\n"
+echo "Available init method list: [random, commGreedy, gpmetis]"
+echo -e "Available improvement/refinement method list: [Ugandar, clusterMove, pairwiseSwap]\n"
 exit 1
 fi
 
@@ -66,7 +64,9 @@ fi
 chmod +x graph_plot.py
 ./graph_plot.py
 
-cp graph_plotting_data.txt output/graph_plotting_"$initMethod"_"$impMethod".txt
+IFS="." read -ra file <<< "$FileName"
+cp graph_plotting_data.txt output/graph_plotting_"$initMethod"_"$impMethod"_"${file[0]}"_"$shard".txt
+cp sharding_result.bin output/sharding_result_"$initMethod"_"$impMethod"_"${file[0]}"_"$shard".bin
 
 
 

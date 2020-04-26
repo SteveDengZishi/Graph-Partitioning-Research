@@ -7,7 +7,7 @@ Created on Sat Jul 22 13:41:59 2017
 """
 from bokeh.plotting import figure, show, output_file
 
-output_file('graph_comparison_plot.html')
+output_file('line_graph_comparison_plot.html')
 file_header='graph_plotting_'
 file_extension='.txt'
 #dataset layout dataset['methodName']=[ [Y(locality)] , [X(iterations)] ]
@@ -58,17 +58,39 @@ def readManualFile(filename):
 def main():
     
     #ALL PLOTS
-    #generatedResults = ['cluster_move', 'pairwise_swap', 'Ugandar', 'disruptive', 'commGreedy_Ugandar', 'gpmetis_Ugandar']
+    generatedResults = [ 
+                         'random_Ugandar',
+                         'random_clusterMove',
+                         'random_pairwiseSwap',
+                         'commGreedy_Ugandar',
+                         'commGreedy_clusterMove',
+                         'commGreedy_pairwiseSwap',
+                         'gpmetis_Ugandar',
+                         'gpmetis_clusterMove',
+                         'gpmetis_pairwiseSwap'
+                     ]
     
-    generatedResults = ['commGreedy_clusterMove', 'commGreedy_pairwiseSwap', 'commGreedy_Ugandar', 'gpmetis_Ugandar', 'gpmetis_pairwiseSwap', 'gpmetis_clusterMove']
-    colors = {'commGreedy_clusterMove':'red', 'commGreedy_pairwiseSwap':'blue', 'commGreedy':'brown', 'gpmetis_clusterMove':'gold','gpmetis':'orange', 'random_Ugandar':'grey', 'random_disruptive':'pink', 'gpmetis_Ugandar':'purple', 'commGreedy_Ugandar':'black', 'gpmetis_pairwiseSwap':'green'}
+    colors = {
+                'commGreedy_clusterMove':'red', 
+                'commGreedy_pairwiseSwap':'blue',
+                'commGreedy_Ugandar':'black',
+                'commGreedy':'brown', 
+                'gpmetis_clusterMove':'gold',
+                'gpmetis_Ugandar':'purple', 
+                'gpmetis_pairwiseSwap':'green',
+                'gpmetis':'orange',
+                'random_Ugandar':'grey', 
+                'random_pairwiseSwap':'pink',
+                'random_clusterMove':'silver',
+            }
+    
     for method in generatedResults:
         filename = file_header + method + file_extension
         readGeneratedFile(filename, method)
     
     #gpmetis and comm + greedy are straight lines data that sit in the manual file
     #can be used for other manual graphs
-    readManualFile('graph_plotting_manual.txt')
+    #readManualFile('graph_plotting_manual.txt')
     
     plot1=figure(plot_width=600, plot_height=600, title="Locality against number of iterations")
     

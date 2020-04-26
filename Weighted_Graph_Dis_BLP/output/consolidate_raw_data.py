@@ -38,7 +38,17 @@ def main():
     outFile=open('raw_data.txt', 'w')
     outFile.close()
     
-    methodList = ['cluster_move', 'pairwise_swap', 'Ugandar', 'disruptive']
+    methodList = [ 
+                         'random_Ugandar',
+                         'random_clusterMove',
+                         'random_pairwiseSwap',
+                         'commGreedy_Ugandar',
+                         'commGreedy_clusterMove',
+                         'commGreedy_pairwiseSwap',
+                         'gpmetis_Ugandar',
+                         'gpmetis_clusterMove',
+                         'gpmetis_pairwiseSwap'
+                     ]
     
     for method in methodList:
         filename = file_header + method + file_extension

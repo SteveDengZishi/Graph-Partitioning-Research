@@ -37,6 +37,7 @@ int partitions;
 int block_num;
 int nodes;
 int edges;
+int seed;
 
 //functions here
 void randomAssignment(int seed){
