@@ -2,7 +2,7 @@
 # experimentRunner.sh
 
 #fileName=('athletes_edges_clean.txt' 'orkut.txt')
-fileName=('roadNetCA.txt')
+fileName=('company_edges_clean.txt' 'livejournal.txt')
 partitions=(10 30 50 70 90)
 initMethod=('commGreedy' 'random' 'gpmetis')
 imprvMethod=('Ugandar' 'clusterMove' 'pairwiseSwap')
@@ -26,4 +26,5 @@ do
     mkdir "${files[0]}"
     mv graph_plotting_*"${files[0]}"*.txt "${files[0]}"/
     mv sharding_result_*"${files[0]}"*.bin "${files[0]}"/
+    cd ../
 done
