@@ -14,6 +14,7 @@
 '''
 #read from recently added graph plotting data
 th1=0.001
+#th1=0.005
 infile=open("graph_plotting_data.txt","r")
 infile.readline()
 node=[]

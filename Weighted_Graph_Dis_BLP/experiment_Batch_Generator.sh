@@ -2,7 +2,7 @@
 # experimentRunner.sh
 
 #fileName=('athletes_edges_clean.txt' 'orkut.txt')
-fileName=('company_edges_clean.txt' 'livejournal.txt')
+fileName=('roadNetCA.txt')
 partitions=(10 30 50 70 90)
 initMethod=('commGreedy' 'random' 'gpmetis')
 imprvMethod=('Ugandar' 'clusterMove' 'pairwiseSwap')
