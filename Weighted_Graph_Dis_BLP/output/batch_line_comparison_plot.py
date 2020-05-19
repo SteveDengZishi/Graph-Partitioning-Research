@@ -90,7 +90,7 @@ def generatePlotForGraph(graph_name):
     
     #benchmarks file is for recording initialization methods performances alone, has a different parse logic to parse the initial locality before refinements
     for method in benchmarks:
-        print(method,file=raw_data_file, end=' ')
+        print(method.split('_')[0],file=raw_data_file, end=' ')
         result_lst = []
         for part in partitions:
             filename = folder_name + '/' + file_header + method + '_' + folder_name + '_' + str(part) + file_extension
@@ -102,7 +102,7 @@ def generatePlotForGraph(graph_name):
         
     
     raw_data_file.close()
-    plot1=figure(plot_width=700, plot_height=600, title= folder_name + " Graph - Final Locality (Y) against number of partitions (X)")
+    plot1=figure(plot_width=700, plot_height=700, title= folder_name + " Graph - Final Locality (Y) against number of partitions (X)")
     
     #ploting each method lines    
     for key, value in result_map.items():
