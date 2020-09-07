@@ -1,6 +1,6 @@
 # !/bin/bash
 
-#  execute_Ugandar.sh
+#  execute_BLP.sh
 #  In Ugandar proposed linear constraint relocation
 #
 #  Created by Steve DengZishi on 3/21/18.

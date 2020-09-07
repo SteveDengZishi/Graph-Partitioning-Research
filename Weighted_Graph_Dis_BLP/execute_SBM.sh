@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  execute_commGreedy.sh
+#  execute_SBM.sh
 #  Community Clustering and Greedy Mappping to Partitions (Sharding Social Network) Initialization
 #
 #  Created by Steve DengZishi on 11/28/19.

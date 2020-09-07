@@ -1,6 +1,6 @@
 # !/bin/bash
 
-#  executeProbDisruptiveBLP.sh
+#  execute_Random.sh
 #  Boost
 #
 #  Created by Steve DengZishi on 3/21/18.

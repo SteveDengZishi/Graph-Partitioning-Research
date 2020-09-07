@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  METIS_BLP.sh
+#  execute_Metis.sh
 #  Boost
 #
 #  Created by Steve DengZishi on 7/24/17.

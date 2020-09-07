@@ -1,13 +1,13 @@
 #!/bin/bash
 
-#  executePairwise_BLP.sh
+#  execute_BLP-KL.sh
 #  Hybrid pairwise partition swap plus linear programming (HCLP)
 #  With pairwise partitions swapping at convergence
 #  Boost
 #
 #  Created by Steve DengZishi on 11/28/19.
 #  Copyright © 2019 Steve DengZishi. All rights reserved.
-echo -e "\nPairwise paritions swap enhanced Balanced Label Propagation  Version 3.0"
+echo -e "\nPairwise paritions swap (KL) enhanced Balanced Label Propagation  Version 3.0"
 echo -e "       Copyright © 2019 Steve DengZishi  New York University\n"
 
 if [ "$#" -eq 4 ]; then

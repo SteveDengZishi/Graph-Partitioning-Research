@@ -1,18 +1,30 @@
 # !/bin/bash
 
-#  executeProbDisruptiveBLP.sh
+#  execute_BLP-RD.sh
 #  Boost
 #
 #  Created by Steve DengZishi on 3/21/18.
 #  Copyright © 2018 Steve DengZishi. All rights reserved.
-echo -e "\nRandomly Initialized Balanced Label Propagation      Version 1.6"
+
 echo -e "    Probability Based Selective Ratio Disruption with Replication"
 echo -e "       Copyright © 2017 Steve DengZishi  New York University\n"
 
-#set the source file for input
-read -p "Enter the file name of the undirected graph: " FileName
-read -p "Enter the number of partitions k (k<1000): " shard
-read -p "Enter the seed of random probability: " seed
+if [ "$#" -eq 4 ]; then
+
+verbose=$4
+
+elif [ "$#" -eq 3 ]; then
+
+verbose=''
+
+else
+echo "Wrong number of args provided: Use Case 1.Filename 2.partitions 3.seed 4.verbose(optional)"
+exit 1
+fi
+
+FileName=$1
+shard=$2
+seed=$3
 
 #compile all .cpp files to executables
 g++ -o clean clean.cpp -std=c++11
@@ -25,18 +37,10 @@ g++ -o applyMove applyMove.cpp -std=c++11
 echo "g++ compiled applyMove.cpp successfully"
 g++ -o probDisruptiveMove probDisruptiveMove.cpp -std=c++11
 echo "g++ compiled disruptiveMove.cpp successfully"
-g++ -o randomAssignment randomAssignment.cpp -std=c++11
-echo -e "g++ compiled randomAssignment.cpp successfully"
 chmod +x checkConvergence.py
 
 #time the effective execution
 time(
-#initialize using random assignment outside of iteration
-echo -e "Starting random initialization...\n"
-./randomAssignment $FileName $shard
-
-
-echo -e "Initialization completed\n"
 
 #to make sure do not run two disruptive rounds in a row
 skip=0

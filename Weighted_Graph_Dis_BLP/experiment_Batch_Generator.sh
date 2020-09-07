@@ -2,10 +2,10 @@
 # experimentRunner.sh
 
 #fileName=('athletes_edges_clean.txt' 'orkut.txt')
-fileName=('roadNetCA.txt')
+fileName=('facebook_combined.txt')
 partitions=(10 30 50 70 90)
-initMethod=('commGreedy' 'random' 'gpmetis')
-imprvMethod=('Ugandar' 'clusterMove' 'pairwiseSwap')
+initMethod=('Random')
+imprvMethod=('BLP')
 seed=-1
 
 for file in ${fileName[@]}
