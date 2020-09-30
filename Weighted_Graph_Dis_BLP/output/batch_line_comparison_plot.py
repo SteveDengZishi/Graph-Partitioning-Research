@@ -104,17 +104,20 @@ def generatePlotForGraph(graph_name):
         x_data=value[1]
 
         init_method = methodName.split('_')[0]
-        refine_method = methodName.split('_')[1]
+        refine_method = ""
+
+        if len(methodName.split('_')) > 1:
+            refine_method = methodName.split('_')[1]
         
         # add both a line and another pattern representing refinement methods
-        plot1.line(x=x_data, y=y_data, line_width=2, color=colors[init_method], legend_label=methodName.split('_')[1]+'('+ init_method +')')
+        plot1.line(x=x_data, y=y_data, line_width=2, color=colors[init_method], legend_label=refine_method+'('+ init_method +')')
 
         if refine_method == 'BLP':
-            plot1.circle(x=x_data, y=y_data, fill_color="white", size=8, legend_label=methodName.split('_')[1]+'('+ init_method +')')
+            plot1.circle(x=x_data, y=y_data, fill_color="white", size=8, legend_label=refine_method+'('+ init_method +')')
         elif refine_method == 'BLP-MC':
-            plot1.triangle(x=x_data, y=y_data, fill_color="white", size=8, legend_label=methodName.split('_')[1]+'('+ init_method +')')
+            plot1.triangle(x=x_data, y=y_data, fill_color="white", size=8, legend_label=refine_method+'('+ init_method +')')
         elif refine_method == 'BLP-KL':
-            plot1.asterisk(x=x_data, y=y_data, fill_color="white", size=8, legend_label=methodName.split('_')[1]+'('+ init_method +')')
+            plot1.asterisk(x=x_data, y=y_data, fill_color="white", size=8, legend_label=refine_method+'('+ init_method +')')
         
     plot1.legend.location = "top_right"
     
