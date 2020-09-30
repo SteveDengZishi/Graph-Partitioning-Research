@@ -118,8 +118,16 @@ def generatePlotForGraph(graph_name):
             plot1.triangle(x=x_data, y=y_data, fill_color="white", size=8, legend_label=refine_method+'('+ init_method +')')
         elif refine_method == 'BLP-KL':
             plot1.asterisk(x=x_data, y=y_data, fill_color="white", size=8, legend_label=refine_method+'('+ init_method +')')
-        
+    
+    #plot stylings  
     plot1.legend.location = "top_right"
+    plot1.xaxis.axis_label = "Number of partitions"
+    plot1.yaxis.axis_label = "Locality Ratio"
+    plot1.xaxis.axis_label_text_font_size = "15pt"
+    plot1.yaxis.axis_label_text_font_size = "15pt"
+    plot1.axis.axis_label_text_font_style = 'bold'
+    plot1.xaxis.major_label_text_font_size = '5mm'
+    plot1.yaxis.major_label_text_font_size = '5mm'
     
     show(plot1)
         
