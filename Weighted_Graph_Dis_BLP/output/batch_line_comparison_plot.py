@@ -15,34 +15,27 @@ graphs = [ 'livejournal.txt', 'roadNetCA.txt', 'email-Enron.txt', 'athletes_edge
 
 #ALL PLOTS
 generatedResults = [ 
-                     'random_Ugandar',
-                     'random_clusterMove',
-                     'random_pairwiseSwap',
-                     'commGreedy_Ugandar',
-                     'commGreedy_clusterMove',
-                     'commGreedy_pairwiseSwap',
-                     'gpmetis_Ugandar',
-                     'gpmetis_clusterMove',
-                     'gpmetis_pairwiseSwap'
+                     'Random_BLP',
+                     'Random_BLP-MC',
+                     'Random_BLP-KL',
+                     'SBM_BLP',
+                     'SBM_BLP-MC',
+                     'SBM_BLP-KL',
+                     'Metis_BLP',
+                     'Metis_BLP-MC',
+                     'Metis_BLP-KL'
                  ]
 
+#use the first data point which is the initialization but not the last data point as in generated results
 benchmarks = [
-                'commGreedy_Ugandar',
-                'gpmetis_Ugandar'
+                'SBM_BLP',
+                'Metis_BLP'
             ]
 
 colors = {
-            'commGreedy_clusterMove':'red', 
-            'commGreedy_pairwiseSwap':'blue',
-            'commGreedy_Ugandar':'black',
-            'commGreedy':'brown', 
-            'gpmetis_clusterMove':'gold',
-            'gpmetis_Ugandar':'purple', 
-            'gpmetis_pairwiseSwap':'green',
-            'gpmetis':'orange',
-            'random_Ugandar':'grey', 
-            'random_pairwiseSwap':'pink',
-            'random_clusterMove':'silver'
+            'SBM':'green', 
+            'Metis':'orange',
+            'Random':'grey'
         }
 
 partitions = [ 10, 30, 50, 70, 90 ]
@@ -109,10 +102,19 @@ def generatePlotForGraph(graph_name):
         methodName=key
         y_data=value[0]
         x_data=value[1]
+
+        init_method = methodName.split('_')[0]
+        refine_method = methodName.split('_')[1]
         
-        # add both a line and circles on the same plot
-        plot1.line(x=x_data, y=y_data, line_width=2, color=colors[methodName], legend=methodName)
-        plot1.circle(x=x_data, y=y_data, fill_color="white", size=8)
+        # add both a line and another pattern representing refinement methods
+        plot1.line(x=x_data, y=y_data, line_width=2, color=colors[init_method], legend_label=methodName.split('_')[1]+'('+ init_method +')')
+
+        if refine_method == 'BLP':
+            plot1.circle(x=x_data, y=y_data, fill_color="white", size=8, legend_label=methodName.split('_')[1]+'('+ init_method +')')
+        elif refine_method == 'BLP-MC':
+            plot1.triangle(x=x_data, y=y_data, fill_color="white", size=8, legend_label=methodName.split('_')[1]+'('+ init_method +')')
+        elif refine_method == 'BLP-KL':
+            plot1.asterisk(x=x_data, y=y_data, fill_color="white", size=8, legend_label=methodName.split('_')[1]+'('+ init_method +')')
         
     plot1.legend.location = "top_right"
     

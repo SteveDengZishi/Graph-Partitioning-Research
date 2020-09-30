@@ -10,6 +10,7 @@ from bokeh.plotting import figure, show, output_file
 output_file('line_graph_comparison_plot.html')
 file_header='graph_plotting_'
 file_extension='.txt'
+graphs_name = '_livejournal_50'
 #dataset layout dataset['methodName']=[ [Y(locality)] , [X(iterations)] ]
 dataset={}
 
@@ -59,38 +60,30 @@ def main():
     
     #ALL PLOTS
     generatedResults = [ 
-                         'random_Ugandar',
-                         'random_clusterMove',
-                         'random_pairwiseSwap',
-                         'commGreedy_Ugandar',
-                         'commGreedy_clusterMove',
-                         'commGreedy_pairwiseSwap',
-                         'gpmetis_Ugandar',
-                         'gpmetis_clusterMove',
-                         'gpmetis_pairwiseSwap'
-                     ]
+                         #'Random_BLP',
+                         #'Random_BLP-MC',
+                         #'Random_BLP-KL',
+                         'SBM_BLP',
+                         'SBM_BLP-MC',
+                         'SBM_BLP-KL',
+                         'Metis_BLP',
+                         'Metis_BLP-MC',
+                         'Metis_BLP-KL'
+                ]
     
     colors = {
-                'commGreedy_clusterMove':'red', 
-                'commGreedy_pairwiseSwap':'blue',
-                'commGreedy_Ugandar':'black',
-                'commGreedy':'brown', 
-                'gpmetis_clusterMove':'gold',
-                'gpmetis_Ugandar':'purple', 
-                'gpmetis_pairwiseSwap':'green',
-                'gpmetis':'orange',
-                'random_Ugandar':'grey', 
-                'random_pairwiseSwap':'pink',
-                'random_clusterMove':'silver',
+                'SBM':'green', 
+                'Metis':'orange',
+                'Random':'grey'
             }
     
     for method in generatedResults:
-        filename = file_header + method + file_extension
+        filename = file_header + method + graphs_name + file_extension
         readGeneratedFile(filename, method)
     
     #gpmetis and comm + greedy are straight lines data that sit in the manual file
     #can be used for other manual graphs
-    #readManualFile('graph_plotting_manual.txt')
+    readManualFile('graph_plotting_manual.txt')
     
     plot1=figure(plot_width=600, plot_height=600, title="Locality against number of iterations")
     
@@ -100,8 +93,17 @@ def main():
         y_data=value[0]
         x_data=value[1]
         # add both a line and circles on the same plot
-        plot1.line(x=x_data, y=y_data, line_width=2, color=colors[methodName], legend=methodName)
-        plot1.circle(x=x_data, y=y_data, fill_color="white", size=8)
+        # color is according to initialization technique and shape is according to refinement method
+        init_method = methodName.split('_')[0]
+        refine_method = methodName.split('_')[1]
+        plot1.line(x=x_data, y=y_data, line_width=2, color=colors[init_method], legend_label=methodName.split('_')[1]+'('+ init_method +')')
+
+        if refine_method == 'BLP':
+            plot1.circle(x=x_data, y=y_data, fill_color="white", size=8, legend_label=methodName.split('_')[1]+'('+ init_method +')')
+        elif refine_method == 'BLP-MC':
+            plot1.triangle(x=x_data, y=y_data, fill_color="white", size=8, legend_label=methodName.split('_')[1]+'('+ init_method +')')
+        elif refine_method == 'BLP-KL':
+            plot1.asterisk(x=x_data, y=y_data, fill_color="white", size=8, legend_label=methodName.split('_')[1]+'('+ init_method +')')
         
     plot1.legend.location = "bottom_right"
     

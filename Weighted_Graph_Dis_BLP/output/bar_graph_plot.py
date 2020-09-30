@@ -18,24 +18,24 @@ file_extension='.txt'
 output_file("bar_graph_comparison_plot.html")
 
 factors = [
-    ("random init", "Ugandar"), ("random init", "clusterMove"), ("random init", "pairwiseSwap"),
-    ("commGreedy init", "Ugandar"), ("commGreedy init", "clusterMove"), ("commGreedy init", "pairwiseSwap"),
-    ("gpmetis init", "Ugandar"), ("gpmetis init", "clusterMove"), ("gpmetis init", "pairwiseSwap")
+    ("Random init", "BLP"), ("Random init", "BLP-MC"), ("Random init", "BLP-KL"),
+    ("SBM init", "BLP"), ("SBM init", "BLP-MC"), ("SBM init", "BLP-KL"),
+    ("Metis init", "BLP"), ("Metis init", "BLP-MC"), ("Metis init", "BLP-KL")
 
 ]
 
 methods = ['initialization', 'improvement']
 
 generatedResults = [ 
-                         'random_Ugandar',
-                         'random_clusterMove',
-                         'random_pairwiseSwap',
-                         'commGreedy_Ugandar',
-                         'commGreedy_clusterMove',
-                         'commGreedy_pairwiseSwap',
-                         'gpmetis_Ugandar',
-                         'gpmetis_clusterMove',
-                         'gpmetis_pairwiseSwap'
+                         'Random_BLP_livejournal_50',
+                         'Random_BLP-MC_livejournal_50',
+                         'Random_BLP-KL_livejournal_50',
+                         'SBM_BLP_livejournal_50',
+                         'SBM_BLP-MC_livejournal_50',
+                         'SBM_BLP-KL_livejournal_50',
+                         'Metis_BLP_livejournal_50',
+                         'Metis_BLP-MC_livejournal_50',
+                         'Metis_BLP-KL_livejournal_50'
                 ]
 
 def readData():
