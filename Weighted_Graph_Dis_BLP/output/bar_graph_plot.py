@@ -80,6 +80,13 @@ def main():
     p.xgrid.grid_line_color = None
     p.legend.location = "top_left"
     p.legend.orientation = "horizontal"
+    p.xaxis.axis_label = "Initialization + Refinement Methods"
+    p.yaxis.axis_label = "Locality Ratio"
+    p.xaxis.axis_label_text_font_size = "15pt"
+    p.yaxis.axis_label_text_font_size = "15pt"
+    p.axis.axis_label_text_font_style = 'bold'
+    p.xaxis.major_label_text_font_size = '5mm'
+    p.yaxis.major_label_text_font_size = '5mm'
     
     show(p)
     
