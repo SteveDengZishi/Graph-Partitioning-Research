@@ -28,11 +28,11 @@ for line in inFile:
 
 
 
-plot1=figure(plot_width=400, plot_height=400, title="Number of node movement across iteration")
+plot1=figure(plot_width=400, plot_height=400, title="Number of node movement across iteration", x_axis_label="Number of iterations", y_axis_label="Number of node movements")
 
 plot1.vbar(x=iteration, width=0.5, bottom=0, top=nodes, color="navy")
 
-plot2=figure(plot_width=400, plot_height=400, title="Locality of edges across iteration")
+plot2=figure(plot_width=400, plot_height=400, title="Locality of edges across iteration", x_axis_label="Number of iterations", y_axis_label="Local edge ratio (Locality)")
 
 # add both a line and circles on the same plot
 plot2.line(x=iteration, y=locality, line_width=2, color="red")

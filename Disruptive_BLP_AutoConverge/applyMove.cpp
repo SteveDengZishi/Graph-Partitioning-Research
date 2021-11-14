@@ -22,7 +22,6 @@
 #include <unordered_set> //To remove duplicates and count size
 #include <functional> //To use std::hash
 #include <fstream> // To input and output to files
-#include <boost/interprocess/shared_memory_object.hpp>
 
 
 //macro here
@@ -38,7 +37,6 @@
 #define CINLINE(a) getline(cin,a)
 #define FILL(a,b) memset(a, b , sizeof(a)) //fill array a with all bs
 #define INIT(a) FILL(a,0) //initialize array a with all 0s
-#define INF 2e9
 //#define lp_ingredient_5th
 
 //name space here
@@ -109,6 +107,10 @@ void cutList(){
                 int fromTo; char x;
                 inFile>>x>>fromTo;
                 int size; inFile>>size;
+                if(size<0) size=0;
+                //cerr<<"size ("<<i<<","<<j<<") is: "<<size<<endl;
+                //cerr<<"vector size: "<<sortedCountIJ[i][j].size()<<endl;
+                //cerr<<"resize is: "<<size<<endl;
                 sortedCountIJ[i][j].resize(size);
             }
         }
@@ -116,14 +118,18 @@ void cutList(){
 }
 
 //directly using cutted sortedCountIJ to apply movement and count movement at the same time
-void applyShift(vector<PII>** sortedIJ){
+void applyShift(){
     move_count=0;
     FOR(i,0,partitions){
         FOR(j,0,partitions){
-            FOR(k,0,sortedCountIJ[i][j].size()){
-                //update the location of the previous node for next iteration
-                prevShard[sortedCountIJ[i][j][k].second]=(int)j;
-                move_count++;
+            if(i!=j){
+                //cerr<<i<<j<<" the number of nodes movement are: "<<sortedCountIJ[i][j].size()<<endl;
+                FOR(k,0,sortedCountIJ[i][j].size()){
+                    //update the location of the previous node for next iteration
+                    //cerr<<prevShard[sortedCountIJ[i][j][k].second]<<" becomes "<<j<<endl;
+                    prevShard[sortedCountIJ[i][j][k].second]=(int)j;
+                    move_count++;
+                }
             }
         }
     }
@@ -158,10 +164,12 @@ void loadShard(){
             shard[i].push_back(data);
         }
     }
+    
     //prevShard
     for(int i=0;i<nodes;i++){
         fscanf(inFile,"%d",&prevShard[i]);
     }
+    
     //sortedCountIJ
     for(int i=0;i<partitions;i++){
         for(int j=0;j<partitions;j++){
@@ -179,7 +187,7 @@ void loadShard(){
 }
 
 void printTotalMovement(){
-    printf("%d nodes out of %d nodes made their movement in this iteration\n",move_count,nodes);
+    printf("\n%d nodes out of %d nodes made their movement in this iteration\n",move_count,nodes);
 }
 
 
@@ -228,14 +236,22 @@ int main(int argc, const char * argv[]){
 
     //Three steps to move nodes after the linear program returns constraints X(ij), input values with files injection in cutList()
     cutList();
-    
-    applyShift(sortedCountIJ);
+    applyShift();
     reConstructShard();
 
     //print movement info
     printTotalMovement();
     //output locality info to shell
     double locality=printLocatlityFraction();
+    
+    //check sizes
+    cerr<<endl<<"Sizes of partitions after linear programming: "<<endl;
+    int sum=0;
+    FOR(i,0,partitions) {
+        cerr<<shard[i].size()<<" "<<endl;
+        sum+=shard[i].size();
+    }
+    cerr<<"the sum of the sizes is: "<<sum<<endl;
     
     //write data to file for graph plotting
     FILE* outFile=fopen("graph_plotting_data.txt","a");

@@ -5,7 +5,7 @@ Created on Sat Jul 22 13:41:59 2017
 
 @author: stevedeng
 """
-from bokeh.plotting import figure, show, output_file
+from bokeh.plotting import figure, show, output_file, save
 from bokeh.layouts import column
 
 output_file('BLPG_result_graph.html')
@@ -39,6 +39,7 @@ plot2.line(x=iteration, y=locality, line_width=2, color="red")
 plot2.circle(x=iteration, y=locality, fill_color="white", size=8)
 
 p=column(plot1,plot2)
+save(p)
 show(p)
 
 
