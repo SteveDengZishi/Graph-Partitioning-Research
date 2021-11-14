@@ -67,8 +67,7 @@ def main():
         improvement=imprvData,
     ))
     
-    p = figure(x_range=FactorRange(*factors), plot_height=650,
-               toolbar_location=None, tools="")
+    p = figure(x_range=FactorRange(*factors), plot_height=650)
     
     p.vbar_stack(methods, x='x', width=0.9, alpha=0.7, color=["blue", "red"], source=source,
                  legend_label=methods)
@@ -78,6 +77,8 @@ def main():
     p.x_range.range_padding = 0.3
     p.xaxis.major_label_orientation = 1
     p.xgrid.grid_line_color = None
+    p.xaxis.group_text_font_size = "15pt"
+    p.legend.label_text_font_size = "15pt"
     p.legend.location = "top_left"
     p.legend.orientation = "horizontal"
     p.xaxis.axis_label = "Initialization + Refinement Methods"

@@ -72,9 +72,9 @@ def main():
                 ]
     
     colors = {
-                'SBM':'green', 
-                'Metis':'orange',
-                'Random':'grey'
+                'SBM':'royalblue', 
+                'Metis':'red',
+                'Random':'chocolate'
             }
     
     for method in generatedResults:
@@ -99,15 +99,16 @@ def main():
         plot1.line(x=x_data, y=y_data, line_width=2, color=colors[init_method], legend_label=methodName.split('_')[1]+'('+ init_method +')')
 
         if refine_method == 'BLP':
-            plot1.circle(x=x_data, y=y_data, fill_color="white", size=8, legend_label=methodName.split('_')[1]+'('+ init_method +')')
+            plot1.square(x=x_data, y=y_data, fill_color="lavenderblush", size=8, legend_label=methodName.split('_')[1]+'('+ init_method +')')
         elif refine_method == 'BLP-MC':
-            plot1.triangle(x=x_data, y=y_data, fill_color="white", size=8, legend_label=methodName.split('_')[1]+'('+ init_method +')')
+            plot1.circle(x=x_data, y=y_data, fill_color="lavenderblush", size=8, legend_label=methodName.split('_')[1]+'('+ init_method +')')
         elif refine_method == 'BLP-KL':
-            plot1.asterisk(x=x_data, y=y_data, fill_color="white", size=8, legend_label=methodName.split('_')[1]+'('+ init_method +')')
+            plot1.triangle(x=x_data, y=y_data, fill_color="lavenderblush", size=8, legend_label=methodName.split('_')[1]+'('+ init_method +')')
         
     plot1.legend.location = "bottom_right"
     plot1.xaxis.axis_label = "Number of iterations"
     plot1.yaxis.axis_label = "Locality Ratio"
+    plot1.title.text_font_size = "15pt"
     plot1.xaxis.axis_label_text_font_size = "15pt"
     plot1.yaxis.axis_label_text_font_size = "15pt"
     plot1.axis.axis_label_text_font_style = 'bold'

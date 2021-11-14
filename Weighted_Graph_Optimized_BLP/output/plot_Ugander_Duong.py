@@ -51,7 +51,7 @@ def main():
     
     readManualFile(filename)
     
-    plot1=figure(plot_width=600, plot_height=600, title="Final locality against number of partitions", x_axis_label="Number of partitions", y_axis_label="Final local edge ratio (Locality)")
+    plot1=figure(plot_width=600, plot_height=600, title="Final locality at convergence against No. partitions", x_axis_label="Number of partitions", y_axis_label="Final local edge ratio (Locality)")
     
     #dataset layout dataset['methodName']=[ [Y(locality)] , [X(iterations)] ]
     for key, value in dataset.items():
@@ -59,10 +59,17 @@ def main():
         y_data=value[0]
         x_data=value[1]
         # add both a line and circles on the same plot
-        plot1.line(x=x_data, y=y_data, line_width=2, color=colors[methodName], legend=methodName)
+        plot1.line(x=x_data, y=y_data, line_width=2, color=colors[methodName], legend_label=methodName)
         plot1.circle(x=x_data, y=y_data, fill_color="white", size=8)
         
     plot1.legend.location = "top_right"
+    plot1.title.text_font_size = "15pt"
+    plot1.legend.label_text_font_size = "15pt"
+    plot1.xaxis.axis_label_text_font_size = "15pt"
+    plot1.yaxis.axis_label_text_font_size = "15pt"
+    plot1.axis.axis_label_text_font_style = 'bold'
+    plot1.xaxis.major_label_text_font_size = '5mm'
+    plot1.yaxis.major_label_text_font_size = '5mm'
     
     
     show(plot1)

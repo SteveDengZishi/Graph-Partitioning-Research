@@ -11,7 +11,7 @@ from bokeh.plotting import figure, show, output_file
 file_header='graph_plotting_'
 file_extension='.txt'
 
-graphs = [ 'livejournal.txt', 'roadNetCA.txt', 'email-Enron.txt', 'athletes_edges_clean.txt', 'company_edges_clean.txt', 'orkut.txt' ]
+graphs = [ 'livejournal.txt', 'roadNetCA.txt', 'email-Enron.txt', 'orkut.txt' ]
 
 #ALL PLOTS
 generatedResults = [ 
@@ -33,9 +33,9 @@ benchmarks = [
             ]
 
 colors = {
-            'SBM':'green', 
-            'Metis':'orange',
-            'Random':'grey'
+            'SBM':'royalblue', 
+            'Metis':'red',
+            'Random':'chocolate'
         }
 
 partitions = [ 10, 30, 50, 70, 90 ]
@@ -113,16 +113,17 @@ def generatePlotForGraph(graph_name):
         plot1.line(x=x_data, y=y_data, line_width=2, color=colors[init_method], legend_label=refine_method+'('+ init_method +')')
 
         if refine_method == 'BLP':
-            plot1.circle(x=x_data, y=y_data, fill_color="white", size=8, legend_label=refine_method+'('+ init_method +')')
+            plot1.square(x=x_data, y=y_data, fill_color="lavenderblush", size=8, legend_label=refine_method+'('+ init_method +')')
         elif refine_method == 'BLP-MC':
-            plot1.triangle(x=x_data, y=y_data, fill_color="white", size=8, legend_label=refine_method+'('+ init_method +')')
+            plot1.circle(x=x_data, y=y_data, fill_color="lavenderblush", size=8, legend_label=refine_method+'('+ init_method +')')
         elif refine_method == 'BLP-KL':
-            plot1.asterisk(x=x_data, y=y_data, fill_color="white", size=8, legend_label=refine_method+'('+ init_method +')')
+            plot1.triangle(x=x_data, y=y_data, fill_color="lavenderblush", size=8, legend_label=refine_method+'('+ init_method +')')
     
     #plot stylings  
     plot1.legend.location = "top_right"
     plot1.xaxis.axis_label = "Number of partitions"
     plot1.yaxis.axis_label = "Locality Ratio"
+    plot1.title.text_font_size = "13pt"
     plot1.xaxis.axis_label_text_font_size = "15pt"
     plot1.yaxis.axis_label_text_font_size = "15pt"
     plot1.axis.axis_label_text_font_style = 'bold'
