@@ -15,6 +15,7 @@
 		It loops through all args and calls experiment_runner.sh under the hood.
 
 **Input Graph File format**
+	
 	we provide a small example test file in dataset folder, but you should source your own dataset
 		facebook_combined.txt
 		It starts with a header line consist the number of node in the graph the and number of undirected edges in a graph
