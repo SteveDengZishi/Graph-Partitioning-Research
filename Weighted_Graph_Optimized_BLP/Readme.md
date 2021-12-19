@@ -10,3 +10,7 @@
 		You can modify script to give a list of files and a list of partition number
 		to generate comparison on a certain combination of init and refinement disruption methods
 		It loops through all args and calls experiment_runner.sh under the hood.
+
+**Input Graph File format**
+	we provide a small example test file in dataset folder
+	facebook_combined.txt
