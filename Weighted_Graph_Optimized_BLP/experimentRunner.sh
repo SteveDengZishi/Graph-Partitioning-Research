@@ -29,8 +29,8 @@ verbose=''
 else
 echo -e "illegal number of arguments, please check use cases and give two or four arguments as below, * are mandantory\n"
 echo -e "./experimentRunner (init_method *) (improvement_method *) (graphFile) (partition_num)\n"
-echo "Available init method list: [random-Random, commGreedy-SBM, gpmetis-Metis]"
-echo -e "Available improvement/refinement method list: [Ugandar-BLP, clusterMove-BLP-MC, pairwiseSwap-BLP-KL]\n"
+echo "Available init method list: [random -> Random, commGreedy -> SBM, gpmetis -> Metis]"
+echo -e "Available improvement/refinement method list: [Ugandar_BLP -> BLP, clusterMove -> BLP-MC, KL_Swap -> BLP-KL]\n"
 exit 1
 fi
 
