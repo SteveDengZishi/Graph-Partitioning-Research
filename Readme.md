@@ -1,26 +1,27 @@
-                                 SOCIAL GRAPH PARTITIONING ALGORITHMS RESEARCH
+                      Paper Name: Optimizing Iterative Algorithms for Social Network Sharding
+                                    Published Conference: IEEE Big Data 2021
 
-	           Student: Zishi Deng    Professor: Torsten Suel  Institution: New York University
+	           Student: Zishi Deng    Supervisor: Torsten Suel  Institution: New York University
       
 **Research Abstract**
+There has recently been significant interest in applications that require computations on massive graph structures, including scenarios where the graph is too large to be processed on a single machine. In this case, the graph needs to be partitioned into subgraphs that can be assigned to individual machines, in a process called graph or social network sharding. Given the sizes of the graphs involved, it is necessary or at least highly desirable that the partitioning itself can also be performed in a distributed manner, instead of running a sequential partitioning algorithm on a single node.
 
-Graph partitioning is a well-known NP-hard problem that has no known efficient algorithm. Given its practical importance, many heuristic algorithms have been proposed. One example is METIS, a k-way multilevel partitioning algorithm, which can deliver good practical results. With the rise of social media, we see huge growth in social networks such as Facebook, Google+ and Twitter. The large amounts of user data make these social graphs impossible to be stored on a single machine. Thus, companies have built large distributed systems to store these graphs, and to run queries on them. However, due to bandwidth constraints and communication overheads, querying nodes across machines takes significantly more time than querying nodes locally. Hence, to minimize communication costs, data needs to be partitioned such that the total number of edges cutting across partitions is minimized while also satisfying constraints on the maximum amount of data that can be stored on each node.
-
-In this research project, we study several methods proposed in recent papers, in particular, Balanced Label Propagation, LEOPARD, and a Bayesian Sharding approach. We implement these algorithms and run them on several large social graphs including LiveJournal, Orkut, and Pokec, each with millions of nodes and tens of millions of edges. We then compare and contrast the advantages and drawbacks for each algorithm. Finally, we further optimize the algorithms to improve partition quality.
-
+We study such distributed algorithms for graph sharding, where the goal is to create subgraphs of roughly equal size that minimize the number of edges crossing subgraph boundaries. In particular, we focus on two well-known approaches that can be efficiently implemented in MapReduce and related distributed computing paradigms: the Balanced Label Propagation algorithm of Ugander and Backstrom, and the method of Duong et al. based on the Bayesian Stochastic Block Modeling approach of Hofman and Wiggins. Our contributions are as follows: (1) We perform the first direct experimental comparison of the two approaches, which were independently proposed and published. (2) We propose and evaluate several enhancements of Balanced Label Propagation that result in improved graph shardings. (3) We propose and evaluate hybrid methods that perform label propagation both on individual nodes, as suggested by Ugander and Backstrom, and on stochastic blocks inferred using the approach of Duong et al.
 
 
 **Repository Description**
 
-	This git repository consists of three folders, and one poster briefly describes the purpose of the project,
+	This git repository consists of five folders
 
-	Balanced_Label_Propagation
+	Balanced_Label_Propagation_Deprecated
+	Community_Detection
 	Disruptive_BLP_AutoConverge
-	LEOPARD
 	References
-	Poster_ZISHI_DENG_pdf
+	Weighted_Graph_Optimized_BLP
+	
+	**NOTE THAT Weight_Graph_Optimized_BLP folder contains all up-to-date implementations for initializations, refinement and disruption techniques, including BLP, SBM, Probability based disruption, cluster based movement, KL Swaps, you should use these up-to-date implementations.**
 
-	Balanced_Label_Propagation consists of two parts,
+	Balanced_Label_Propagation consists of two parts, it was the first implementation but it is DEPRECATED!
 	1.Randomly initialized Balanced Label Propagation
 	2.METIS + BLP (Balanced Label Propagation run on top of METIS)
 
@@ -29,8 +30,9 @@ In this research project, we study several methods proposed in recent papers, in
 	2.It will run disruptive rounds when it is close to convergence (When improvement in locality between two rounds < 0.5%)
 	3.It will automatically stop the BLP process and return the highest locality achieved when no improvement can be achieved (Convergence arises and it is lower than the previous convergence point)
 
-	LEOPARD stands for Lightweight Edge-Oriented Partitioning and Replication for Dynamic Graphs
-	It is still at the beginning stage
+        Community_Detection contains SBM methods for clustering and greedy map to blocks
+
+	Weighted_Graph_Optimized_BLP contains all up-to-date algorithms used in generating results in the paper as well as helper script to run multiple comparison with plotting. 
 
 	References contains all the relevant papers referred during this research 
 	

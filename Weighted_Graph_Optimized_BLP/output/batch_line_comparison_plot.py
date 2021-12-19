@@ -11,7 +11,7 @@ from bokeh.plotting import figure, show, output_file
 file_header='graph_plotting_'
 file_extension='.txt'
 
-graphs = [ 'livejournal.txt', 'roadNetCA.txt', 'email-Enron.txt', 'orkut.txt' ]
+graphs = [ 'livejournal.txt', 'roadNetCA.txt', 'email-Enron.txt', 'orkut.txt', 'athletes_edges_clean.txt', 'company_edges_clean.txt' ]
 
 #ALL PLOTS
 generatedResults = [ 
