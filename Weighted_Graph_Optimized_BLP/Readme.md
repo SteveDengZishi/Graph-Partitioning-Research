@@ -7,7 +7,7 @@
 		List of provided refinement + disruption methods - [BLP, BLP-RD, BLP-MC, BLP-KL]
 
 		An example call will be:
-		./experimentRunner.sh Random BLP dataset/facebook_combined.txt 10 
+		./experimentRunner.sh SBM BLP-MC dataset/facebook_combined.txt 10 
 
 	experiment_Batch_Generator.sh
 		You can modify script to give a list of files and a list of partition number
@@ -15,8 +15,8 @@
 		It loops through all args and calls experiment_runner.sh under the hood.
 
 **Input Graph File format**
-	we provide a small example test file in dataset folder
-	facebook_combined.txt
-	It starts with a header line consist the number of node in the graph the and number of undirected edges in a graph
-	then on each line represent an undirected edge with from-nodeID to to-nodeID
-	Note that nodeID must be cleaned from 0 to (number of node - 1) 
+	we provide a small example test file in dataset folder, but you should source your own dataset
+		facebook_combined.txt
+		It starts with a header line consist the number of node in the graph the and number of undirected edges in a graph
+		then on each line represent an undirected edge with from-nodeID to to-nodeID
+		Note that nodeID must be cleaned from 0 to (number of node - 1) 
