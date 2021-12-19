@@ -19,7 +19,7 @@ We study such distributed algorithms for graph sharding, where the goal is to cr
 	References
 	Weighted_Graph_Optimized_BLP
 	
-	**NOTE THAT Weight_Graph_Optimized_BLP folder contains all up-to-date implementations for initializations, refinement and disruption techniques, including BLP, SBM, Probability based disruption, cluster based movement, KL Swaps, you should use these up-to-date implementations.**
+**NOTE THAT Weight_Graph_Optimized_BLP folder contains all up-to-date implementations for initializations, refinement and disruption techniques, including BLP, SBM, Probability based disruption, cluster based movement, KL Swaps, you should use these up-to-date implementations.**
 
 	Balanced_Label_Propagation consists of two parts, it was the first implementation but it is DEPRECATED!
 	1.Randomly initialized Balanced Label Propagation
@@ -29,8 +29,8 @@ We study such distributed algorithms for graph sharding, where the goal is to cr
 	1.Improved mapping algorithm allow it to run faster on larger graph and partitions
 	2.It will run disruptive rounds when it is close to convergence (When improvement in locality between two rounds < 0.5%)
 	3.It will automatically stop the BLP process and return the highest locality achieved when no improvement can be achieved (Convergence arises and it is lower than the previous convergence point)
-
-        Community_Detection contains SBM methods for clustering and greedy map to blocks
+	
+	Community_Detection contains SBM methods for clustering and greedy map to blocks
 
 	Weighted_Graph_Optimized_BLP contains all up-to-date algorithms used in generating results in the paper as well as helper script to run multiple comparison with plotting. 
 
