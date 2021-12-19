@@ -17,9 +17,9 @@ We study such distributed algorithms for graph sharding, where the goal is to cr
 	Community_Detection
 	Disruptive_BLP_AutoConverge
 	References
-	Weighted_Graph_Optimized_BLP
+	**Weighted_Graph_Optimized_BLP**
 	
-NOTE THAT: **Weight_Graph_Optimized_BLP** folder contains **all up-to-date implementations** for initializations, refinement and disruption techniques, including BLP, SBM, Probability based disruption, cluster based movement, KL Swaps, you should use these up-to-date implementations.
+NOTE THAT: **Weight_Graph_Optimized_BLP** folder contains **all up-to-date implementations** for initializations, refinement and disruption techniques, including BLP, SBM, Probability based disruption, cluster based movement, KL Swaps, you should **use these up-to-date implementations**
 
 	Balanced_Label_Propagation consists of two parts, it was the first implementation but it is DEPRECATED!
 	1.Randomly initialized Balanced Label Propagation

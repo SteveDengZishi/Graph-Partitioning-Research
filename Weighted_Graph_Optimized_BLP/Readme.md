@@ -20,4 +20,10 @@
 		facebook_combined.txt
 		It starts with a header line consist the number of node in the graph the and number of undirected edges in a graph
 		then on each line represent an undirected edge with from-nodeID to to-nodeID
-		Note that nodeID must be cleaned from 0 to (number of node - 1) 
+		Note that nodeID must be cleaned from 0 to (number of node - 1)
+
+**Dependencies needed before you execute the program**
+
+	g++ we used g++ to compile all c++ code to executables
+	python3 we used python for graph plotting
+	lp_solve it should be installed and callable from shell script to solve linear programs 
